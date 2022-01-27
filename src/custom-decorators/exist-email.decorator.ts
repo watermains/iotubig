@@ -7,7 +7,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
-import { UserRepository } from '../user/user.repository'
+import { UserRepository } from '../user/user.repository';
 
 @ValidatorConstraint({ async: true })
 @Injectable()

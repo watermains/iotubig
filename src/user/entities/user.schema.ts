@@ -5,7 +5,7 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true})
 export class User {
-  @Prop({ required: true })
+  @Prop()
   water_meter_id: string;
 
   @Prop({ required: true })

@@ -3,6 +3,7 @@ import { IsEmailAlreadyExist } from '../../custom-decorators/unique-email.decora
 
 export class CreateUserDto {
   @IsString()
+  @IsOptional()
   water_meter_id: string;
 
   @IsString()
