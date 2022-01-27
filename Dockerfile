@@ -1,13 +1,16 @@
-FROM node:15.12.0-alpine3.10
-RUN apk update --no-cache && \
-    apk add bash autoconf automake gcc make g++ zlib-dev --no-cache
+FROM node:12.19.0-alpine3.9 AS development
+
+# RUN apk update --no-cache && \
+#     apk add bash autoconf automake gcc make g++ zlib-dev --no-cache
 
 WORKDIR /usr/src/app
 
-ADD . .
+COPY package*.json ./
 
-RUN npm install
+RUN npm install glob rimraf
 
-EXPOSE 3000
+RUN npm install --only=development
 
-CMD [ "npm", "run", "start" ]
+COPY . .
+
+RUN npm run build
