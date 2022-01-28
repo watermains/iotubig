@@ -17,7 +17,7 @@ export class TransactionService {
 
   async create(
     createTransactionDto: CreateTransactionDto,
-  ): Promise<Transaction> {
+  ): Promise<TransactionDocument> {
     return await this.transactionModel.create({
       ...createTransactionDto,
       created_by: '-1',
@@ -25,7 +25,7 @@ export class TransactionService {
     });
   }
 
-  async findAll(): Promise<Transaction[]> {
+  async findAll(): Promise<TransactionDocument[]> {
     return await this.transactionModel
       .find({
         deleted_at: null,
@@ -33,7 +33,7 @@ export class TransactionService {
       .sort({ created_at: '-1' });
   }
 
-  async findWhere(meter: string): Promise<Transaction[]> {
+  async findWhere(meter: string): Promise<TransactionDocument[]> {
     return await this.transactionModel
       .find({
         iot_meter_id: meter,

@@ -3,7 +3,7 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type MeterDocument = Meter & Document;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, toJSON: { getters: true } })
 export class Meter {
   @Prop({ required: true })
   meter_name: string;
@@ -11,46 +11,54 @@ export class Meter {
   @Prop({ required: true })
   dev_eui: string;
 
-  @Prop()
+  @Prop({ default: '' })
   wireless_device_id: string;
 
-  @Prop({ type: MongooseSchema.Types.Decimal128 })
+  @Prop({
+    default: 0.0,
+    type: MongooseSchema.Types.Decimal128,
+    get: (val) => val.toString(),
+  })
   cumulative_flow: number;
 
-  @Prop({ type: MongooseSchema.Types.Decimal128 })
-  allowed_flow: string;
+  @Prop({
+    default: 0.0,
+    type: MongooseSchema.Types.Decimal128,
+    get: (val) => val.toString(),
+  })
+  allowed_flow: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   battery_level: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   battery_fault: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   valve_status: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   valve_fault: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   hall_fault: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   mag_fault: number;
 
-  @Prop()
+  @Prop({ default: '' })
   site_name: string;
 
-  @Prop()
+  @Prop({ default: '' })
   unit_name: string;
 
-  @Prop()
+  @Prop({ default: 'residential' })
   consumer_type: string;
 
-  @Prop()
+  @Prop({ default: null })
   deleted_by: string;
 
-  @Prop()
+  @Prop({ default: null })
   deleted_at: Date;
 
   @Prop()
@@ -59,7 +67,7 @@ export class Meter {
   @Prop()
   iot_organization_id: string;
 
-  @Prop()
+  @Prop({ default: 1 })
   frame_id: number;
 }
 

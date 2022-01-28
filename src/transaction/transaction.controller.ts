@@ -11,8 +11,10 @@ import { TransactionService } from './transaction.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
 import { map } from 'rxjs/operators';
-import { ResponseInterceptor } from 'src/response.interceptor';
-import { ResponseWrapper } from 'src/wrapper/response.wrapper';
+import {
+  DocumentsInterceptor,
+  ResponseInterceptor,
+} from 'src/response.interceptor';
 
 @Controller('transactions')
 export class TransactionController {
@@ -42,15 +44,15 @@ export class TransactionController {
   }
 
   @Get()
-  @UseInterceptors(ResponseInterceptor)
+  @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
   findAll() {
-    return new ResponseWrapper().wrap(this.transactionService.findAll());
+    return this.transactionService.findAll();
   }
 
   @Get(':meter')
-  @UseInterceptors(ResponseInterceptor)
+  @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
   findWhere(@Param('meter') meter: string) {
-    return new ResponseWrapper().wrap(this.transactionService.findWhere(meter));
+    return this.transactionService.findWhere(meter);
   }
 
   @Delete(':id')
