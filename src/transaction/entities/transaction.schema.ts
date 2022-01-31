@@ -3,7 +3,7 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type TransactionDocument = Transaction & Document;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, toJSON: { getters: true } })
 export class Transaction {
   @Prop({ required: true })
   amount: number;
@@ -14,7 +14,11 @@ export class Transaction {
   @Prop({ required: true })
   volume: number;
 
-  @Prop({ required: true, type: MongooseSchema.Types.Decimal128 })
+  @Prop({
+    required: true,
+    type: MongooseSchema.Types.Decimal128,
+    get: (val) => val.toString(),
+  })
   rate: number;
 
   @Prop({ required: true })
