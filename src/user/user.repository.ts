@@ -1,12 +1,12 @@
-import * as bcrypt from 'bcrypt';
-import { Model } from 'mongoose';
 import {
-  InternalServerErrorException,
   Injectable,
   NotAcceptableException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcrypt';
+import { Model } from 'mongoose';
 import { User, UserDocument } from './entities/user.schema';
 
 @Injectable()
@@ -43,8 +43,10 @@ export class UserRepository {
           message: 'Login Success',
         };
       }
+
+      throw new NotFoundException(['Credentials not found']);
     } catch {
-      throw new InternalServerErrorException(['Credentials not found']);
+      throw new NotFoundException(['Credentials not found']);
     }
   }
 
@@ -52,7 +54,10 @@ export class UserRepository {
     const user = await this.findOneByEmail(forgotPasswordDto.email);
     const payload = { email: user.email, id: user._id, role: user.role };
     const token = this.jwtService.sign(payload);
-    return { response: { token }, message: "Reset password link sent on your email address" };
+    return {
+      response: { token },
+      message: 'Reset password link sent on your email address',
+    };
   }
 
   async resetPassword(request, resetPasswordDto) {
@@ -89,8 +94,10 @@ export class UserRepository {
         const payload = { email: user.email, id: user._id, role: user.role };
         return { response: { access_token: this.jwtService.sign(payload) } };
       }
+
+      throw new NotFoundException(['Credentials not found']);
     } catch {
-      throw new InternalServerErrorException(['Credentials not found']);
+      throw new NotFoundException(['Credentials not found']);
     }
   }
   async seedAdmin(body) {
