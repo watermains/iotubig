@@ -21,7 +21,7 @@ export class UserController {
   @Post('auth/register')
   @UseInterceptors(ResponseInterceptor)
   async register(@Body() body: CreateUserDto) {
-  return this.userService.create(body);
+    return this.userService.create(body);
   }
 
   // @Get(':id')

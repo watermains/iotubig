@@ -5,6 +5,9 @@ export class CreateMeterDto {
   meter_name: number;
 
   @IsString()
+  dev_eui: number;
+
+  @IsString()
   site_name: number;
 
   @IsString()
@@ -12,7 +15,4 @@ export class CreateMeterDto {
 
   @IsString()
   consumer_type: string;
-
-  @IsString()
-  dev_eui: number;
 }
