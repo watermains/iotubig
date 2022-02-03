@@ -1,0 +1,9 @@
+{
+  "water_alarm_threshold": 100,
+  "overdraw_limitation": -1000,
+  "minimum_monthly_consumer_deduction": 300,
+  "residential_consumption_rates": 20,
+  "commercial_consumption_rates": 50,
+  "organization_id": "",
+  "created_by": ""
+}

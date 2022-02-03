@@ -7,8 +7,11 @@ import {
   Param,
   Delete,
   UseInterceptors,
+  UseGuards,
+  Req,
   Query,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/user/guards/jwt-auth.guard';
 import { MeterService } from './meter.service';
 import { CreateMeterDto } from './dto/create-meter.dto';
 import { UpdateMeterDto } from './dto/update-meter.dto';
@@ -28,6 +31,13 @@ export class MeterController {
     private readonly meterService: MeterService,
     private readonly iotService: IotService,
   ) {}
+
+  // @UseGuards(JwtAuthGuard)
+  // @Get('dashboard')
+  // @UseInterceptors(ResponseInterceptor)
+  // dashboard(@Req() request) {
+  //   return this.meterService.dashboard(request);
+  // }
 
   @Post()
   @UseInterceptors(ResponseInterceptor, DocumentInterceptor)

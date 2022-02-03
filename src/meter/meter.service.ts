@@ -6,7 +6,7 @@ import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
 import { UpdateMeterDto } from './dto/update-meter.dto';
-import { Meter, MeterDocument } from './entities/meter.entity';
+import { Meter, MeterDocument } from './entities/meter.schema';
 
 @Injectable()
 export class MeterService {
@@ -73,4 +73,8 @@ export class MeterService {
     forRemove.deleted_at = new Date();
     await forRemove.save();
   }
+
+  // dashboard(request) {
+  //   return this.meterRepository.dashboard(request)
+  // }
 }

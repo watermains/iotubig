@@ -1,5 +1,4 @@
 import { Controller, Post, Body, UseInterceptors } from '@nestjs/common';
-import { Command } from 'nestjs-command';
 import { AdminService } from './admin.service';
 import { ResponseInterceptor } from 'src/response.interceptor';
 import { LoginUserDto } from '../dto/login-user.dto';

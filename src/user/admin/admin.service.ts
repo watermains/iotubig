@@ -11,10 +11,4 @@ export class AdminService {
   async login(loginUserDto: LoginUserDto): Promise<Object> {
     return this.userRepository.adminLogin(loginUserDto);
   }
-
-  async create(body) {
-    body.role = 'admin'
-    body.password = await bcrypt.hash(body.password, 10);
-    return this.userRepository.seedAdmin(body)
-  }
 }

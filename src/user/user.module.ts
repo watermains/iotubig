@@ -11,7 +11,6 @@ import { IsEmailExistConstraint } from '../custom-decorators/exist-email.decorat
 import { IsMatchConstraint } from 'src/custom-decorators/match.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { AdminSeeder } from './admin/admin.seed';
 import { AdminService } from './admin/admin.service';
 import { AdminController } from './admin/admin.controller';
 
@@ -33,9 +32,8 @@ import { AdminController } from './admin/admin.controller';
     IsMatchConstraint,
     JwtAuthGuard,
     JwtStrategy,
-    AdminSeeder,
     AdminService,
   ],
-  exports: [UserService, AdminService, AdminSeeder],
+  exports: [UserService, AdminService],
 })
 export class UserModule {}
