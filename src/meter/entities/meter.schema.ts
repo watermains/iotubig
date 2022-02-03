@@ -5,10 +5,10 @@ export type MeterDocument = Meter & Document;
 
 @Schema({ timestamps: true, toJSON: { getters: true } })
 export class Meter {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   meter_name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   dev_eui: string;
 
   @Prop({ default: '' })
@@ -61,7 +61,7 @@ export class Meter {
   @Prop({ default: null })
   deleted_at: Date;
 
-  @Prop()
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'users' })
   iot_user_id: string;
 
   @Prop()
@@ -69,6 +69,9 @@ export class Meter {
 
   @Prop({ default: 1 })
   frame_id: number;
+  
+  @Prop()
+  balanceInPeso: number;
 }
 
 export const MeterSchema = SchemaFactory.createForClass(Meter);

@@ -101,7 +101,6 @@ export class UserRepository {
     }
   }
   async seedAdmin(body) {
-    const createdUser = new this.userModel(body).save();
-    return 'success';
+    return this.userModel.findOneAndUpdate({email: body.email}, body, { upsert: true, new: true, setDefaultsOnInsert: true });
   }
 }

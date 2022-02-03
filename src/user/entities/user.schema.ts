@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Organization } from 'src/organization/entities/organization.schema';
 
 export type UserDocument = User & Document;
 
@@ -23,9 +24,8 @@ export class User {
   @Prop()
   role: string;  
 
-// For relationship later. Do not remove
-//   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Organization' })
-//   organization_id: Organization;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'organization' })
+  organization_id: Organization;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
