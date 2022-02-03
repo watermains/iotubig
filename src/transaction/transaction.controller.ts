@@ -32,7 +32,7 @@ export class TransactionController {
       )
       .pipe(
         map((obs) => {
-          // if OBS says a valid transaction occured, proceed with creating the record
+          //TODO If OBS says a valid transaction occured, proceed with creating the record
           return this.transactionService
             .create(createTransactionDto)
             .then((value) => {

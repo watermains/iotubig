@@ -17,15 +17,40 @@ import {
   DocumentsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
+import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
+import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
+import { IotService } from 'src/iot/iot.service';
+import { map } from 'rxjs/operators';
 
 @Controller('meter')
 export class MeterController {
-  constructor(private readonly meterService: MeterService) {}
+  constructor(
+    private readonly meterService: MeterService,
+    private readonly iotService: IotService,
+  ) {}
 
   @Post()
   @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
-  create(@Body() createMeterDto: CreateMeterDto) {
-    return this.meterService.create(createMeterDto);
+  create(@Body() dto: CreateMeterDto) {
+    return this.meterService.create(dto);
+  }
+
+  //TODO expose endpoint only for 1 specific user
+  @Post('/iot')
+  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  createIoT(@Body() dto: CreateMeterIOTDto) {
+    return this.meterService.create(dto);
+  }
+
+  @Patch('/valve')
+  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  changeValve(@Body() dto: UpdateMeterValveDto) {
+    return this.iotService.sendOpenValveUpdate(dto).pipe(
+      map((obs) => {
+        //TODO If OBS says a valid transaction occured, proceed with creating the record
+        return this.meterService.updateValve(dto);
+      }),
+    );
   }
 
   @Get()
@@ -45,12 +70,12 @@ export class MeterController {
 
   @Patch(':id')
   @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
-  update(@Param('id') id: string, @Body() updateMeterDto: UpdateMeterDto) {
-    return this.meterService.update(id, updateMeterDto);
+  update(@Param('id') devEui: string, @Body() dto: UpdateMeterDto) {
+    return this.meterService.update(devEui, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.meterService.remove(id);
+  remove(@Param('id') devEui: string) {
+    return this.meterService.remove(devEui);
   }
 }
