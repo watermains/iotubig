@@ -4,9 +4,9 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
+import { Document } from 'mongoose';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Document } from 'mongoose';
 
 export interface Response<T> {
   statusCode: number;
@@ -23,9 +23,9 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
         if (data) {
           return {
             statusCode: context.switchToHttp().getResponse().statusCode,
-            message: data.message ?? '',
-            data: data.response ?? '',
-            error: data.error ?? '',
+            message: data.message,
+            data: data.response,
+            error: data.error,
           };
         } else {
           return {

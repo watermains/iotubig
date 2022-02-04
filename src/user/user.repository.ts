@@ -101,6 +101,11 @@ export class UserRepository {
     }
   }
   async seedAdmin(body) {
-    return this.userModel.findOneAndUpdate({email: body.email}, body, { upsert: true, new: true, setDefaultsOnInsert: true });
+    body.password = await bcrypt.hash(body.password, 10);
+    return this.userModel.findOneAndUpdate({ email: body.email }, body, {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+    });
   }
 }
