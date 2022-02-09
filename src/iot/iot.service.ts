@@ -5,7 +5,8 @@ import { Observable } from 'rxjs/internal/Observable';
 import { map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { observeNotification } from 'rxjs/internal/Notification';
-import { UpdateMeterValveDto } from 'src/meter/dto/update-meter-valve.dto';
+import { UpdateMeterValveDto } from 'src/module/meter/dto/update-meter-valve.dto';
+import { isPositive } from 'src/validation';
 
 export class BalanceUpdateDTO {
   balance: string;
@@ -18,29 +19,38 @@ export class BalanceUpdateDTO {
 export class IotService {
   constructor(private httpService: HttpService) {}
 
-  sendBalanceUpdate(dto: BalanceUpdateDTO): Observable<AxiosResponse<Object>> {
-    const res = this.httpService
-      .post(process.env.IOT_URL, {
-        device_id: 'db7e0725-647d-4b54-bd66-0ee6c352feab',
-        command: 'SBALADD',
-        data: dto.balance,
-        frame_id: 1,
-      })
-      .pipe(
-        map((obs) => {
-          return obs.data;
-        }),
-      );
-    return res;
+  sendBalanceUpdate(dto: BalanceUpdateDTO): Observable<AxiosResponse<unknown>> {
+    return this._send(
+      'db7e0725-647d-4b54-bd66-0ee6c352feab',
+      isPositive(dto.balance) ? 'SBALADD' : 'SBALDEDUCT',
+      { data: dto.balance },
+      1,
+    );
   }
 
+  // 1 - open valve
+  // 0 - close valve
   sendOpenValveUpdate(dto: UpdateMeterValveDto) {
+    return this._send(
+      'db7e0725-647d-4b54-bd66-0ee6c352feab',
+      'SVALVE',
+      { data: dto.is_open ? 1 : 0 },
+      1,
+    );
+  }
+
+  private _send(
+    device_id: string,
+    command: string,
+    data: any = {},
+    frame_id: number,
+  ) {
     const res = this.httpService
       .post(process.env.IOT_URL, {
-        device_id: 'db7e0725-647d-4b54-bd66-0ee6c352feab',
-        command: 'SBALADD',
-        data: dto.is_open ? 1 : 0,
-        frame_id: 1,
+        device_id,
+        command,
+        data,
+        frame_id,
       })
       .pipe(
         map((obs) => {
@@ -48,9 +58,5 @@ export class IotService {
         }),
       );
     return res;
-  }
-
-  getConsumption(start: Date, end: Date) {
-    //do something
   }
 }

@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from 'src/user/entities/user.schema';
-import { UserRepository } from 'src/user/user.repository';
+import { User, UserSchema } from 'src/module/user/entities/user.schema';
 import { AdminSeederService } from './admin.service';
+import { UserRepository } from 'src/module/user/user.repository';
 
 @Module({
   imports: [
@@ -16,6 +16,6 @@ import { AdminSeederService } from './admin.service';
     }),
   ],
   providers: [AdminSeederService, UserRepository],
-  exports: [AdminSeederService]
+  exports: [AdminSeederService],
 })
 export class AdminSeederModule {}

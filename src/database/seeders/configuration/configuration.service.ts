@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigurationRepository } from 'src/configuration/configuration.repository';
+import { ConfigurationRepository } from 'src/module/configuration/configuration.repository';
 
 @Injectable()
 export class ConfigurationSeederService {
-  constructor(private readonly configurationRepository: ConfigurationRepository) {}
+  constructor(
+    private readonly configurationRepository: ConfigurationRepository,
+  ) {}
   seedConfiguration(organization, admin) {
     const data = require('./configuration.json');
     data.organization_id = organization._id;

@@ -6,7 +6,12 @@ import { OrganizationSeederModule } from '../organization/organization.module';
 import { Seeder } from './seeder';
 
 @Module({
-    imports: [MongoDBProviderModule, AdminSeederModule, OrganizationSeederModule, ConfigurationSeederModule],
-    providers: [Logger, Seeder]
+  imports: [
+    MongoDBProviderModule,
+    AdminSeederModule,
+    OrganizationSeederModule,
+    ConfigurationSeederModule,
+  ],
+  providers: [Logger, Seeder],
 })
 export class SeederModule {}
