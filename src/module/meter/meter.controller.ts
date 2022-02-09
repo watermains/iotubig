@@ -91,7 +91,7 @@ export class MeterController {
 
   @Get('/stats')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  @UseInterceptors(ResponseInterceptor)
   findStat() {
     return this.meterService.findStats();
   }
