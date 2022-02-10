@@ -83,7 +83,7 @@ export class MeterService {
     await forRemove.save();
   }
 
-  async findStats(): Promise<Stats> {
+  async findStats(): Promise<unknown> {
     const stats = new Stats();
     stats.idle = await this.meterModel.count({
       valve_status: MeterStatus.idle,
@@ -103,7 +103,7 @@ export class MeterService {
     stats.pending_close = await this.meterModel.count({
       valve_status: MeterStatus.pendingClose,
     });
-    return stats;
+    return { response: stats };
   }
 
   // dashboard(request) {
