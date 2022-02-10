@@ -23,6 +23,7 @@ export class UserRepository {
 
   async create(createUserDto) {
     const createdUser = new this.userModel(createUserDto);
+    createdUser.role = RoleTypes.customer;
     createdUser.save();
     return { message: 'Registration Success' };
   }

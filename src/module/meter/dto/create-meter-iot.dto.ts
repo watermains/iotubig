@@ -3,9 +3,9 @@ import { IsDecimal, IsInt, IsString } from 'class-validator';
 import { CreateMeterDto } from './create-meter.dto';
 
 export class CreateMeterIOTDto {
-  @ApiProperty({ type: 'number' })
+  @ApiProperty({ type: 'string' })
   @IsString()
-  dev_eui: number;
+  dev_eui: string;
 
   @ApiProperty({ type: 'string' })
   @IsString()

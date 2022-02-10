@@ -38,9 +38,9 @@ export class MeterModule {
       .apply(ValidateMeterMiddleware)
       .forRoutes(
         { path: '/meter/details', method: RequestMethod.GET },
-        { path: '/meter/valve', method: RequestMethod.PATCH },
-        { path: '/meter', method: RequestMethod.PATCH },
-        { path: '/meter', method: RequestMethod.DELETE },
+        { path: '/meter/valve', method: RequestMethod.POST },
+        { path: '/meter/:devEUI', method: RequestMethod.PATCH },
+        { path: '/meter/:devEUI', method: RequestMethod.DELETE },
       );
   }
 }

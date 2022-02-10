@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { MeterStatus } from '../enum/meter.status.enum';
 
 export type MeterDocument = Meter & Document;
 
@@ -75,3 +76,22 @@ export class Meter {
 }
 
 export const MeterSchema = SchemaFactory.createForClass(Meter);
+
+MeterSchema.virtual('valve_status_name').get(function () {
+  switch (this.valve_status) {
+    case MeterStatus.idle:
+      return 'Idle';
+    case MeterStatus.open:
+      return 'Open';
+    case MeterStatus.close:
+      return 'Close';
+    case MeterStatus.fault:
+      return 'Fault';
+    case MeterStatus.pendingOpen:
+      return 'Pending Open';
+    case MeterStatus.pendingClose:
+      return 'Pending Close';
+    default:
+      return 'N/A';
+  }
+});

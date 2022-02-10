@@ -23,9 +23,11 @@ import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
 import { IotService } from 'src/iot/iot.service';
 import { map } from 'rxjs/operators';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
+import { IsOptional } from 'class-validator';
+import { FindMeterDto } from './dto/find-meter.dto';
 
 @ApiTags('Meter')
 @ApiBearerAuth()
@@ -62,15 +64,16 @@ export class MeterController {
     return this.meterService.createIoT(dto);
   }
 
-  @Patch('/valve')
+  @Post('/valve')
   @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
   changeValve(@Body() dto: UpdateMeterValveDto) {
-    return this.iotService.sendOpenValveUpdate(dto).pipe(
-      map((obs) => {
-        //TODO If OBS says a valid transaction occured, proceed with creating the record
-        return this.meterService.updateValve(dto);
-      }),
-    );
+    // return this.iotService.sendOpenValveUpdate(dto).pipe(
+    //   map(async (obs) => {
+    //     console.log(obs);
+    //TODO If OBS says a valid transaction occured, proceed with creating the record
+    return this.meterService.updateValve(dto);
+    //   }),
+    // );
   }
 
   @Get()
@@ -82,15 +85,11 @@ export class MeterController {
   @Get('/details')
   @Roles(RoleTypes.customer)
   @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
-  findOne(
-    @Query('meterName') meterName: string,
-    @Query('devEUI') devEUI: string,
-  ) {
-    return this.meterService.findOne(meterName, devEUI);
+  findOne(@Query() dto: FindMeterDto) {
+    return this.meterService.findOne(dto.meterName, dto.devEUI);
   }
 
   @Get('/stats')
-  @UseGuards(JwtAuthGuard)
   @UseInterceptors(ResponseInterceptor)
   findStat() {
     return this.meterService.findStats();

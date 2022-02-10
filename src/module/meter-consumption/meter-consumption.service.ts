@@ -1,26 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
-import { UpdateMeterConsumptionDto } from './dto/update-meter-consumption.dto';
+import { MeterConsumption } from './entities/meter-consumption.schema';
 
 @Injectable()
 export class MeterConsumptionService {
-  create(createMeterConsumptionDto: CreateMeterConsumptionDto) {
-    return 'This action adds a new meterConsumption';
+  constructor(
+    @InjectModel(MeterConsumption.name)
+    private meterConsumptionModel: Model<MeterConsumption>,
+  ) {}
+
+  create(dto: CreateMeterConsumptionDto) {
+    return this.meterConsumptionModel.create(dto);
   }
 
-  findAll() {
-    return `This action returns all meterConsumption`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} meterConsumption`;
-  }
-
-  update(id: number, updateMeterConsumptionDto: UpdateMeterConsumptionDto) {
-    return `This action updates a #${id} meterConsumption`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} meterConsumption`;
+  findMeterConsumption(devEUI: string, startDate: Date, endDate: Date) {
+    return this.meterConsumptionModel.find({
+      dev_eui: devEUI,
+      consumed_at: { $gte: startDate, $lte: endDate },
+    });
   }
 }
