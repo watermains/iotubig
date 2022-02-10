@@ -14,8 +14,8 @@ export class IsEmailAlreadyExistConstraint
   implements ValidatorConstraintInterface
 {
   constructor(private userRepository: UserRepository) {}
-  async validate(email: any, args: ValidationArguments) {
-    return await this.userRepository.findOneByEmail(email).then((user) => {
+  async validate(aemail: any, args: ValidationArguments) {
+    return await this.userRepository.findOneByEmail(aemail).then((user) => {
       if (user) return false;
       return true;
     });

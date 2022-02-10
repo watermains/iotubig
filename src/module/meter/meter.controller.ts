@@ -27,12 +27,12 @@ import { ApiBearerAuth, ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { IsOptional } from 'class-validator';
-import { FindMeterDto } from './dto/find-meter.dto';
+import { FindMeterDto, MeterDevEUIDto } from './dto/find-meter.dto';
 
 @ApiTags('Meter')
 @ApiBearerAuth()
-@Roles(RoleTypes.admin)
-@UseGuards(JwtAuthGuard, RolesGuard)
+// @Roles(RoleTypes.admin)
+// @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meter')
 export class MeterController {
   constructor(
@@ -49,7 +49,7 @@ export class MeterController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  @UseInterceptors(ResponseInterceptor)
   create(@Body() dto: CreateMeterDto) {
     return this.meterService.create(dto);
   }
@@ -97,12 +97,12 @@ export class MeterController {
 
   @Patch(':devEUI')
   @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
-  update(@Param('devEUI') devEui: string, @Body() dto: UpdateMeterDto) {
-    return this.meterService.update(devEui, dto);
+  update(@Param() devEuiDto: MeterDevEUIDto, @Body() dto: UpdateMeterDto) {
+    return this.meterService.update(devEuiDto.devEUI, dto);
   }
 
   @Delete(':devEUI')
-  remove(@Param('devEUI') devEui: string) {
-    return this.meterService.remove(devEui);
+  remove(@Param() devEuiDto: MeterDevEUIDto) {
+    return this.meterService.remove(devEuiDto.devEUI);
   }
 }

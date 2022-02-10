@@ -7,7 +7,6 @@ import { Transaction, TransactionSchema } from './entities/transaction.schema';
 import { HttpModule } from '@nestjs/axios';
 import * as AutoIncrementFactory from 'mongoose-sequence';
 import { Meter, MeterSchema } from 'src/module/meter/entities/meter.schema';
-import { ValidateMeterMiddleware } from 'src/middleware/meter.middleware';
 
 @Module({
   imports: [
@@ -43,11 +42,4 @@ import { ValidateMeterMiddleware } from 'src/middleware/meter.middleware';
   controllers: [TransactionController],
   providers: [TransactionService, IotService],
 })
-export class TransactionModule {
-  public configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ValidateMeterMiddleware).forRoutes({
-      path: '/transactions',
-      method: RequestMethod.POST,
-    });
-  }
-}
+export class TransactionModule {}
