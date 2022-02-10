@@ -49,7 +49,7 @@ export class MeterController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  @UseInterceptors(ResponseInterceptor)
   create(@Body() dto: CreateMeterDto) {
     return this.meterService.create(dto);
   }

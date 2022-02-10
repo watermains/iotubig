@@ -15,14 +15,13 @@ export class TransactionService {
     private transactionModel: Model<TransactionDocument>,
   ) {}
 
-  async create(
-    createTransactionDto: CreateTransactionDto,
-  ): Promise<TransactionDocument> {
-    return await this.transactionModel.create({
+  async create(createTransactionDto: CreateTransactionDto) {
+    await this.transactionModel.create({
       ...createTransactionDto,
       created_by: '-1',
       reference_no: 0,
     });
+    return { message: 'Transaction successfully recorded.' };
   }
 
   async findAll(): Promise<TransactionDocument[]> {

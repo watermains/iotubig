@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { MeterDevEUIExist } from 'src/validators/exist-meter.validator';
+import { MeterDevEUIUnique } from 'src/validators/meter.validator';
 
 export class MeterDto {
   @ApiProperty({ type: 'string' })
@@ -21,9 +21,14 @@ export class MeterDto {
   consumer_type: string;
 }
 
-export class CreateMeterDto extends PartialType(MeterDto) {
+export class MeterDevEUIDto extends PartialType(MeterDto) {
   @ApiProperty({ type: 'string' })
-  @MeterDevEUIExist({ message: 'Meter does not exist' })
+  @MeterDevEUIUnique({ message: 'Meter DevEUI already defined' })
   @IsString()
   dev_eui: string;
 }
+
+export class CreateMeterDto extends IntersectionType(
+  MeterDevEUIDto,
+  MeterDto,
+) {}

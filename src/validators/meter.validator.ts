@@ -21,6 +21,7 @@ export class MeterNameExistConstraint implements ValidatorConstraintInterface {
     if (meter) {
       return true;
     }
+    return false;
   }
 }
 
@@ -48,6 +49,7 @@ export class MeterDevEUIExistConstraint
     if (meter) {
       return true;
     }
+    return false;
   }
 }
 
@@ -58,7 +60,36 @@ export function MeterDevEUIExist(validationOptions?: ValidationOptions) {
       propertyName: propertyName,
       options: validationOptions,
       constraints: [],
-      validator: MeterNameExistConstraint,
+      validator: MeterDevEUIExistConstraint,
+    });
+  };
+}
+
+@ValidatorConstraint({ async: true })
+@Injectable()
+export class MeterDevEUIUniqueConstraint
+  implements ValidatorConstraintInterface
+{
+  constructor(@InjectModel(Meter.name) private meter: Model<MeterDocument>) {}
+
+  async validate(value: any, validationArguments?: ValidationArguments) {
+    const meter = await this.meter.findOne({ dev_eui: value });
+    console.log(meter);
+    if (meter) {
+      return false;
+    }
+    return true;
+  }
+}
+
+export function MeterDevEUIUnique(validationOptions?: ValidationOptions) {
+  return function (object: unknown, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: MeterDevEUIUniqueConstraint,
     });
   };
 }

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEmail, IsOptional, Validate } from 'class-validator';
 import { IsEmailAlreadyExist } from 'src/decorators/unique-email.decorator';
-import { MeterNameExist } from 'src/validators/exist-meter.validator';
+import { MeterNameExist } from 'src/validators/meter.validator';
 
 export class CreateUserDto {
   @ApiProperty({ type: 'string' })

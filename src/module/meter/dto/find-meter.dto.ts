@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
-import { MeterDevEUIExist } from 'src/validators/exist-meter.validator';
+import { MeterDevEUIExist } from 'src/validators/meter.validator';
 
 export class MeterDevEUIDto {
   @ApiProperty({ type: 'string', required: true })

@@ -8,7 +8,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { IotService } from 'src/iot/iot.service';
 import { Meter, MeterSchema } from './entities/meter.schema';
-import { MeterDevEUIExistConstraint } from 'src/validators/exist-meter.validator';
+import {
+  MeterDevEUIExistConstraint,
+  MeterDevEUIUniqueConstraint,
+} from 'src/validators/meter.validator';
 
 @Module({
   imports: [
@@ -34,6 +37,7 @@ import { MeterDevEUIExistConstraint } from 'src/validators/exist-meter.validator
     MeterRepository,
     IotService,
     MeterDevEUIExistConstraint,
+    MeterDevEUIUniqueConstraint,
   ],
   exports: [MeterService],
 })

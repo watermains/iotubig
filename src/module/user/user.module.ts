@@ -11,7 +11,7 @@ import { AdminService } from './admin/admin.service';
 import { AdminController } from './admin/admin.controller';
 import { IsEmailAlreadyExistConstraint } from 'src/decorators/unique-email.decorator';
 import { IsEmailExistConstraint } from 'src/decorators/exist-email.decorator';
-import { MeterNameExistConstraint } from 'src/validators/exist-meter.validator';
+import { MeterNameExistConstraint } from 'src/validators/meter.validator';
 import { Meter, MeterSchema } from '../meter/entities/meter.schema';
 
 @Module({

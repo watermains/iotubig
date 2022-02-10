@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsDecimal, IsPositive } from 'class-validator';
-import { MeterDevEUIExist } from 'src/validators/exist-meter.validator';
+import { MeterDevEUIExist } from 'src/validators/meter.validator';
 
 export class CreateTransactionDto {
   @ApiProperty({ type: 'number' })
