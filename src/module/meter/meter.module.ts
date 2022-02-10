@@ -8,7 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { IotService } from 'src/iot/iot.service';
 import { Meter, MeterSchema } from './entities/meter.schema';
-import { ValidateMeterMiddleware } from 'src/middleware/meter.middleware';
+import { MeterDevEUIExistConstraint } from 'src/validators/exist-meter.validator';
 
 @Module({
   imports: [
@@ -29,18 +29,12 @@ import { ValidateMeterMiddleware } from 'src/middleware/meter.middleware';
     HttpModule,
   ],
   controllers: [MeterController],
-  providers: [MeterService, MeterRepository, IotService],
+  providers: [
+    MeterService,
+    MeterRepository,
+    IotService,
+    MeterDevEUIExistConstraint,
+  ],
   exports: [MeterService],
 })
-export class MeterModule {
-  public configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(ValidateMeterMiddleware)
-      .forRoutes(
-        { path: '/meter/details', method: RequestMethod.GET },
-        { path: '/meter/valve', method: RequestMethod.POST },
-        { path: '/meter/:devEUI', method: RequestMethod.PATCH },
-        { path: '/meter/:devEUI', method: RequestMethod.DELETE },
-      );
-  }
-}
+export class MeterModule {}

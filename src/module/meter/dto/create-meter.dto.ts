@@ -1,6 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
+import { MeterDevEUIExist } from 'src/validators/exist-meter.validator';
 
 export class MeterDto {
   @ApiProperty({ type: 'string' })
@@ -22,6 +23,7 @@ export class MeterDto {
 
 export class CreateMeterDto extends PartialType(MeterDto) {
   @ApiProperty({ type: 'string' })
+  @MeterDevEUIExist({ message: 'Meter does not exist' })
   @IsString()
   dev_eui: string;
 }

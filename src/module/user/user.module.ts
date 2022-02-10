@@ -11,11 +11,14 @@ import { AdminService } from './admin/admin.service';
 import { AdminController } from './admin/admin.controller';
 import { IsEmailAlreadyExistConstraint } from 'src/decorators/unique-email.decorator';
 import { IsEmailExistConstraint } from 'src/decorators/exist-email.decorator';
+import { MeterNameExistConstraint } from 'src/validators/exist-meter.validator';
+import { Meter, MeterSchema } from '../meter/entities/meter.schema';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: Meter.name, schema: MeterSchema }]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },
@@ -29,6 +32,7 @@ import { IsEmailExistConstraint } from 'src/decorators/exist-email.decorator';
     IsEmailExistConstraint,
     IsMatchConstraint,
     AdminService,
+    MeterNameExistConstraint,
   ],
   exports: [UserService, AdminService],
 })

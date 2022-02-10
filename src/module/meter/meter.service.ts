@@ -16,10 +16,11 @@ export class MeterService {
     private meterModel: Model<MeterDocument>,
   ) {}
 
-  async create(createMeterDto: CreateMeterDto): Promise<Meter> {
-    return await this.meterModel.create({
+  async create(createMeterDto: CreateMeterDto) {
+    await this.meterModel.create({
       ...createMeterDto,
     });
+    return { message: 'Successfully Created Meter.' };
   }
 
   async createIoT(createMeterIOTDto: CreateMeterIOTDto): Promise<Meter> {
