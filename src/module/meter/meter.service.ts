@@ -20,7 +20,7 @@ export class MeterService {
     await this.meterModel.create({
       ...createMeterDto,
     });
-    return { message: 'Successfully Created Meter.' };
+    return { message: 'Meter created successfully' };
   }
 
   async createIoT(createMeterIOTDto: CreateMeterIOTDto): Promise<Meter> {
@@ -76,12 +76,14 @@ export class MeterService {
   async update(
     devEUI: string,
     updateMeterDto: UpdateMeterDto,
-  ): Promise<Meter | null> {
-    return await this.meterModel.findOneAndUpdate(
+  ): Promise<unknown> {
+    const response = await this.meterModel.findOneAndUpdate(
       { dev_eui: devEUI },
       { ...updateMeterDto },
       { upsert: false, new: true },
     );
+
+    return { response, message: 'Meter updated successfully' };
   }
 
   async upsert(dev_eui: string, dto: CreateMeterIOTDto): Promise<Meter> {
@@ -96,6 +98,7 @@ export class MeterService {
     const forRemove = await this.meterModel.findOne({ dev_eui: devEUI });
     forRemove.deleted_at = new Date();
     await forRemove.save();
+    return { message: 'Meter deleted successfully' };
   }
 
   async findStats(): Promise<unknown> {
