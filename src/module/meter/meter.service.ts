@@ -48,12 +48,27 @@ export class MeterService {
     });
   }
 
+  private getStatus(open: boolean, force: boolean): number {
+    if (force) {
+      if (open) {
+        return MeterStatus.open;
+      } else {
+        return MeterStatus.close;
+      }
+    } else {
+      if (open) {
+        return MeterStatus.pendingOpen;
+      } else {
+        return MeterStatus.pendingClose;
+      }
+    }
+  }
+
   async updateValve(dto: UpdateMeterValveDto): Promise<Meter | null> {
-    //TODO validation
     return await this.meterModel.findOneAndUpdate(
       { dev_eui: dto.dev_eui },
-      { valve_status: dto.is_open ? 1 : 0 },
-      { upsert: false },
+      { valve_status: this.getStatus(dto.is_open, dto.force) },
+      { upsert: false, new: true },
     );
   }
 
@@ -61,7 +76,6 @@ export class MeterService {
     devEUI: string,
     updateMeterDto: UpdateMeterDto,
   ): Promise<Meter | null> {
-    //TODO validation
     return await this.meterModel.findOneAndUpdate(
       { dev_eui: devEUI },
       { ...updateMeterDto },
