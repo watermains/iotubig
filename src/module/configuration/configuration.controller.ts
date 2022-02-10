@@ -1,19 +1,23 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
+import { JwtAuthGuard, RolesGuard } from 'src/guard';
+import { ResponseInterceptor } from 'src/response.interceptor';
 import { ConfigurationService } from './configuration.service';
 import { CreateConfigurationDto } from './dto/create-configuration.dto';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
-import { JwtAuthGuard, RolesGuard } from 'src/guard';
 
 @ApiTags('Configuration')
 @ApiBearerAuth()
@@ -29,21 +33,21 @@ export class ConfigurationController {
   }
 
   @Get()
-  findAll() {
-    return this.configurationService.findAll();
+  @UseInterceptors(ResponseInterceptor)
+  findOne(@Req() request: Request) {
+    return this.configurationService.findOne(request.user['id']);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.configurationService.findOne(+id);
-  }
-
-  @Patch(':id')
+  @Patch()
+  @UseInterceptors(ResponseInterceptor)
   update(
-    @Param('id') id: string,
+    @Req() request: Request,
     @Body() updateConfigurationDto: UpdateConfigurationDto,
   ) {
-    return this.configurationService.update(+id, updateConfigurationDto);
+    return this.configurationService.update(
+      request.user['id'],
+      updateConfigurationDto,
+    );
   }
 
   @Delete(':id')

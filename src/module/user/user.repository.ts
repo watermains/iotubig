@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { RoleTypes } from 'src/decorators/roles.decorator';
+import { Organization } from '../organization/entities/organization.schema';
 import { User, UserDocument } from './entities/user.schema';
 
 @Injectable()
@@ -109,5 +110,17 @@ export class UserRepository {
       new: true,
       setDefaultsOnInsert: true,
     });
+  }
+
+  async findOrganizationIdById(id: string): Promise<Organization> {
+    const { organization_id } = await this.userModel.findById(id);
+
+    if (!organization_id) {
+      throw new NotFoundException([
+        'Organization not found. Please contact your System Administrator',
+      ]);
+    }
+
+    return organization_id;
   }
 }

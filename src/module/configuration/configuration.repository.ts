@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Organization } from '../organization/entities/organization.schema';
+import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import {
   Configuration,
   ConfigurationDocument,
@@ -14,6 +16,28 @@ export class ConfigurationRepository {
   ) {}
 
   seedConfiguration(body) {
-    return this.configurationModel.findOneAndUpdate({organization_id: body.organization_id}, body, { upsert: true, new: true, setDefaultsOnInsert: true })
+    return this.configurationModel.findOneAndUpdate(
+      { organization_id: body.organization_id },
+      body,
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
+  }
+
+  async findOne(organization_id: Organization) {
+    const configuration = await this.configurationModel.findOne({
+      organization_id,
+    });
+
+    return { response: configuration };
+  }
+
+  async update(organization_id: Organization, dto: UpdateConfigurationDto) {
+    const configuration = await this.configurationModel.findOneAndUpdate(
+      { organization_id },
+      { ...dto },
+      { upsert: false, new: true },
+    );
+
+    return { response: configuration, message: 'Settings saved successfully' };
   }
 }
