@@ -21,7 +21,7 @@ export class MeterDto {
   consumer_type: string;
 }
 
-export class MeterDevEUIDto extends PartialType(MeterDto) {
+export class MeterDevEUIDto {
   @ApiProperty({ type: 'string' })
   @MeterDevEUIUnique({ message: 'Meter DevEUI already defined' })
   @IsString()
