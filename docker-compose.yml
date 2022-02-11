@@ -19,7 +19,7 @@ services:
       dockerfile: ./Dockerfile
     env_file:
       - .env.docker
-    command: npm run start:dev
+    command: npm run start:prod
     ports:
       - 3000:3000
     volumes:
