@@ -1,33 +1,30 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseInterceptors,
-  UseGuards,
-  Req,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { MeterService } from './meter.service';
-import { CreateMeterDto } from './dto/create-meter.dto';
-import { UpdateMeterDto } from './dto/update-meter.dto';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
+import { JwtAuthGuard } from 'src/guard';
+import { IotService } from 'src/iot/iot.service';
 import {
   DocumentInterceptor,
   DocumentsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
-import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
-import { IotService } from 'src/iot/iot.service';
-import { map } from 'rxjs/operators';
-import { ApiBearerAuth, ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
-import { JwtAuthGuard, RolesGuard } from 'src/guard';
-import { IsOptional } from 'class-validator';
+import { CreateMeterDto } from './dto/create-meter.dto';
 import { FindMeterDto, MeterDevEUIDto } from './dto/find-meter.dto';
+import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
+import { UpdateMeterDto } from './dto/update-meter.dto';
+import { MeterService } from './meter.service';
 
 @ApiTags('Meter')
 @ApiBearerAuth()
@@ -96,12 +93,13 @@ export class MeterController {
   }
 
   @Patch(':devEUI')
-  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  @UseInterceptors(ResponseInterceptor)
   update(@Param() devEuiDto: MeterDevEUIDto, @Body() dto: UpdateMeterDto) {
     return this.meterService.update(devEuiDto.devEUI, dto);
   }
 
   @Delete(':devEUI')
+  @UseInterceptors(ResponseInterceptor)
   remove(@Param() devEuiDto: MeterDevEUIDto) {
     return this.meterService.remove(devEuiDto.devEUI);
   }
