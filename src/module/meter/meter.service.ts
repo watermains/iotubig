@@ -65,12 +65,14 @@ export class MeterService {
     }
   }
 
-  async updateValve(dto: UpdateMeterValveDto): Promise<Meter | null> {
-    return await this.meterModel.findOneAndUpdate(
+  async updateValve(dto: UpdateMeterValveDto): Promise<unknown> {
+    const response = await this.meterModel.findOneAndUpdate(
       { dev_eui: dto.dev_eui },
       { valve_status: this.getStatus(dto.is_open, dto.force) },
       { upsert: false, new: true },
     );
+
+    return { response, message: 'Meter valve status updated successfully' };
   }
 
   async update(
