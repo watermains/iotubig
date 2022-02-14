@@ -1,8 +1,6 @@
-import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { LoginUserDto } from '../dto/login-user.dto';
 import { UserRepository } from '../user.repository';
-
 
 @Injectable()
 export class AdminService {
@@ -10,5 +8,10 @@ export class AdminService {
 
   async login(loginUserDto: LoginUserDto): Promise<Object> {
     return this.userRepository.adminLogin(loginUserDto);
+  }
+
+  async findOneByEmail(email: string): Promise<Object> {
+    const { first_name } = await this.userRepository.findOneByEmail(email);
+    return { response: { first_name } };
   }
 }
