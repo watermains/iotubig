@@ -12,7 +12,7 @@
 
 Sample values can be viewed on [.env.example](./.env.example)
 
-| Parameter        | Description                                 |
+| Variable         | Description                                 |
 | ---------------- | ------------------------------------------- |
 | `MONGO_URL`      | **Required**. DocumentDB/MongoDB URI.       |
 | `JWT_SECRET`     | **Required**. JSON Web Token Secret Key.    |

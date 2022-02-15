@@ -62,7 +62,7 @@ export class MeterController {
   }
 
   @Post('/valve')
-  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  @UseInterceptors(ResponseInterceptor)
   changeValve(@Body() dto: UpdateMeterValveDto) {
     // return this.iotService.sendOpenValveUpdate(dto).pipe(
     //   map(async (obs) => {
