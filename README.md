@@ -18,6 +18,9 @@ Sample values can be viewed on [.env.example](./.env.example)
 | `JWT_SECRET`     | **Required**. JSON Web Token Secret Key.    |
 | `JWT_EXPIRATION` | **Required**. JSON Web Token Expiration.    |
 | `IOT_URL`        | **Required**. AWS IoT Core API Gateway URL. |
+| `MAIL_API_KEY`   | **Required**. AWS SES API KEY.              |
+| `REGION`         | **Required**. AWS SES Region.               |
+| `SECRET`         | **Required**. AWS SES Secret.               |
 
 ## Installation
 

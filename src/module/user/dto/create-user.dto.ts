@@ -1,15 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEmail, IsOptional, Validate } from 'class-validator';
 import { IsEmailAlreadyExist } from 'src/decorators/unique-email.decorator';
-import { MeterNameExist } from 'src/validators/meter.validator';
+import { MeterCheck, MeterField } from 'src/validators/meter.validator';
 
 export class CreateUserDto {
   @ApiProperty({ type: 'string' })
   @IsString()
   @IsOptional()
-  @MeterNameExist({
-    message: 'Meter does not exist',
-  })
+  @MeterCheck(
+    { field: MeterField.name, exist: true },
+    { message: 'Meter does not exist' },
+  )
   private _water_meter_id: string;
   public get water_meter_id(): string {
     return this._water_meter_id;

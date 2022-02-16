@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   registerDecorator,
@@ -10,86 +10,69 @@ import {
 import { Model } from 'mongoose';
 import { Meter, MeterDocument } from 'src/module/meter/entities/meter.schema';
 
+export enum MeterField {
+  devEUI = 'dev_eui',
+  name = 'meter_name',
+}
+export class MeterValidationOptions {
+  field: MeterField;
+  unique?: boolean;
+  exist?: boolean;
+}
+
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class MeterNameExistConstraint implements ValidatorConstraintInterface {
+export class MeterCheckConstraint implements ValidatorConstraintInterface {
   constructor(@InjectModel(Meter.name) private meter: Model<MeterDocument>) {}
 
-  async validate(value: any, validationArguments?: ValidationArguments) {
-    const meter = await this.meter.findOne({ meter_name: value });
-    console.log(meter);
-    if (meter) {
-      return true;
+  async validate(value: any, args: ValidationArguments) {
+    const constraints = args.constraints;
+    if (
+      constraints.length != 1 ||
+      constraints[0] instanceof MeterValidationOptions
+    ) {
+      throw new InternalServerErrorException('Invalid Meter Constraints set');
     }
-    return false;
-  }
-}
-
-export function MeterNameExist(validationOptions?: ValidationOptions) {
-  return function (object: unknown, propertyName: string) {
-    registerDecorator({
-      target: object.constructor,
-      propertyName: propertyName,
-      options: validationOptions,
-      constraints: [],
-      validator: MeterNameExistConstraint,
-    });
-  };
-}
-
-@ValidatorConstraint({ async: true })
-@Injectable()
-export class MeterDevEUIExistConstraint
-  implements ValidatorConstraintInterface
-{
-  constructor(@InjectModel(Meter.name) private meter: Model<MeterDocument>) {}
-
-  async validate(value: any, validationArguments?: ValidationArguments) {
-    const meter = await this.meter.findOne({ dev_eui: value });
-    if (meter) {
-      return true;
+    const params = constraints[0] as MeterValidationOptions;
+    const field = params.field;
+    const whereClause = {};
+    whereClause[field] = value;
+    const meter = await this.meter.findOne(whereClause);
+    if (
+      (params.exist === undefined && params.unique === undefined) ||
+      (params.exist !== undefined && params.unique !== undefined)
+    ) {
+      throw new InternalServerErrorException(
+        'At least 1 constraint should be chosen',
+      );
     }
-    return false;
-  }
-}
 
-export function MeterDevEUIExist(validationOptions?: ValidationOptions) {
-  return function (object: unknown, propertyName: string) {
-    registerDecorator({
-      target: object.constructor,
-      propertyName: propertyName,
-      options: validationOptions,
-      constraints: [],
-      validator: MeterDevEUIExistConstraint,
-    });
-  };
-}
-
-@ValidatorConstraint({ async: true })
-@Injectable()
-export class MeterDevEUIUniqueConstraint
-  implements ValidatorConstraintInterface
-{
-  constructor(@InjectModel(Meter.name) private meter: Model<MeterDocument>) {}
-
-  async validate(value: any, validationArguments?: ValidationArguments) {
-    const meter = await this.meter.findOne({ dev_eui: value });
-    console.log(meter);
-    if (meter) {
+    if (params.exist) {
+      if (meter) {
+        return true;
+      }
       return false;
     }
-    return true;
+    if (params.unique) {
+      if (meter) {
+        return false;
+      }
+      return true;
+    }
   }
 }
 
-export function MeterDevEUIUnique(validationOptions?: ValidationOptions) {
+export function MeterCheck(
+  options: MeterValidationOptions,
+  validationOptions?: ValidationOptions,
+) {
   return function (object: unknown, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [],
-      validator: MeterDevEUIUniqueConstraint,
+      constraints: [options],
+      validator: MeterCheckConstraint,
     });
   };
 }

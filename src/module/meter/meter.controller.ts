@@ -12,6 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { request } from 'http';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { IotService } from 'src/iot/iot.service';
@@ -38,15 +39,7 @@ export class MeterController {
     private readonly iotService: IotService,
   ) {}
 
-  // @UseGuards(JwtAuthGuard)
-  // @Get('dashboard')
-  // @UseInterceptors(ResponseInterceptor)
-  // dashboard(@Req() request) {
-  //   return this.meterService.dashboard(request);
-  // }
-
   @Post()
-  @UseGuards(JwtAuthGuard)
   @UseInterceptors(ResponseInterceptor)
   create(@Body() dto: CreateMeterDto) {
     return this.meterService.create(dto);
