@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { ConsumerType } from '../enum/consumer-type.enum';
 import { MeterStatus } from '../enum/meter.status.enum';
 
 export type MeterDocument = Meter & Document;
@@ -53,8 +54,8 @@ export class Meter {
   @Prop({ default: '' })
   unit_name: string;
 
-  @Prop({ default: 'residential' })
-  consumer_type: string;
+  @Prop({ default: ConsumerType.Residential })
+  consumer_type: ConsumerType;
 
   @Prop({ default: null })
   deleted_by: string;
@@ -73,6 +74,9 @@ export class Meter {
 
   @Prop()
   balanceInPeso: number;
+
+  getWaterMeterRate: (consumption_rate: number) => number;
+  getEstimatedBalance: (consumption_rate: number) => number;
 }
 
 export const MeterSchema = SchemaFactory.createForClass(Meter);
@@ -95,3 +99,16 @@ MeterSchema.virtual('valve_status_name').get(function () {
       return 'N/A';
   }
 });
+
+MeterSchema.methods.getWaterMeterRate = function (
+  consumption_rate: number,
+): number {
+  return consumption_rate * 1000;
+};
+
+MeterSchema.methods.getEstimatedBalance = function (
+  consumption_rate: number,
+): number {
+  const waterMeterRate = this.getWaterMeterRate(consumption_rate);
+  return (Number(this.allowed_flow) || 0) / waterMeterRate;
+};

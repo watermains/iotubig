@@ -5,7 +5,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { IotService } from 'src/iot/iot.service';
 import { MeterCheckConstraint } from 'src/validators/meter.validator';
+import {
+  Configuration,
+  ConfigurationSchema,
+} from '../configuration/entities/configuration.schema';
 import { User, UserSchema } from '../user/entities/user.schema';
+import { UserRepository } from '../user/user.repository';
 import { Meter, MeterSchema } from './entities/meter.schema';
 import { MeterController } from './meter.controller';
 import { MeterRepository } from './meter.repository';
@@ -24,6 +29,9 @@ import { MeterService } from './meter.service';
       },
     ]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: Configuration.name, schema: ConfigurationSchema },
+    ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },
@@ -31,7 +39,13 @@ import { MeterService } from './meter.service';
     HttpModule,
   ],
   controllers: [MeterController],
-  providers: [MeterService, MeterRepository, IotService, MeterCheckConstraint],
+  providers: [
+    MeterService,
+    MeterRepository,
+    IotService,
+    MeterCheckConstraint,
+    UserRepository,
+  ],
   exports: [MeterService],
 })
 export class MeterModule {}
