@@ -1,17 +1,18 @@
 import { HttpModule } from '@nestjs/axios';
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
-import { MeterService } from './meter.service';
-import { MeterController } from './meter.controller';
-import { MeterRepository } from './meter.repository';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
+import { MongooseModule } from '@nestjs/mongoose';
 import { IotService } from 'src/iot/iot.service';
-import { Meter, MeterSchema } from './entities/meter.schema';
 import {
   MeterDevEUIExistConstraint,
   MeterDevEUIUniqueConstraint,
 } from 'src/validators/meter.validator';
+import { User, UserSchema } from '../user/entities/user.schema';
+import { Meter, MeterSchema } from './entities/meter.schema';
+import { MeterController } from './meter.controller';
+import { MeterRepository } from './meter.repository';
+import { MeterService } from './meter.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import {
         },
       },
     ]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },

@@ -1,26 +1,24 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
-  UseInterceptors,
-  NotFoundException,
+  Get,
+  Param,
+  Post,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { TransactionService } from './transaction.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { map } from 'rxjs/operators';
+import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
+import { JwtAuthGuard, RolesGuard } from 'src/guard';
+import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
 import {
   DocumentsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { MeterService } from 'src/module/meter/meter.service';
-import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
-import { JwtAuthGuard, RolesGuard } from 'src/guard';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { TransactionService } from './transaction.service';
 
 @ApiTags('Transactions')
 @ApiBearerAuth()
@@ -55,11 +53,11 @@ export class TransactionController {
     return this.transactionService.findAll();
   }
 
-  @Get(':meter')
+  @Get(':devEUI')
   @Roles(RoleTypes.customer)
   @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
-  findWhere(@Param('meter') meter: string) {
-    return this.transactionService.findWhere(meter);
+  findWhere(@Param('devEUI') devEUI: string) {
+    return this.transactionService.findWhere(devEUI);
   }
 
   @Delete(':id')

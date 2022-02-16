@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Meter, MeterDocument } from '../meter/entities/meter.schema';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-
 import {
   Transaction,
   TransactionDocument,
@@ -13,6 +13,8 @@ export class TransactionService {
   constructor(
     @InjectModel(Transaction.name)
     private transactionModel: Model<TransactionDocument>,
+    @InjectModel(Meter.name)
+    private meterModel: Model<MeterDocument>,
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto) {
@@ -29,16 +31,20 @@ export class TransactionService {
       .find({
         deleted_at: null,
       })
-      .sort({ created_at: '-1' });
+      .sort({ createdAt: '-1' });
   }
 
-  async findWhere(meter: string): Promise<TransactionDocument[]> {
+  async findWhere(dev_eui: string): Promise<TransactionDocument[]> {
+    const { meter_name: iot_meter_id } = await this.meterModel.findOne({
+      dev_eui,
+    });
+
     return await this.transactionModel
       .find({
-        iot_meter_id: meter,
+        iot_meter_id,
         deleted_at: null,
       })
-      .sort({ created_at: '-1' });
+      .sort({ createdAt: '-1' });
   }
 
   async remove(id: number) {

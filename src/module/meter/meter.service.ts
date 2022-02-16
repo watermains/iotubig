@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { User, UserDocument } from '../user/entities/user.schema';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
@@ -14,6 +15,8 @@ export class MeterService {
   constructor(
     @InjectModel(Meter.name)
     private meterModel: Model<MeterDocument>,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
   ) {}
 
   async create(createMeterDto: CreateMeterDto) {
@@ -35,7 +38,15 @@ export class MeterService {
     });
   }
 
-  async findOne(meter: string, devEUI: string) {
+  async findOne(meter?: string, devEUI?: string, user_id?: string) {
+    if (!meter && !devEUI) {
+      const { water_meter_id } = await this.userModel.findOne({
+        _id: user_id,
+      });
+
+      meter = water_meter_id;
+    }
+
     const params = {
       meter_name: meter,
       dev_eui: devEUI,
