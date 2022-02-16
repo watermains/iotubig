@@ -1,4 +1,4 @@
-import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 import { MeterDevEUIExist } from 'src/validators/meter.validator';
 
@@ -16,7 +16,14 @@ export class MeterNameDto {
   meterName: string;
 }
 
-export class FindMeterDto extends IntersectionType(
-  MeterNameDto,
-  MeterDevEUIDto,
-) {}
+export class FindMeterDto {
+  @ApiProperty({ type: 'string', required: false })
+  @IsString()
+  @IsOptional()
+  meterName: string;
+
+  @ApiProperty({ type: 'string', required: false })
+  @IsString()
+  @IsOptional()
+  devEUI: string;
+}
