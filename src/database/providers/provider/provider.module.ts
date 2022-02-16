@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGO_URL)
+    MongooseModule.forRoot(process.env.MONGO_URL),
   ],
 })
 export class MongoDBProviderModule {}

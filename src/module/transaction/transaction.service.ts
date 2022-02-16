@@ -20,7 +20,6 @@ export class TransactionService {
   async create(createTransactionDto: CreateTransactionDto) {
     await this.transactionModel.create({
       ...createTransactionDto,
-      created_by: '-1',
       reference_no: 0,
     });
     return { message: 'Transaction successfully recorded.' };

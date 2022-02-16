@@ -11,11 +11,12 @@ import { AdminService } from './admin/admin.service';
 import { AdminController } from './admin/admin.controller';
 import { IsEmailAlreadyExistConstraint } from 'src/decorators/unique-email.decorator';
 import { IsEmailExistConstraint } from 'src/decorators/exist-email.decorator';
-import { MeterNameExistConstraint } from 'src/validators/meter.validator';
+import { MeterCheckConstraint } from 'src/validators/meter.validator';
 import { Meter, MeterSchema } from '../meter/entities/meter.schema';
-
+import { MailerModule } from 'src/mailer/mailer.module';
 @Module({
   imports: [
+    MailerModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Meter.name, schema: MeterSchema }]),
@@ -32,7 +33,7 @@ import { Meter, MeterSchema } from '../meter/entities/meter.schema';
     IsEmailExistConstraint,
     IsMatchConstraint,
     AdminService,
-    MeterNameExistConstraint,
+    MeterCheckConstraint,
   ],
   exports: [UserService, AdminService],
 })

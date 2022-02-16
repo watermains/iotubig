@@ -14,11 +14,15 @@ import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../../../guard/auth/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
+import { MailerService } from 'src/mailer/mailer.service';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly mailerService: MailerService,
+  ) {}
 
   @Post('auth/register')
   @UseInterceptors(ResponseInterceptor)
