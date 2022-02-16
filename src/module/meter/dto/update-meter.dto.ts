@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { IsDecimal, IsOptional } from 'class-validator';
 import { MeterDto } from './create-meter.dto';

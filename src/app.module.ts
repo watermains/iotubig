@@ -18,6 +18,7 @@ import {
   TransactionModule,
   UserModule,
 } from './module';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import {
     OrganizationModule,
     TransactionModule,
     UserModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

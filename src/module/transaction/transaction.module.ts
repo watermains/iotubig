@@ -28,10 +28,10 @@ import { Meter, MeterSchema } from 'src/module/meter/entities/meter.schema';
           schema.plugin(AutoIncrement, {
             inc_field: 'reference_no',
           });
-          // schema.pre('save', function (next) {
-          //   // this.created_by = this.$locals.user_id;
-          //   next();
-          // });
+          schema.pre('save', function (next) {
+            // this.created_by = this.$locals.user_id;
+            next();
+          });
           return schema;
         },
         inject: [getConnectionToken()],
