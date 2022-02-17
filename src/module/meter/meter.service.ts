@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ConsumerType } from 'src/module/meter/enum/consumer-type.enum';
 import {
   Configuration,
   ConfigurationDocument,
@@ -38,9 +39,39 @@ export class MeterService {
     });
   }
 
-  async findAll(user_id: string): Promise<Meter[]> {
-    return await this.meterModel.find({
+  async findAll(organization_id: string) {
+    const configuration = await this.configurationModel.findOne({
+      organization_id,
+    });
+
+    const residential_consumption_rate = configuration.getConsumptionRate(
+      ConsumerType.Residential,
+    );
+
+    const commercial_consumption_rate = configuration.getConsumptionRate(
+      ConsumerType.Commercial,
+    );
+
+    const meters = await this.meterModel.find({
       deleted_at: null,
+    });
+
+    return meters.map((meter) => {
+      const consumption_rate = (() => {
+        switch (meter.consumer_type) {
+          case ConsumerType.Residential:
+            return residential_consumption_rate;
+          case ConsumerType.Commercial:
+            return commercial_consumption_rate;
+        }
+      })();
+
+      const estimated_balance = meter.getEstimatedBalance(consumption_rate);
+
+      return {
+        document: meter,
+        custom_fields: { estimated_balance },
+      };
     });
   }
 
