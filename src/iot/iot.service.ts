@@ -49,7 +49,7 @@ export class IotService {
       .post(process.env.IOT_URL, {
         device_id,
         command,
-        data,
+        ...data,
         frame_id,
       })
       .pipe(
