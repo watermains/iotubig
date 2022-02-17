@@ -78,7 +78,12 @@ export class MeterController {
   @Roles(RoleTypes.customer)
   @UseInterceptors(ResponseInterceptor, MutableDocumentInterceptor)
   findOne(@Req() req, @Query() dto: FindMeterDto) {
-    return this.meterService.findOne(req.user.id, dto.meterName, dto.devEUI);
+    return this.meterService.findOne(
+      req.user.id,
+      req.user.org_id,
+      dto.meterName,
+      dto.devEUI,
+    );
   }
 
   @Get('/stats')

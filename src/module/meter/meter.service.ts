@@ -6,7 +6,6 @@ import {
   ConfigurationDocument,
 } from '../configuration/entities/configuration.schema';
 import { User, UserDocument } from '../user/entities/user.schema';
-import { UserRepository } from '../user/user.repository';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
@@ -24,7 +23,6 @@ export class MeterService {
     private userModel: Model<UserDocument>,
     @InjectModel(Configuration.name)
     private configurationModel: Model<ConfigurationDocument>,
-    private readonly userRepository: UserRepository,
   ) {}
 
   async create(createMeterDto: CreateMeterDto) {
@@ -46,7 +44,12 @@ export class MeterService {
     });
   }
 
-  async findOne(user_id: string, meter_name?: string, dev_eui?: string) {
+  async findOne(
+    user_id: string,
+    organization_id: string,
+    meter_name?: string,
+    dev_eui?: string,
+  ) {
     if (!meter_name && !dev_eui) {
       const { water_meter_id } = await this.userModel.findOne({
         _id: user_id,
@@ -62,10 +65,6 @@ export class MeterService {
 
     Object.keys(params).forEach((key) =>
       params[key] === undefined ? delete params[key] : {},
-    );
-
-    const organization_id = await this.userRepository.findOrganizationIdById(
-      user_id,
     );
 
     const configuration = await this.configurationModel.findOne({
