@@ -40,7 +40,7 @@ export class MeterService {
     });
   }
 
-  async findAll(): Promise<Meter[]> {
+  async findAll(user_id: string): Promise<Meter[]> {
     return await this.meterModel.find({
       deleted_at: null,
     });

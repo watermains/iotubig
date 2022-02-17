@@ -40,7 +40,12 @@ export class UserRepository {
         user.password,
       );
       if (isMatch) {
-        const payload = { email: user.email, id: user._id, role: user.role };
+        const payload = {
+          email: user.email,
+          id: user._id,
+          role: user.role,
+          org_id: user.organization_id,
+        };
         return {
           response: { access_token: this.jwtService.sign(payload) },
           message: 'Login Success',
@@ -94,7 +99,12 @@ export class UserRepository {
         user.password,
       );
       if (isMatch) {
-        const payload = { email: user.email, id: user._id, role: user.role };
+        const payload = {
+          email: user.email,
+          id: user._id,
+          role: user.role,
+          org_id: user.organization_id,
+        };
         return { response: { access_token: this.jwtService.sign(payload) } };
       }
 

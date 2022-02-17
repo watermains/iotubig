@@ -7,14 +7,6 @@ export class CreateTransactionDto {
   @IsPositive()
   amount: number;
 
-  @ApiProperty({ type: 'number', format: 'double' })
-  @IsDecimal()
-  volume: number;
-
-  @ApiProperty({ type: 'number', format: 'double' })
-  @IsDecimal()
-  rate: number;
-
   @ApiProperty({ type: 'string' })
   @IsString()
   iot_meter_id: string;

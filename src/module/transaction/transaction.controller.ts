@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -33,13 +34,15 @@ export class TransactionController {
 
   @Post()
   @UseInterceptors(ResponseInterceptor)
-  async create(@Body() dto: CreateTransactionDto) {
+  async create(@Req() request: any, @Body() dto: CreateTransactionDto) {
     return this.iotService
       .sendBalanceUpdate(new BalanceUpdateDTO(dto.amount.toString()))
       .pipe(
         map((obs) => {
           //TODO If OBS says a valid transaction occured, proceed with creating the record
-          return this.transactionService.create(dto).then((value) => {
+          return this.transactionService
+            .create(request.user.id, request.user.org_id, dto)
+            .then((value) => {
             console.log(value);
             return value;
           });

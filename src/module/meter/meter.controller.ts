@@ -30,8 +30,8 @@ import { MeterService } from './meter.service';
 
 @ApiTags('Meter')
 @ApiBearerAuth()
-// @Roles(RoleTypes.admin)
-// @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(RoleTypes.admin)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meter')
 export class MeterController {
   constructor(
@@ -69,8 +69,8 @@ export class MeterController {
 
   @Get()
   @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
-  findAll() {
-    return this.meterService.findAll();
+  findAll(@Req() req) {
+    return this.meterService.findAll(req.user.id);
   }
 
   @Get('/details')
