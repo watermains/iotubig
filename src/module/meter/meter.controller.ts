@@ -12,13 +12,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { request } from 'http';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { IotService } from 'src/iot/iot.service';
 import {
   DocumentInterceptor,
   DocumentsInterceptor,
+  MutableDocumentInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
@@ -76,9 +76,9 @@ export class MeterController {
   @Get('/details')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleTypes.customer)
-  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  @UseInterceptors(ResponseInterceptor, MutableDocumentInterceptor)
   findOne(@Req() req, @Query() dto: FindMeterDto) {
-    return this.meterService.findOne(dto.meterName, dto.devEUI, req.user.id);
+    return this.meterService.findOne(req.user.id, dto.meterName, dto.devEUI);
   }
 
   @Get('/stats')

@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import {
+  Configuration,
+  ConfigurationDocument,
+} from '../configuration/entities/configuration.schema';
 import { User, UserDocument } from '../user/entities/user.schema';
+import { UserRepository } from '../user/user.repository';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
@@ -17,6 +22,9 @@ export class MeterService {
     private meterModel: Model<MeterDocument>,
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
+    @InjectModel(Configuration.name)
+    private configurationModel: Model<ConfigurationDocument>,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async create(createMeterDto: CreateMeterDto) {
@@ -38,26 +46,48 @@ export class MeterService {
     });
   }
 
-  async findOne(meter?: string, devEUI?: string, user_id?: string) {
-    if (!meter && !devEUI) {
+  async findOne(user_id: string, meter_name?: string, dev_eui?: string) {
+    if (!meter_name && !dev_eui) {
       const { water_meter_id } = await this.userModel.findOne({
         _id: user_id,
       });
 
-      meter = water_meter_id;
+      meter_name = water_meter_id;
     }
 
     const params = {
-      meter_name: meter,
-      dev_eui: devEUI,
+      meter_name,
+      dev_eui,
     };
+
     Object.keys(params).forEach((key) =>
       params[key] === undefined ? delete params[key] : {},
     );
-    return await this.meterModel.findOne({
+
+    const organization_id = await this.userRepository.findOrganizationIdById(
+      user_id,
+    );
+
+    const configuration = await this.configurationModel.findOne({
+      organization_id,
+    });
+
+    const meter = await this.meterModel.findOne({
       ...params,
       deleted_at: null,
     });
+
+    const consumption_rate = configuration.getConsumptionRate(
+      meter.consumer_type,
+    );
+
+    const water_meter_rate = meter.getWaterMeterRate(consumption_rate);
+    const estimated_balance = meter.getEstimatedBalance(consumption_rate);
+
+    return {
+      document: meter,
+      custom_fields: { water_meter_rate, estimated_balance },
+    };
   }
 
   private getStatus(open: boolean, force: boolean): number {
