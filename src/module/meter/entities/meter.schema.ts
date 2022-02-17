@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { number } from 'yargs';
 import { ConsumerType } from '../enum/consumer-type.enum';
 import { MeterStatus } from '../enum/meter.status.enum';
 
@@ -77,6 +78,7 @@ export class Meter {
 
   getWaterMeterRate: (consumption_rate: number) => number;
   getEstimatedBalance: (consumption_rate: number) => number;
+  addFlow: (current_flow: number, volume: number) => number;
 }
 
 export const MeterSchema = SchemaFactory.createForClass(Meter);
@@ -99,6 +101,14 @@ MeterSchema.virtual('valve_status_name').get(function () {
       return 'N/A';
   }
 });
+
+MeterSchema.methods.addFlow = function (
+  current_flow: number,
+  volume: number,
+): number {
+  const res = Number(current_flow) + Number(volume);
+  return res;
+};
 
 MeterSchema.methods.getWaterMeterRate = function (
   consumption_rate: number,
