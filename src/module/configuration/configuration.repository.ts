@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Organization } from '../organization/entities/organization.schema';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import {
   Configuration,
@@ -23,7 +22,7 @@ export class ConfigurationRepository {
     );
   }
 
-  async findOne(organization_id: Organization) {
+  async findOne(organization_id: string) {
     const configuration = await this.configurationModel.findOne({
       organization_id,
     });
@@ -31,7 +30,7 @@ export class ConfigurationRepository {
     return { response: configuration };
   }
 
-  async update(organization_id: Organization, dto: UpdateConfigurationDto) {
+  async update(organization_id: string, dto: UpdateConfigurationDto) {
     const configuration = await this.configurationModel.findOneAndUpdate(
       { organization_id },
       { ...dto },
