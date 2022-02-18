@@ -87,3 +87,24 @@ export class MutableDocumentInterceptor<T extends Document, U extends JSON>
     );
   }
 }
+
+@Injectable()
+export class MutableDocumentsInterceptor<T extends Document[], U extends JSON>
+  implements NestInterceptor<T, U>
+{
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map((res) => {
+        if (res) {
+          return {
+            response: res.map((e) => ({
+              ...e.document.toJSON(),
+              ...e.custom_fields,
+            })),
+          };
+        }
+        return res;
+      }),
+    );
+  }
+}

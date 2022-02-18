@@ -10,7 +10,6 @@ import {
   ConfigurationSchema,
 } from '../configuration/entities/configuration.schema';
 import { User, UserSchema } from '../user/entities/user.schema';
-import { UserRepository } from '../user/user.repository';
 import { Meter, MeterSchema } from './entities/meter.schema';
 import { MeterController } from './meter.controller';
 import { MeterRepository } from './meter.repository';
@@ -39,13 +38,7 @@ import { MeterService } from './meter.service';
     HttpModule,
   ],
   controllers: [MeterController],
-  providers: [
-    MeterService,
-    MeterRepository,
-    IotService,
-    MeterCheckConstraint,
-    UserRepository,
-  ],
+  providers: [MeterService, MeterRepository, IotService, MeterCheckConstraint],
   exports: [MeterService],
 })
 export class MeterModule {}

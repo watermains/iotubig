@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { number } from 'yargs';
 import { ConsumerType } from '../enum/consumer-type.enum';
 import { MeterStatus } from '../enum/meter.status.enum';
 
@@ -119,6 +118,6 @@ MeterSchema.methods.getWaterMeterRate = function (
 MeterSchema.methods.getEstimatedBalance = function (
   consumption_rate: number,
 ): number {
-  const waterMeterRate = this.getWaterMeterRate(consumption_rate);
-  return (Number(this.allowed_flow) || 0) / waterMeterRate;
+  const water_meter_rate = this.getWaterMeterRate(consumption_rate);
+  return (Number(this.allowed_flow) || 0) / water_meter_rate;
 };

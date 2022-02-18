@@ -17,8 +17,8 @@ import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { IotService } from 'src/iot/iot.service';
 import {
   DocumentInterceptor,
-  DocumentsInterceptor,
   MutableDocumentInterceptor,
+  MutableDocumentsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
@@ -68,9 +68,9 @@ export class MeterController {
   }
 
   @Get()
-  @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
+  @UseInterceptors(ResponseInterceptor, MutableDocumentsInterceptor)
   findAll(@Req() req) {
-    return this.meterService.findAll(req.user.id);
+    return this.meterService.findAll(req.user.org_id);
   }
 
   @Get('/details')
@@ -78,7 +78,12 @@ export class MeterController {
   @Roles(RoleTypes.customer)
   @UseInterceptors(ResponseInterceptor, MutableDocumentInterceptor)
   findOne(@Req() req, @Query() dto: FindMeterDto) {
-    return this.meterService.findOne(req.user.id, dto.meterName, dto.devEUI);
+    return this.meterService.findOne(
+      req.user.id,
+      req.user.org_id,
+      dto.meterName,
+      dto.devEUI,
+    );
   }
 
   @Get('/stats')
