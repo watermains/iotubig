@@ -25,6 +25,7 @@ import {
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
 import { FindMeterDto, MeterDevEUIDto } from './dto/find-meter.dto';
+import { GetMetersDto } from './dto/get-meters.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
 import { UpdateMeterDto } from './dto/update-meter.dto';
 import { MeterService } from './meter.service';
@@ -70,8 +71,8 @@ export class MeterController {
 
   @Get()
   @UseInterceptors(ResponseInterceptor, MutableDocumentsInterceptor)
-  findAll(@Req() req) {
-    return this.meterService.findAll(req.user.org_id);
+  findAll(@Req() req, @Query() dto: GetMetersDto) {
+    return this.meterService.findAll(req.user.org_id, dto.offset, dto.pageSize);
   }
 
   @Get('/details')

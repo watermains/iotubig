@@ -38,14 +38,21 @@ export class MeterService {
     });
   }
 
-  async findAll(organization_id: string) {
+  async findAll(organization_id: string, offset?: number, pageSize?: number) {
     const configuration = await this.configurationModel.findOne({
       organization_id,
     });
 
-    const meters = await this.meterModel.find({
+    const query = {
       deleted_at: null,
-    });
+    };
+
+    const meters = await this.meterModel
+      .find(query)
+      .skip(offset)
+      .limit(pageSize);
+
+    const total_rows = await this.meterModel.find(query).count();
 
     return meters.map((meter) => {
       const consumption_rate = configuration.getConsumptionRate(
@@ -56,7 +63,7 @@ export class MeterService {
 
       return {
         document: meter,
-        custom_fields: { estimated_balance },
+        custom_fields: { estimated_balance, total_rows },
       };
     });
   }
