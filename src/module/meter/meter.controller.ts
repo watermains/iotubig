@@ -19,6 +19,7 @@ import {
   DocumentInterceptor,
   MutableDocumentInterceptor,
   MutableDocumentsInterceptor,
+  ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
@@ -90,6 +91,12 @@ export class MeterController {
   @UseInterceptors(ResponseInterceptor)
   findStat() {
     return this.meterService.findStats();
+  }
+
+  @Get('/reports')
+  @UseInterceptors(ReportsInterceptor)
+  generateReports(@Req() req) {
+    return this.meterService.generateReports(req.user.org_id);
   }
 
   @Patch(':devEUI')
