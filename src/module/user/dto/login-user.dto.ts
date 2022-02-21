@@ -14,3 +14,9 @@ export class LoginUserDto {
   @IsString()
   password: string;
 }
+
+export class EmailDto {
+  @ApiProperty({ type: 'string' })
+  @IsEmail()
+  email: string;
+}

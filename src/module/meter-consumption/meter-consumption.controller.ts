@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   ValidationPipe,
+  Req,
 } from '@nestjs/common';
 import { MeterConsumptionService } from './meter-consumption.service';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
@@ -28,8 +29,8 @@ export class MeterConsumptionController {
   ) {}
 
   @Post()
-  create(@Body() createMeterConsumptionDto: CreateMeterConsumptionDto) {
-    return this.meterConsumptionService.create(createMeterConsumptionDto);
+  create(@Req() req, @Body() dto: CreateMeterConsumptionDto) {
+    return this.meterConsumptionService.create(req.user.org_id, dto);
   }
 
   @Get(':devEUI')

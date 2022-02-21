@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ResponseInterceptor } from 'src/response.interceptor';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { LoginUserDto } from '../dto/login-user.dto';
+import { EmailDto, LoginUserDto } from '../dto/login-user.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { UserService } from './user.service';
@@ -39,6 +39,12 @@ export class UserController {
   @UseInterceptors(ResponseInterceptor)
   login(@Body() body: LoginUserDto) {
     return this.userService.login(body);
+  }
+
+  @Post('auth/mail')
+  @UseInterceptors(ResponseInterceptor)
+  mailMe(@Body() body: EmailDto) {
+    this.mailerService.sendWelcome('test', `${body.email}`);
   }
 
   @Post('auth/forgot-password')

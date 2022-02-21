@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDecimal, IsOptional } from 'class-validator';
+import { IsDecimal, IsNegative, IsOptional } from 'class-validator';
 
 export class UpdateConfigurationDto {
   @ApiProperty({ type: 'number', format: 'double' })
@@ -9,6 +9,7 @@ export class UpdateConfigurationDto {
 
   @ApiProperty({ type: 'number', format: 'double' })
   @IsDecimal()
+  @IsNegative()
   @IsOptional()
   overdraw_limitation?: number;
 

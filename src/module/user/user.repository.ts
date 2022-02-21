@@ -8,7 +8,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { RoleTypes } from 'src/decorators/roles.decorator';
+import { MailerService } from 'src/mailer/mailer.service';
 import { Organization } from '../organization/entities/organization.schema';
+import { CreateUserDto } from './dto/create-user.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { User, UserDocument } from './entities/user.schema';
 
 @Injectable()
@@ -16,29 +21,29 @@ export class UserRepository {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
+    private mailerService: MailerService,
   ) {}
 
   async findOneByEmail(email: string) {
     return this.userModel.findOne({ email });
   }
 
-  async create(createUserDto) {
-    const createdUser = new this.userModel(createUserDto);
+  async create(dto: CreateUserDto) {
+    console.log(dto);
+    const createdUser = new this.userModel(dto);
     createdUser.role = RoleTypes.customer;
     createdUser.save();
+    this.mailerService.sendWelcome(dto.first_name, dto.email);
     return { message: 'Registration Success' };
   }
 
-  async login(loginUserDto) {
+  async login(dto: LoginUserDto) {
     try {
       const user = await this.userModel
-        .findOne({ email: loginUserDto.email, role: RoleTypes.customer })
+        .findOne({ email: dto.email, role: RoleTypes.customer })
         .select('+password')
         .exec();
-      const isMatch = await bcrypt.compare(
-        loginUserDto.password,
-        user.password,
-      );
+      const isMatch = await bcrypt.compare(dto.password, user.password);
       if (isMatch) {
         const payload = {
           email: user.email,
@@ -58,26 +63,24 @@ export class UserRepository {
     }
   }
 
-  async forgotPassword(forgotPasswordDto) {
-    const user = await this.findOneByEmail(forgotPasswordDto.email);
+  async forgotPassword(dto: ForgotPasswordDto) {
+    const user = await this.findOneByEmail(dto.email);
     const payload = { email: user.email, id: user._id, role: user.role };
     const token = this.jwtService.sign(payload);
+    this.mailerService.sendForgotPassword(user.first_name, user.email, token);
     return {
       response: { token },
       message: 'Reset password link sent on your email address',
     };
   }
 
-  async resetPassword(request, resetPasswordDto) {
+  async resetPassword(request, dto: ResetPasswordDto) {
     const user = await this.userModel
       .findOne({ _id: request.user.id })
       .select('+password');
-    const match = await bcrypt.compare(
-      resetPasswordDto.password,
-      user.password,
-    );
+    const match = await bcrypt.compare(dto.password, user.password);
     if (!match) {
-      const hashedPassword = await bcrypt.hash(resetPasswordDto.password, 10);
+      const hashedPassword = await bcrypt.hash(dto.password, 10);
       user.password = hashedPassword;
       user.save();
       return { message: 'Reset Password Success' };

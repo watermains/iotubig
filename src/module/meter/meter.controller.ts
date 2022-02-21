@@ -53,8 +53,8 @@ export class MeterController {
     type: CreateMeterIOTDto,
   })
   @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
-  createIoT(@Body() dto: CreateMeterIOTDto) {
-    return this.meterService.createIoT(dto);
+  createIoT(@Req() req: any, @Body() dto: CreateMeterIOTDto) {
+    return this.meterService.createIoT(req.user.org_id, dto);
   }
 
   @Post('/valve')

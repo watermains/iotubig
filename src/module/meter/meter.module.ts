@@ -9,6 +9,7 @@ import {
   Configuration,
   ConfigurationSchema,
 } from '../configuration/entities/configuration.schema';
+import { ScreenerModule } from '../screener/screener.module';
 import { User, UserSchema } from '../user/entities/user.schema';
 import { Meter, MeterSchema } from './entities/meter.schema';
 import { MeterController } from './meter.controller';
@@ -36,6 +37,7 @@ import { MeterService } from './meter.service';
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },
     }),
     HttpModule,
+    ScreenerModule,
   ],
   controllers: [MeterController],
   providers: [MeterService, MeterRepository, IotService, MeterCheckConstraint],
