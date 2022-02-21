@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
+import { MailerModule } from 'src/mailer/mailer.module';
 import { User, UserSchema } from '../user/entities/user.schema';
 import { ConfigurationController } from './configuration.controller';
 import { ConfigurationRepository } from './configuration.repository';
@@ -23,6 +24,7 @@ import {
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },
     }),
+    MailerModule,
   ],
   controllers: [ConfigurationController],
   providers: [

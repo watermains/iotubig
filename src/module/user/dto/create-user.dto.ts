@@ -11,13 +11,7 @@ export class CreateUserDto {
     { field: MeterField.name, exist: true },
     { message: 'Meter does not exist' },
   )
-  private _water_meter_id: string;
-  public get water_meter_id(): string {
-    return this._water_meter_id;
-  }
-  public set water_meter_id(value: string) {
-    this._water_meter_id = value;
-  }
+  water_meter_id: string;
 
   @ApiProperty({ type: 'string' })
   @IsString()

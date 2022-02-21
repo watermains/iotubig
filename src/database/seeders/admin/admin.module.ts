@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from 'src/module/user/entities/user.schema';
 import { AdminSeederService } from './admin.service';
 import { UserRepository } from 'src/module/user/user.repository';
+import { MailerModule } from 'src/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UserRepository } from 'src/module/user/user.repository';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },
     }),
+    MailerModule,
   ],
   providers: [AdminSeederService, UserRepository],
   exports: [AdminSeederService],

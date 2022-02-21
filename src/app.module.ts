@@ -17,9 +17,9 @@ import {
   OrganizationModule,
   TransactionModule,
   UserModule,
+  ScreenerModule,
 } from './module';
 import { MailerModule } from './mailer/mailer.module';
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -35,6 +35,7 @@ import { MailerModule } from './mailer/mailer.module';
     TransactionModule,
     UserModule,
     MailerModule,
+    ScreenerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

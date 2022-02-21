@@ -5,6 +5,7 @@ import {
   Configuration,
   ConfigurationDocument,
 } from '../configuration/entities/configuration.schema';
+import { ScreenerService } from '../screener/screener.service';
 import { User, UserDocument } from '../user/entities/user.schema';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
@@ -23,6 +24,8 @@ export class MeterService {
     private userModel: Model<UserDocument>,
     @InjectModel(Configuration.name)
     private configurationModel: Model<ConfigurationDocument>,
+    private readonly userRepository: UserRepository,
+    private readonly screenerService: ScreenerService,
   ) {}
 
   async create(createMeterDto: CreateMeterDto) {
@@ -32,10 +35,33 @@ export class MeterService {
     return { message: 'Meter created successfully' };
   }
 
-  async createIoT(createMeterIOTDto: CreateMeterIOTDto): Promise<Meter> {
-    return await this.meterModel.create({
-      ...createMeterIOTDto,
+  async createIoT(
+    organization_id: string,
+    dto: CreateMeterIOTDto,
+  ): Promise<Meter> {
+    const config = await this.configurationModel.findOne({ organization_id });
+    const meter = await this.meterModel.findOneAndUpdate(
+      { dev_eui: dto.dev_eui },
+      { ...dto },
+      { upsert: true, new: true },
+    );
+    const users = await this.userModel.find({
+      water_meter_id: meter.meter_name,
     });
+
+    const rate = config.getConsumptionRate(meter.consumer_type);
+    const perRate = meter.getWaterMeterRate(rate);
+    this.screenerService.checkMeters(
+      config,
+      {
+        perRate,
+        siteName: meter.site_name,
+        meterName: meter.meter_name,
+        allowedFlow: meter.allowed_flow,
+      },
+      users,
+    );
+    return meter;
   }
 
   async findAll(organization_id: string, offset?: number, pageSize?: number) {
