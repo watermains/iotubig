@@ -38,14 +38,21 @@ export class MeterService {
     });
   }
 
-  async findAll(organization_id: string) {
+  async findAll(organization_id: string, offset?: number, pageSize?: number) {
     const configuration = await this.configurationModel.findOne({
       organization_id,
     });
 
-    const meters = await this.meterModel.find({
+    const query = {
       deleted_at: null,
-    });
+    };
+
+    const meters = await this.meterModel
+      .find(query)
+      .skip(offset)
+      .limit(pageSize);
+
+    const total_rows = await this.meterModel.find(query).count();
 
     return meters.map((meter) => {
       const consumption_rate = configuration.getConsumptionRate(
@@ -56,7 +63,7 @@ export class MeterService {
 
       return {
         document: meter,
-        custom_fields: { estimated_balance },
+        custom_fields: { estimated_balance, total_rows },
       };
     });
   }
@@ -183,7 +190,73 @@ export class MeterService {
     return { response: stats };
   }
 
-  // dashboard(request) {
-  //   return this.meterRepository.dashboard(request)
-  // }
+  async generateReports(organization_id: string) {
+    const meters = await this.meterModel.find({});
+
+    const configuration = await this.configurationModel.findOne({
+      organization_id,
+    });
+
+    const data = meters.map((meter) => {
+      const consumption_rate = configuration.getConsumptionRate(
+        meter.consumer_type,
+      );
+
+      const balance = meter.getCubicMeterBalance(consumption_rate);
+      return { ...meter.toJSON(), balance };
+    });
+
+    const fields = [
+      {
+        label: 'meter_name',
+        value: 'meter_name',
+      },
+      {
+        label: 'site_name',
+        value: 'site_name',
+      },
+      {
+        label: 'unit_name',
+        value: 'unit_name',
+      },
+      {
+        label: 'consumer_type',
+        value: 'consumer_type',
+      },
+      {
+        label: 'balance(cu.m)',
+        value: 'balance',
+      },
+      {
+        label: 'battery_level',
+        value: 'battery_level',
+      },
+      {
+        label: 'valve_status',
+        value: 'valve_status',
+      },
+      {
+        label: 'battery_fault',
+        value: 'battery_fault',
+      },
+      {
+        label: 'valve_fault',
+        value: 'valve_fault',
+      },
+      {
+        label: 'hall_fault',
+        value: 'hall_fault',
+      },
+      {
+        label: 'mag_fault',
+        value: 'mag_fault',
+      },
+      {
+        label: 'wireless_device_id',
+        value: 'wireless_device_id',
+      },
+    ];
+
+    return { data, fields };
+  }
 }

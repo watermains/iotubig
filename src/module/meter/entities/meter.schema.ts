@@ -78,6 +78,7 @@ export class Meter {
   getWaterMeterRate: (consumption_rate: number) => number;
   getEstimatedBalance: (consumption_rate: number) => number;
   addFlow: (current_flow: number, volume: number) => number;
+  getCubicMeterBalance: (consumption_rate: number) => number;
 }
 
 export const MeterSchema = SchemaFactory.createForClass(Meter);
@@ -112,7 +113,7 @@ MeterSchema.methods.addFlow = function (
 MeterSchema.methods.getWaterMeterRate = function (
   consumption_rate: number,
 ): number {
-  return consumption_rate * 1000;
+  return consumption_rate * 1000 || 0;
 };
 
 MeterSchema.methods.getEstimatedBalance = function (
@@ -120,4 +121,10 @@ MeterSchema.methods.getEstimatedBalance = function (
 ): number {
   const water_meter_rate = this.getWaterMeterRate(consumption_rate);
   return (Number(this.allowed_flow) || 0) / water_meter_rate;
+};
+
+MeterSchema.methods.getCubicMeterBalance = function (
+  consumption_rate: number,
+): number {
+  return ((Number(this.allowed_flow) || 0) * consumption_rate) / 1000;
 };
