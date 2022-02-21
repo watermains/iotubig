@@ -69,7 +69,6 @@ export class UserRepository {
     const token = this.jwtService.sign(payload);
     this.mailerService.sendForgotPassword(user.first_name, user.email, token);
     return {
-      response: { token },
       message: 'Reset password link sent on your email address',
     };
   }

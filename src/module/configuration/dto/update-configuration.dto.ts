@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsDecimal, IsNegative, IsOptional } from 'class-validator';
 
 export class UpdateConfigurationDto {
@@ -8,9 +9,9 @@ export class UpdateConfigurationDto {
   water_alarm_threshold?: number;
 
   @ApiProperty({ type: 'number', format: 'double' })
-  @IsDecimal()
   @IsNegative()
   @IsOptional()
+  @Type(() => Number)
   overdraw_limitation?: number;
 
   @ApiProperty({ type: 'number', format: 'double' })

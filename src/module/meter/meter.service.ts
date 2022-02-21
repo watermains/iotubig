@@ -24,7 +24,6 @@ export class MeterService {
     private userModel: Model<UserDocument>,
     @InjectModel(Configuration.name)
     private configurationModel: Model<ConfigurationDocument>,
-    private readonly userRepository: UserRepository,
     private readonly screenerService: ScreenerService,
   ) {}
 
