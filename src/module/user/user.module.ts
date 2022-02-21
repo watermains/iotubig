@@ -14,6 +14,7 @@ import { IsEmailExistConstraint } from 'src/decorators/exist-email.decorator';
 import { MeterCheckConstraint } from 'src/validators/meter.validator';
 import { Meter, MeterSchema } from '../meter/entities/meter.schema';
 import { MailerModule } from 'src/mailer/mailer.module';
+import { MailerService } from 'src/mailer/mailer.service';
 @Module({
   imports: [
     MailerModule,

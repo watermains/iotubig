@@ -76,5 +76,7 @@ export class TransactionService {
   async remove(id: number) {
     const forRemove = await this.transactionModel.findOne({ id });
     forRemove.deleted_at = new Date();
+    forRemove.save();
+    return { message: 'Transaction successfully deleted.' };
   }
 }
