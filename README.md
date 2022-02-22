@@ -12,15 +12,17 @@
 
 Sample values can be viewed on [.env.example](./.env.example)
 
-| Variable         | Description                                 |
-| ---------------- | ------------------------------------------- |
-| `MONGO_URL`      | **Required**. DocumentDB/MongoDB URI.       |
-| `JWT_SECRET`     | **Required**. JSON Web Token Secret Key.    |
-| `JWT_EXPIRATION` | **Required**. JSON Web Token Expiration.    |
-| `IOT_URL`        | **Required**. AWS IoT Core API Gateway URL. |
-| `MAIL_API_KEY`   | **Required**. AWS SES API KEY.              |
-| `REGION`         | **Required**. AWS SES Region.               |
-| `SECRET`         | **Required**. AWS SES Secret.               |
+| Variable                 | Description                                          |
+| ------------------------ | ---------------------------------------------------- |
+| `MONGO_URL`              | **Required**. DocumentDB/MongoDB URI.                |
+| `JWT_SECRET`             | **Required**. JSON Web Token Secret Key.             |
+| `JWT_EXPIRATION`         | **Required**. JSON Web Token Expiration.             |
+| `IOT_URL`                | **Required**. AWS IoT Core API Gateway URL.          |
+| `CUSTOMER_FRONT_END_URL` | **Required**. IoTubig Customer Frontend Base URL.    |
+| `RESET_PASSWORD_PATH`    | **Required**. IoTubig Customer Reset Password route. |
+| `MAIL_API_KEY`           | **Required**. AWS SES API KEY.                       |
+| `REGION`                 | **Required**. AWS SES Region.                        |
+| `SECRET`                 | **Required**. AWS SES Secret.                        |
 
 ## Installation
 
