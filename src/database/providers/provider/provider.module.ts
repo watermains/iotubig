@@ -5,12 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGO_URL, {
-      ssl: true,
-      sslValidate: true,
-      sslCA: 'rds-combined-ca-bundle.pem',
-      useNewUrlParser: true
-    }),
+    MongooseModule.forRoot(process.env.MONGO_URL),
   ],
 })
 export class MongoDBProviderModule {}
