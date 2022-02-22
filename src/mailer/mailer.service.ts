@@ -1,11 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import * as fs from 'fs';
 import Handlebars from 'handlebars';
 import * as temp from 'node-ses';
 import { Client } from 'node-ses';
-import { API_KEY, REGION, SECRET } from './mailer.keys';
-
-import * as fs from 'fs';
-import { rejects } from 'assert';
 import * as path from 'path';
 
 export interface EmailOptions {
@@ -64,8 +61,18 @@ export class MailerService {
     const res = this.fetchTemplate('reset_password.hbs');
 
     const template = Handlebars.compile(res.toString());
-    const path = `${process.env.FRONT_END_URL}${process.env.RESET_PATH}`;
-    emailOptions.html = template({ firstName, link: `${path}${token}` });
+
+    // Safely join URLs
+    const url = new URL(
+      path.join(
+        process.env.CUSTOMER_FRONT_END_URL,
+        process.env.RESET_PASSWORD_PATH,
+      ),
+    ).toString();
+
+    const link = new URL(path.join(url, token)).toString();
+
+    emailOptions.html = template({ firstName, link });
 
     this.sendEmail(emailOptions);
   }
