@@ -59,7 +59,7 @@ export class MeterConsumptionService {
   findMeterConsumption(devEUI: string, startDate: Date, endDate: Date) {
     return this.meterConsumptionModel.find({
       dev_eui: devEUI,
-      consumed_at: { $gte: startDate, $lte: endDate },
+      consumed_at: { $gte: startDate, $lt: endDate },
     });
   }
 }
