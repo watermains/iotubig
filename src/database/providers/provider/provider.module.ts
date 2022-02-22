@@ -4,6 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 var key = require('fs').readFileSync(__dirname + '/rds-combined-ca-bundle.pem');
 
+console.log(process.env.MONGO_URL);
+console.log(key);
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
