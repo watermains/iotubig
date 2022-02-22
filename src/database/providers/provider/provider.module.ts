@@ -7,7 +7,6 @@ import { MongooseModule } from '@nestjs/mongoose';
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGO_URL, {
       ssl: true,
-      sslValidate: true,
       sslCA: `${__dirname}/rds-combined-ca-bundle.pem`
     }),
   ],
