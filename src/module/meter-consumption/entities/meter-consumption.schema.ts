@@ -5,7 +5,7 @@ export type MeterConsumptionDocument = MeterConsumption & Document;
 
 @Schema({ timestamps: true, toJSON: { getters: true } })
 export class MeterConsumption {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   dev_eui: string;
 
   @Prop({ default: '' })

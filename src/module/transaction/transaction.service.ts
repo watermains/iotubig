@@ -60,7 +60,11 @@ export class TransactionService {
       .sort({ createdAt: '-1' });
   }
 
-  async findWhere(dev_eui: string): Promise<TransactionDocument[]> {
+  async findWhere(
+    dev_eui: string,
+    offset?: number,
+    pageSize?: number,
+  ): Promise<TransactionDocument[]> {
     const { meter_name: iot_meter_id } = await this.meterModel.findOne({
       dev_eui,
     });
@@ -70,6 +74,8 @@ export class TransactionService {
         iot_meter_id,
         deleted_at: null,
       })
+      .skip(offset)
+      .limit(pageSize)
       .sort({ createdAt: '-1' });
   }
 
