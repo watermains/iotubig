@@ -56,10 +56,16 @@ export class MeterConsumptionService {
     return { message: 'Meter Consumption successfully recorded' };
   }
 
-  findMeterConsumption(devEUI: string, startDate: Date, endDate: Date) {
+  findMeterConsumption(devEUI: string, startDate: Date, endDate?: Date) {
+    const consumed_at: { $gte: Date; $lt?: Date } = { $gte: startDate };
+
+    if (endDate) {
+      consumed_at.$lt = endDate;
+    }
+
     return this.meterConsumptionModel.find({
       dev_eui: devEUI,
-      consumed_at: { $gte: startDate, $lte: endDate },
+      consumed_at,
     });
   }
 }
