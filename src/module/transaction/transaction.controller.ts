@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
   UseInterceptors,
@@ -19,6 +20,7 @@ import {
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { GetTransactionsDto } from './dto/get-transactions.dto';
 import { TransactionService } from './transaction.service';
 
 @ApiTags('Transactions')
@@ -43,9 +45,9 @@ export class TransactionController {
           return this.transactionService
             .create(request.user.id, request.user.org_id, dto)
             .then((value) => {
-            console.log(value);
-            return value;
-          });
+              console.log(value);
+              return value;
+            });
         }),
       );
   }
@@ -59,8 +61,8 @@ export class TransactionController {
   @Get(':devEUI')
   @Roles(RoleTypes.customer)
   @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
-  findWhere(@Param('devEUI') devEUI: string) {
-    return this.transactionService.findWhere(devEUI);
+  findWhere(@Param('devEUI') devEUI: string, @Query() dto: GetTransactionsDto) {
+    return this.transactionService.findWhere(devEUI, dto.offset, dto.pageSize);
   }
 
   @Delete(':id')
