@@ -55,12 +55,7 @@ export class IotService {
   // 1 - open valve
   // 0 - close valve
   sendOpenValveUpdate(wireless_id: string, dto: UpdateMeterValveDto) {
-    return this.send(
-      wireless_id,
-      'SVALVE',
-      { data: dto.is_open ? 1 : 0 },
-      1,
-    );
+    return this.send(wireless_id, 'SVALVE', { data: dto.is_open ? 1 : 0 }, 1);
   }
 
   private send(
