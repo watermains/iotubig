@@ -27,7 +27,11 @@ export class IotService {
     return this.send(
       'db7e0725-647d-4b54-bd66-0ee6c352feab',
       'SOVERDRAW',
+<<<<<<< HEAD
       { data: dto.overdraw_limitation ?? 0 },
+=======
+      { data: dto.commercial_consumption_rates ?? 0 },
+>>>>>>> Added Balance Deduction cron job
       1,
     );
   }
@@ -38,7 +42,11 @@ export class IotService {
     return this.send(
       'db7e0725-647d-4b54-bd66-0ee6c352feab',
       'SLOWBAL',
+<<<<<<< HEAD
       { data: dto.water_alarm_threshold ?? 0 },
+=======
+      { data: dto.commercial_consumption_rates ?? 0 },
+>>>>>>> Added Balance Deduction cron job
       1,
     );
   }
@@ -54,8 +62,18 @@ export class IotService {
 
   // 1 - open valve
   // 0 - close valve
+<<<<<<< HEAD
   sendOpenValveUpdate(wireless_id: string, dto: UpdateMeterValveDto) {
     return this.send(wireless_id, 'SVALVE', { data: dto.is_open ? 1 : 0 }, 1);
+=======
+  sendOpenValveUpdate(dto: UpdateMeterValveDto) {
+    return this.send(
+      'db7e0725-647d-4b54-bd66-0ee6c352feab',
+      'SVALVE',
+      { data: dto.is_open ? 1 : 0 },
+      1,
+    );
+>>>>>>> Added Balance Deduction cron job
   }
 
   private send(
