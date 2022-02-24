@@ -20,8 +20,10 @@ import {
   ScreenerModule,
 } from './module';
 import { MailerModule } from './mailer/mailer.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     MongoDBProviderModule,
     AdminSeederModule,
