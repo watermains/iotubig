@@ -123,3 +123,18 @@ export class ReportsInterceptor implements NestInterceptor {
     );
   }
 }
+
+@Injectable()
+export class AggregatedDocumentsInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map((response) => {
+        if (response) {
+          return { response };
+        }
+
+        return response;
+      }),
+    );
+  }
+}

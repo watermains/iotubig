@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Aggregate, Model } from 'mongoose';
 import {
   Configuration,
   ConfigurationDocument,
@@ -84,5 +84,50 @@ export class TransactionService {
     forRemove.deleted_at = new Date();
     forRemove.save();
     return { message: 'Transaction successfully deleted.' };
+  }
+
+  async getTotalAmount(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Aggregate<TransactionDocument[]>> {
+    return await this.transactionModel.aggregate([
+      {
+        $addFields: {
+          date: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$createdAt',
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+          deleted_at: null,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$createdAt',
+            },
+          },
+          total: {
+            $sum: '$amount',
+          },
+        },
+      },
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
+    ]);
   }
 }
