@@ -9,7 +9,6 @@ import {
   Req,
   UseGuards,
   UseInterceptors,
-  ValidationPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { map } from 'rxjs/operators';
@@ -22,7 +21,7 @@ import {
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { GetTransactionsTotalAmountDto } from './dto/get-transactions-total-amount.dto';
+import { GetTransactionsTotalAmountsDto } from './dto/get-transactions-total-amounts.dto';
 import { GetTransactionsDto } from './dto/get-transactions.dto';
 import { TransactionService } from './transaction.service';
 
@@ -61,13 +60,13 @@ export class TransactionController {
     return this.transactionService.findAll();
   }
 
-  @Get('amount/total')
+  @Post('amounts/total')
   @UseInterceptors(ResponseInterceptor, AggregatedDocumentsInterceptor)
   total(
-    @Query(new ValidationPipe({ transform: true }))
-    dto: GetTransactionsTotalAmountDto,
+    @Body()
+    dto: GetTransactionsTotalAmountsDto,
   ) {
-    return this.transactionService.getTotalAmount(dto.startDate, dto.endDate);
+    return this.transactionService.getTotalAmounts(dto.dates);
   }
 
   @Get(':devEUI')

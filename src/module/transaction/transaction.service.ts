@@ -86,9 +86,8 @@ export class TransactionService {
     return { message: 'Transaction successfully deleted.' };
   }
 
-  async getTotalAmount(
-    startDate: Date,
-    endDate: Date,
+  async getTotalAmounts(
+    dates: Date[],
   ): Promise<Aggregate<TransactionDocument[]>> {
     return await this.transactionModel.aggregate([
       {
@@ -104,8 +103,7 @@ export class TransactionService {
       {
         $match: {
           date: {
-            $gte: startDate,
-            $lte: endDate,
+            $in: dates,
           },
           deleted_at: null,
         },
