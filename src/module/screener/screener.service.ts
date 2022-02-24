@@ -20,22 +20,22 @@ export class ScreenerService {
     meter: MeterScreenerInfo,
     users: UserDocument[],
   ) {
-    const lowThreshold = config.water_alarm_threshold * meter.perRate;
+    const lowThreshold = config.water_alarm_threshold / meter.perRate;
     const belowZeroThreshold = 0;
-    const overdrawThreshold = config.overdraw_limitation * meter.perRate;
+    const overdrawThreshold = config.overdraw_limitation / meter.perRate;
 
     let message = '';
     console.log(`${meter.allowedFlow} < ${overdrawThreshold}`);
     if (meter.allowedFlow <= overdrawThreshold && message == '') {
-      message = `Overdraw Water Limit (${meter.allowedFlow})`;
+      message = `Overdraw Water Limit (${meter.allowedFlow}L)`;
     }
     console.log(`${meter.allowedFlow} < ${belowZeroThreshold}`);
     if (meter.allowedFlow <= belowZeroThreshold && message == '') {
-      message = `Below Zero Balance (${meter.allowedFlow})`;
+      message = `Below Zero Balance (${meter.allowedFlow}L)`;
     }
     console.log(`${meter.allowedFlow} < ${lowThreshold}`);
     if (meter.allowedFlow <= lowThreshold && message == '') {
-      message = `Low Balance (${meter.allowedFlow})`;
+      message = `Low Balance (${meter.allowedFlow}L)`;
     }
     if (message != '') {
       if (users !== undefined && users.length > 0) {
