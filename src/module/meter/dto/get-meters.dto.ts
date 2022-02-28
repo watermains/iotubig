@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class GetMetersDto {
   @ApiProperty({ type: 'number', required: false })
@@ -14,4 +14,9 @@ export class GetMetersDto {
   @IsNumber()
   @Type(() => Number)
   pageSize: number;
+
+  @ApiProperty({ type: 'string', required: false })
+  @IsOptional()
+  @IsString()
+  search: string;
 }

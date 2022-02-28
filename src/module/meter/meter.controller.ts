@@ -72,7 +72,12 @@ export class MeterController {
   @Get()
   @UseInterceptors(ResponseInterceptor, MutableDocumentsInterceptor)
   findAll(@Req() req, @Query() dto: GetMetersDto) {
-    return this.meterService.findAll(req.user.org_id, dto.offset, dto.pageSize);
+    return this.meterService.findAll(
+      req.user.org_id,
+      dto.offset,
+      dto.pageSize,
+      dto.search,
+    );
   }
 
   @Get('/details')
