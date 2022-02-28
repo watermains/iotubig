@@ -28,4 +28,9 @@ export class UpdateConfigurationDto {
   @IsDecimal()
   @IsOptional()
   commercial_consumption_rates?: number;
+
+  @ApiProperty({ type: 'number', format: 'double' })
+  @IsDecimal()
+  @IsOptional()
+  battery_level_threshold?: number;
 }

@@ -23,6 +23,9 @@ export class Configuration {
   @Prop()
   commercial_consumption_rates: number;
 
+  @Prop()
+  battery_level_threshold: number;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'user' })
   created_by: User;
 
