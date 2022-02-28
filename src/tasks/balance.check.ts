@@ -7,6 +7,7 @@ import {
   Configuration,
   ConfigurationDocument,
 } from 'src/module/configuration/entities/configuration.schema';
+import { MeterConsumption, MeterConsumptionDocument } from 'src/module/meter-consumption/entities/meter-consumption.schema';
 import { Meter, MeterDocument } from 'src/module/meter/entities/meter.schema';
 import {
   Organization,
@@ -21,6 +22,8 @@ export class BalanceCheckService {
     private readonly configModel: Model<ConfigurationDocument>,
     @InjectModel(Organization.name)
     private readonly orgModel: Model<OrganizationDocument>,
+    @InjectModel(MeterConsumption.name)
+    private readonly consumptionModel: Model<MeterConsumptionDocument>,
     @Inject() private readonly mailerService: MailerService,
   ) {}
   private readonly logger = new Logger(BalanceCheckService.name);
@@ -33,7 +36,9 @@ export class BalanceCheckService {
     organizations.forEach(async (org) => {
       const meters = await this.meterModel.find({});
       const filtered = meters.filter((e) => e.iot_organization_id === org.id!);
-      // filtered.forEach();
+      filtered.forEach((val) => {
+        this.consumptionModel.findOne({dev_eui: val.dev_eui, consumed_at: })
+      });
     });
   }
 }
