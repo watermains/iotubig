@@ -67,15 +67,24 @@ export class MeterService {
     organization_id: string,
     offset?: number,
     pageSize?: number,
+    valve_status?: MeterStatus,
     search?: string,
   ) {
     const configuration = await this.configurationModel.findOne({
       organization_id,
     });
 
-    const query: { deleted_at: null; $or?: unknown[] } = {
+    const query: {
+      deleted_at: null;
+      valve_status?: MeterStatus;
+      $or?: unknown[];
+    } = {
       deleted_at: null,
     };
+
+    if (valve_status) {
+      query.valve_status = valve_status;
+    }
 
     if (search) {
       const fields = [

@@ -76,6 +76,7 @@ export class MeterController {
       req.user.org_id,
       dto.offset,
       dto.pageSize,
+      dto.valve_status,
       dto.search,
     );
   }
