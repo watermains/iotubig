@@ -12,6 +12,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
+import { map } from 'rxjs';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { IotService } from 'src/iot/iot.service';
@@ -59,14 +61,22 @@ export class MeterController {
 
   @Post('/valve')
   @UseInterceptors(ResponseInterceptor)
-  changeValve(@Body() dto: UpdateMeterValveDto) {
-    // return this.iotService.sendOpenValveUpdate(dto).pipe(
-    //   map(async (obs) => {
-    //     console.log(obs);
-    //TODO If OBS says a valid transaction occured, proceed with creating the record
-    return this.meterService.updateValve(dto);
-    //   }),
-    // );
+  async changeValve(@Req() req, @Body() dto: UpdateMeterValveDto) {
+    const meter = await this.meterService.findOne(
+      req.user.id,
+      req.user.org_id,
+      undefined,
+      dto.dev_eui,
+    );
+    return this.iotService
+      .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
+      .pipe(
+        map(async (obs) => {
+          console.log(obs);
+          // TODO If OBS says a valid transaction occured, proceed with creating the record
+          return this.meterService.updateValve(dto);
+        }),
+      );
   }
 
   @Get()
