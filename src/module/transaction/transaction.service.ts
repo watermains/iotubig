@@ -23,6 +23,10 @@ export class TransactionService {
     private configModel: Model<ConfigurationDocument>,
   ) {}
 
+  async seed(data: []) {
+    data.forEach(async (val) => await this.transactionModel.create(val));
+  }
+
   async create(
     user_id: string,
     organization_id: string,

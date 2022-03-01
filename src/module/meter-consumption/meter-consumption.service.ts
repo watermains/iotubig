@@ -68,4 +68,8 @@ export class MeterConsumptionService {
       consumed_at,
     });
   }
+
+  async seed(data: []) {
+    data.forEach(async (val) => await this.meterConsumptionModel.create(val));
+  }
 }
