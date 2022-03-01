@@ -63,14 +63,40 @@ export class MeterService {
     return meter;
   }
 
-  async findAll(organization_id: string, offset?: number, pageSize?: number) {
+  async findAll(
+    organization_id: string,
+    offset?: number,
+    pageSize?: number,
+    valve_status?: MeterStatus,
+    search?: string,
+  ) {
     const configuration = await this.configurationModel.findOne({
       organization_id,
     });
 
-    const query = {
+    const query: {
+      deleted_at: null;
+      valve_status?: MeterStatus;
+      $or?: unknown[];
+    } = {
       deleted_at: null,
     };
+
+    if (valve_status) {
+      query.valve_status = valve_status;
+    }
+
+    if (search) {
+      const fields = [
+        'meter_name',
+        'site_name',
+        'unit_name',
+        'consumer_type',
+        'dev_eui',
+      ];
+
+      query.$or = fields.map((field) => ({ [field]: new RegExp(search, 'i') }));
+    }
 
     const meters = await this.meterModel
       .find(query)
