@@ -47,6 +47,7 @@ import {
     HttpModule,
   ],
   controllers: [TransactionController],
+  exports: [TransactionService],
   providers: [TransactionService, IotService],
 })
 export class TransactionModule {}
