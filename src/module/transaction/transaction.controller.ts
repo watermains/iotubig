@@ -66,7 +66,7 @@ export class TransactionController {
     @Body()
     dto: GetTransactionsTotalAmountsDto,
   ) {
-    return this.transactionService.getTotalAmounts(dto.dates);
+    return this.transactionService.getTotalAmounts(dto.startDate, dto.endDate);
   }
 
   @Get(':devEUI')
