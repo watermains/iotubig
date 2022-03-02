@@ -19,7 +19,6 @@ import { IotService } from 'src/iot/iot.service';
 import {
   DocumentInterceptor,
   MutableDocumentInterceptor,
-  MutableDocumentsInterceptor,
   ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
@@ -79,7 +78,7 @@ export class MeterController {
   }
 
   @Get()
-  @UseInterceptors(ResponseInterceptor, MutableDocumentsInterceptor)
+  @UseInterceptors(ResponseInterceptor)
   findAll(@Req() req, @Query() dto: GetMetersDto) {
     return this.meterService.findAll(
       req.user.org_id,

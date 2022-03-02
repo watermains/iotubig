@@ -105,18 +105,23 @@ export class MeterService {
 
     const total_rows = await this.meterModel.find(query).count();
 
-    return meters.map((meter) => {
-      const consumption_rate = configuration.getConsumptionRate(
-        meter.consumer_type,
-      );
+    return {
+      response: {
+        meters: meters.map((meter) => {
+          const consumption_rate = configuration.getConsumptionRate(
+            meter.consumer_type,
+          );
 
-      const estimated_balance = meter.getEstimatedBalance(consumption_rate);
+          const estimated_balance = meter.getEstimatedBalance(consumption_rate);
 
-      return {
-        document: meter,
-        custom_fields: { estimated_balance, total_rows },
-      };
-    });
+          return {
+            ...meter.toJSON(),
+            estimated_balance,
+          };
+        }),
+        total_rows,
+      },
+    };
   }
 
   async findOne(
