@@ -45,7 +45,7 @@ export class ScreenerService {
           console.log(user);
           this.mailerService.sendNotification(
             {
-              header: `${message} (${meter.meterName})`,
+              header: `Water Meter (${meter.meterName}) Alert`,
               firstName: `${user.first_name}`,
               dateTriggered: triggerDate,
               message: `${message} (${meter.allowedFlow}L)`,
