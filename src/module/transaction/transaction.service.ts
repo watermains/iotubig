@@ -91,8 +91,15 @@ export class TransactionService {
   }
 
   async getTotalAmounts(
-    dates: Date[],
+    startDate: Date,
+    endDate?: Date,
   ): Promise<Aggregate<TransactionDocument[]>> {
+    const date: { $gte: Date; $lte?: Date } = { $gte: startDate };
+
+    if (endDate) {
+      date.$lte = endDate;
+    }
+
     return await this.transactionModel.aggregate([
       {
         $addFields: {
@@ -106,20 +113,13 @@ export class TransactionService {
       },
       {
         $match: {
-          date: {
-            $in: dates,
-          },
+          date,
           deleted_at: null,
         },
       },
       {
         $group: {
-          _id: {
-            $dateToString: {
-              format: '%Y-%m-%d',
-              date: '$createdAt',
-            },
-          },
+          _id: '$date',
           total: {
             $sum: '$amount',
           },

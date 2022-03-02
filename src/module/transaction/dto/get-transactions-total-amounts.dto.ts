@@ -1,12 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsArray } from 'class-validator';
+import { IsDateString, IsOptional } from 'class-validator';
 
 export class GetTransactionsTotalAmountsDto {
   @ApiProperty({
-    type: [Date],
+    type: 'string',
+    format: 'date',
   })
-  @IsArray()
-  @Type(() => Date)
-  dates: Date[];
+  @IsDateString()
+  startDate: Date;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  endDate?: Date;
 }
