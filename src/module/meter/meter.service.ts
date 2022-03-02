@@ -65,8 +65,8 @@ export class MeterService {
 
   async findAll(
     organization_id: string,
-    offset?: number,
-    pageSize?: number,
+    offset: number,
+    pageSize: number,
     valve_status?: MeterStatus,
     search?: string,
   ) {

@@ -4,17 +4,17 @@ import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { MeterStatus } from '../enum/meter.status.enum';
 
 export class GetMetersDto {
-  @ApiProperty({ type: 'number', required: false })
+  @ApiProperty({ type: 'number', required: false, default: 0 })
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  offset: number;
+  offset = 0;
 
-  @ApiProperty({ type: 'number', required: false })
+  @ApiProperty({ type: 'number', required: false, default: 10 })
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  pageSize: number;
+  pageSize = 10;
 
   @ApiProperty({ type: 'string', required: false })
   @IsOptional()
