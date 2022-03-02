@@ -7,6 +7,7 @@
 ## Dependencies
 
 - [Node.js v12](https://nodejs.org/download/release/latest-v12.x/)
+- [Docker (optional)](https://docs.docker.com/get-docker/)
 
 ## Environment Variables
 
@@ -87,9 +88,8 @@ $ docker compose build
 $ docker compose up -d
 ```
 
-## CRON JOB
+## Cron Job
 
-```bash
-# Disabling CRON
-comment out "providers: [**Service1, **Service2, **Service3]" in "cron.module.ts"
-```
+### Disabling Cron
+
+Comment out <pre>providers: [**Service1**, **Service2**, **Service3**]</pre> in [cron.module.ts](./src/cron/cron.module.ts)
