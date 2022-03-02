@@ -19,11 +19,11 @@ export class GetMetersDto {
   @ApiProperty({ type: 'string', required: false })
   @IsOptional()
   @IsString()
-  search: string;
+  search?: string;
 
   @ApiProperty({ type: 'number', required: false })
   @IsOptional()
   @IsEnum(MeterStatus)
   @Type(() => Number)
-  valve_status: MeterStatus;
+  valve_status?: MeterStatus;
 }
