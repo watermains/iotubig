@@ -27,15 +27,15 @@ export class ScreenerService {
     let message = '';
     console.log(`${meter.allowedFlow} < ${overdrawThreshold}`);
     if (meter.allowedFlow <= overdrawThreshold && message == '') {
-      message = `Overdraw Water Limit (${meter.allowedFlow}L)`;
+      message = `Overdraw Water Limit`;
     }
     console.log(`${meter.allowedFlow} < ${belowZeroThreshold}`);
     if (meter.allowedFlow <= belowZeroThreshold && message == '') {
-      message = `Below Zero Balance (${meter.allowedFlow}L)`;
+      message = `Below Zero Balance`;
     }
     console.log(`${meter.allowedFlow} < ${lowThreshold}`);
     if (meter.allowedFlow <= lowThreshold && message == '') {
-      message = `Low Balance (${meter.allowedFlow}L)`;
+      message = `Low Balance`;
     }
     if (message != '') {
       if (users !== undefined && users.length > 0) {
@@ -45,9 +45,10 @@ export class ScreenerService {
           console.log(user);
           this.mailerService.sendNotification(
             {
+              header: `${message} (${meter.meterName})`,
               firstName: `${user.first_name}`,
               dateTriggered: triggerDate,
-              message,
+              message: `${message} (${meter.allowedFlow}L)`,
               siteName: meter.siteName,
               meterName: meter.meterName,
             },
