@@ -38,10 +38,10 @@ export class BalanceCheckService {
   ) {}
   private readonly logger = new Logger(BalanceCheckService.name);
 
-  // @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT, {
-  //   timeZone: 'Asia/Manila',
-  // })
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT, {
+    timeZone: 'Asia/Manila',
+  })
+  // @Cron(CronExpression.EVERY_30_SECONDS)
   async triggerBalanceCheck() {
     this.logger.debug('triggerBalanceCheck');
     const organizations = await this.orgModel.find();
