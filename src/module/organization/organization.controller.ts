@@ -1,9 +1,10 @@
-import { Controller, Get, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
   DocumentsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
+import { GetOrganizationsDto } from './dto/get-organizations.dto';
 import { OrganizationService } from './organization.service';
 
 @ApiTags('Organization')
@@ -13,7 +14,11 @@ export class OrganizationController {
 
   @Get()
   @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
-  findAll() {
-    return this.organizationService.findAll();
+  findAll(@Query() dto: GetOrganizationsDto) {
+    return this.organizationService.findAll(
+      dto.offset,
+      dto.pageSize,
+      dto.search,
+    );
   }
 }
