@@ -5,5 +5,6 @@
   "residential_consumption_rates": 20,
   "commercial_consumption_rates": 50,
   "organization_id": "",
-  "created_by": ""
+  "created_by": "",
+  "battery_level_threshold": 50
 }
