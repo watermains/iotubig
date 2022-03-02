@@ -86,3 +86,10 @@ $ docker compose build
 # Run
 $ docker compose up -d
 ```
+
+## CRON JOB
+
+```bash
+# Disabling CRON
+comment out "providers: [**Service1, **Service2, **Service3]" in "cron.module.ts"
+```

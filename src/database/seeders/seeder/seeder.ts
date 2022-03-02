@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AdminSeederService } from '../admin/admin.service';
 import { ConfigurationSeederService } from '../configuration/configuration.service';
+import { MeterConsumptionSeederService } from '../consumption/consumption.service';
 import { OrganizationSeederService } from '../organization/organization.service';
+import { TransactionSeederService } from '../transaction/transaction.service';
 
 @Injectable()
 export class Seeder {
@@ -10,38 +12,44 @@ export class Seeder {
     private readonly adminSeederService: AdminSeederService,
     private readonly organizationSeederService: OrganizationSeederService,
     private readonly configurationSeederService: ConfigurationSeederService,
+    private readonly transactionSeederService: TransactionSeederService,
+    private readonly meterConsumptionSeederService: MeterConsumptionSeederService,
   ) {}
   async seed() {
     let _organization = {};
     let _admin = {};
 
-    await this.organization()
-      .then(([completed, org]) => {
-        _organization = org;
-        Promise.resolve(completed);
-      })
-      .catch((error) => {
-        this.logger.error('Failed seeding organization...');
-        Promise.reject(error);
-      });
+    // await this.organization()
+    //   .then(([completed, org]) => {
+    //     _organization = org;
+    //     Promise.resolve(completed);
+    //   })
+    //   .catch((error) => {
+    //     this.logger.error('Failed seeding organization...');
+    //     Promise.reject(error);
+    //   });
 
-    await this.admin(_organization)
-      .then(([completed, admin]) => {
-        _admin = admin;
-        Promise.resolve(completed);
-      })
-      .catch((error) => {
-        this.logger.error('Failed seeding admin...');
-        Promise.reject(error);
-      });
+    // await this.admin(_organization)
+    //   .then(([completed, admin]) => {
+    //     _admin = admin;
+    //     Promise.resolve(completed);
+    //   })
+    //   .catch((error) => {
+    //     this.logger.error('Failed seeding admin...');
+    //     Promise.reject(error);
+    //   });
 
-    await this.configuration(_organization, _admin)
-      .then((completed) => {
-        Promise.resolve(completed);
-      })
-      .catch((error) => {
-        this.logger.error('Failed seeding configuration...');
-        Promise.reject(error);
+    // await this.configuration(_organization, _admin)
+    //   .then((completed) => {
+    //     Promise.resolve(completed);
+    //   })
+    //   .catch((error) => {
+    //     this.logger.error('Failed seeding configuration...');
+    //     Promise.reject(error);
+    //   });
+
+      await this.consumption().catch((err) => {
+        console.log(err);
       });
   }
 
@@ -70,6 +78,16 @@ export class Seeder {
       .seedConfiguration(organization, admin)
       .then((createdConfig) => {
         this.logger.debug(`Created Configuration: ${createdConfig}`);
+        return Promise.resolve(true);
+      })
+      .catch((error) => Promise.reject(error));
+  }
+
+  async consumption() {
+    return await this.meterConsumptionSeederService
+      .create()
+      .then((data) => {
+        this.logger.debug(`Created Consumption: ${data}`);
         return Promise.resolve(true);
       })
       .catch((error) => Promise.reject(error));

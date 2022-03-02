@@ -32,9 +32,14 @@ export class MeterConsumptionService {
     const config = await this.configurationModel.findOne({ organization_id });
     const consumption = await this.meterConsumptionModel.create(dto);
 
-    const meter = await this.meterModel.findOne({
-      dev_eui: consumption.dev_eui,
-    });
+    delete dto.is_last;
+    delete dto.consumed_at;
+    const meter = await this.meterModel.findOneAndUpdate(
+      { dev_eui: dto.dev_eui },
+      { ...dto },
+      { upsert: true, new: true },
+    );
+
     const users = await this.userModel.find({
       water_meter_id: meter.meter_name,
     });
@@ -70,6 +75,9 @@ export class MeterConsumptionService {
   }
 
   async seed(data: []) {
-    data.forEach(async (val) => await this.meterConsumptionModel.create(val));
+    data.forEach(async (val) => {
+      console.log(val);
+      await this.meterConsumptionModel.create(val);
+    });
   }
 }
