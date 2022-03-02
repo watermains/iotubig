@@ -27,7 +27,7 @@ export class ScreenerService {
     let message = '';
     console.log(`${meter.allowedFlow} < ${overdrawThreshold}`);
     if (meter.allowedFlow <= overdrawThreshold && message == '') {
-      message = `Overdraw Water Limit`;
+      message = `Overdrawn Water Limit <meter will be closed>`;
     }
     console.log(`${meter.allowedFlow} < ${belowZeroThreshold}`);
     if (meter.allowedFlow <= belowZeroThreshold && message == '') {
