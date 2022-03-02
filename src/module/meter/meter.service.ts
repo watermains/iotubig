@@ -74,6 +74,9 @@ export class MeterService {
       organization_id,
     });
 
+    const low_balance_threshold = configuration.water_alarm_threshold;
+    const battery_level_threshold = configuration.battery_level_threshold;
+
     const query: {
       deleted_at: null;
       valve_status?: MeterStatus;
@@ -117,6 +120,8 @@ export class MeterService {
           return {
             ...meter.toJSON(),
             estimated_balance,
+            low_balance_threshold,
+            battery_level_threshold,
           };
         }),
         total_rows,
