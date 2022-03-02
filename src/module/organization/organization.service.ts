@@ -7,7 +7,7 @@ export class OrganizationService {
     private readonly organizationRepository: OrganizationRepository,
   ) {}
 
-  findAll() {
-    return this.organizationRepository.findAll();
+  findAll(offset: number, pageSize: number, search?: string) {
+    return this.organizationRepository.findAll(offset, pageSize, search);
   }
 }

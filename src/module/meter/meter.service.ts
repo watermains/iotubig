@@ -65,14 +65,17 @@ export class MeterService {
 
   async findAll(
     organization_id: string,
-    offset?: number,
-    pageSize?: number,
+    offset: number,
+    pageSize: number,
     valve_status?: MeterStatus,
     search?: string,
   ) {
     const configuration = await this.configurationModel.findOne({
       organization_id,
     });
+
+    const low_balance_threshold = configuration.water_alarm_threshold;
+    const battery_level_threshold = configuration.battery_level_threshold;
 
     const query: {
       deleted_at: null;
@@ -105,18 +108,25 @@ export class MeterService {
 
     const total_rows = await this.meterModel.find(query).count();
 
-    return meters.map((meter) => {
-      const consumption_rate = configuration.getConsumptionRate(
-        meter.consumer_type,
-      );
+    return {
+      response: {
+        meters: meters.map((meter) => {
+          const consumption_rate = configuration.getConsumptionRate(
+            meter.consumer_type,
+          );
 
-      const estimated_balance = meter.getEstimatedBalance(consumption_rate);
+          const estimated_balance = meter.getEstimatedBalance(consumption_rate);
 
-      return {
-        document: meter,
-        custom_fields: { estimated_balance, total_rows },
-      };
-    });
+          return {
+            ...meter.toJSON(),
+            estimated_balance,
+            low_balance_threshold,
+            battery_level_threshold,
+          };
+        }),
+        total_rows,
+      },
+    };
   }
 
   async findOne(

@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { MeterStatus } from '../enum/meter.status.enum';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class GetMetersDto {
+export class GetOrganizationsDto {
   @ApiProperty({ type: 'number', required: false, default: 0 })
   @IsOptional()
   @IsNumber()
@@ -20,10 +19,4 @@ export class GetMetersDto {
   @IsOptional()
   @IsString()
   search?: string;
-
-  @ApiProperty({ type: 'number', required: false })
-  @IsOptional()
-  @IsEnum(MeterStatus)
-  @Type(() => Number)
-  valve_status?: MeterStatus;
 }

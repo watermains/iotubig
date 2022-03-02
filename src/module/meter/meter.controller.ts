@@ -12,7 +12,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
 import { map } from 'rxjs';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
@@ -20,7 +19,6 @@ import { IotService } from 'src/iot/iot.service';
 import {
   DocumentInterceptor,
   MutableDocumentInterceptor,
-  MutableDocumentsInterceptor,
   ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
@@ -80,7 +78,7 @@ export class MeterController {
   }
 
   @Get()
-  @UseInterceptors(ResponseInterceptor, MutableDocumentsInterceptor)
+  @UseInterceptors(ResponseInterceptor)
   findAll(@Req() req, @Query() dto: GetMetersDto) {
     return this.meterService.findAll(
       req.user.org_id,
