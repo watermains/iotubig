@@ -66,8 +66,8 @@ export class TransactionService {
 
   async findWhere(
     dev_eui: string,
-    offset?: number,
-    pageSize?: number,
+    offset: number,
+    pageSize: number,
   ): Promise<TransactionDocument[]> {
     const { meter_name: iot_meter_id } = await this.meterModel.findOne({
       dev_eui,

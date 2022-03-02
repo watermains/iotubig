@@ -20,7 +20,13 @@ export class OrganizationRepository {
     });
   }
 
-  findAll() {
-    return this.organizationModel.find({});
+  findAll(offset: number, pageSize: number, search?: string) {
+    const query: { name?: RegExp } = {};
+
+    if (search) {
+      query.name = new RegExp(search, 'i');
+    }
+
+    return this.organizationModel.find(query).skip(offset).limit(pageSize);
   }
 }
