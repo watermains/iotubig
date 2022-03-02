@@ -17,6 +17,7 @@ export interface EmailOptions {
 }
 
 export interface NotificationOptions {
+  header: string;
   firstName: string;
   message: string;
   siteName: string;

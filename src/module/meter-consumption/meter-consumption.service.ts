@@ -75,6 +75,9 @@ export class MeterConsumptionService {
   }
 
   async seed(data: []) {
-    data.forEach(async (val) => await this.meterConsumptionModel.create(val));
+    data.forEach(async (val) => {
+      console.log(val);
+      await this.meterConsumptionModel.create(val);
+    });
   }
 }
