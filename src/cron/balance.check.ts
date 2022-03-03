@@ -20,8 +20,8 @@ import {
   Organization,
   OrganizationDocument,
 } from 'src/module/organization/entities/organization.schema';
-import { CreateTransactionDto } from 'src/module/transaction/dto/create-transaction.dto';
 import { TransactionService } from 'src/module/transaction/transaction.service';
+import { User, UserDocument } from 'src/module/user/entities/user.schema';
 
 @Injectable()
 export class BalanceCheckService {
@@ -33,6 +33,8 @@ export class BalanceCheckService {
     private readonly orgModel: Model<OrganizationDocument>,
     @InjectModel(MeterConsumption.name)
     private readonly consumptionModel: Model<MeterConsumptionDocument>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
     private readonly mailerService: MailerService,
     private readonly transactionService: TransactionService,
   ) {}
@@ -40,7 +42,7 @@ export class BalanceCheckService {
 
   @Cron(
     process.env.NODE_ENV === 'development'
-      ? '*/10 * * * * *'
+      ? '*/30 * * * * *'
       : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
     {
       timeZone: 'Asia/Manila',
@@ -65,12 +67,15 @@ export class BalanceCheckService {
     this.logger.debug(`endDate + 1: ${endDatePlus}`);
 
     organizations.forEach(async (org) => {
-      const meters = await this.meterModel.find({});
       const orgID = org.id;
       if (!orgID) {
         this.logger.error(`no org id`);
         return;
       }
+
+      const orgMeters = await this.meterModel.find({
+        iot_organization_id: orgID,
+      });
 
       const config = await this.configModel.findOne({ organization_id: orgID });
 
@@ -100,10 +105,9 @@ export class BalanceCheckService {
       this.logger.debug(`residentialMinimum: ${residentialMinimum}`);
       this.logger.debug(`*************`);
 
-      this.logger.debug(`meter count: ${meters.length}`);
-      const filtered = meters.filter((e) => e.iot_organization_id === orgID);
+      this.logger.debug(`meter count: ${orgMeters.length}`);
 
-      meters.forEach(async (val) => {
+      orgMeters.forEach(async (val) => {
         let minimum = 0;
         if (val.consumer_type == ConsumerType.Commercial) {
           minimum = commercialMinimum;
@@ -127,6 +131,17 @@ export class BalanceCheckService {
           },
         });
         this.logger.debug(`*************`);
+
+        const hasUser = await this.userModel.findOne({
+          water_meter_id: val.meter_name,
+        });
+        if (!hasUser) {
+          this.logger.debug(
+            `NO EXISTING USER (orphaned): ${val.meter_name} with DEV EUI: ${val.dev_eui}`,
+          );
+          return;
+        }
+
         if (startConsume && endConsume) {
           this.logger.debug(
             `evaluating: ${val.meter_name} of type ${val.consumer_type} with DEV EUI: ${val.dev_eui}`,

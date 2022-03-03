@@ -6,9 +6,9 @@ export class MeterConsumptionSeederService {
   constructor(
     private readonly meterConsumptionService: MeterConsumptionService,
   ) {}
-  create() {
+  create(organization) {
     const data = require('./consumption.json');
     const meterData = require('./meters.json');
-    return this.meterConsumptionService.seed(data, meterData);
+    return this.meterConsumptionService.seed(organization, data, meterData);
   }
 }

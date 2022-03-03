@@ -7,6 +7,7 @@ import {
 } from '../configuration/entities/configuration.schema';
 import { CreateMeterDto } from '../meter/dto/create-meter.dto';
 import { Meter, MeterDocument } from '../meter/entities/meter.schema';
+import { OrganizationDocument } from '../organization/entities/organization.schema';
 import { ScreenerService } from '../screener/screener.service';
 import { User, UserDocument } from '../user/entities/user.schema';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
@@ -75,7 +76,11 @@ export class MeterConsumptionService {
     });
   }
 
-  seed(data: CreateMeterConsumptionDto[], meterData: CreateMeterDto[]) {
+  seed(
+    organization: OrganizationDocument,
+    data: CreateMeterConsumptionDto[],
+    meterData: CreateMeterDto[],
+  ) {
     const consumptions = data.map(async (val) => {
       return this.meterConsumptionModel.findOneAndUpdate(
         {
@@ -92,7 +97,7 @@ export class MeterConsumptionService {
     const meters = meterData.map(async (val) => {
       return this.meterModel.findOneAndUpdate(
         { dev_eui: val.dev_eui },
-        { ...val },
+        { ...val, iot_organization_id: organization.id },
         { upsert: true, new: true },
       );
     });
