@@ -1,7 +1,7 @@
 [
   {
-  "dev_eui": "346888-1234",
-  "wireless_device_id": "123456789",
+  "dev_eui": "340001-1234",
+  "wireless_device_id": "577800001",
   "cumulative_flow": "0.1",
   "allowed_flow": "0.1",
   "battery_level": 100,
@@ -13,8 +13,22 @@
   "frame_id": 1,
   "consumed_at": "2022-02-01T01:36:49.454Z"
 },{
-  "dev_eui": "346888-1234",
-  "wireless_device_id": "123456789",
+  "dev_eui": "340001-1234",
+  "wireless_device_id": "577800001",
+  "cumulative_flow": "14999.1",
+  "allowed_flow": "14999.1",
+  "battery_level": 100,
+  "battery_fault": 0,
+  "valve_status": 1,
+  "valve_fault": 0,
+  "hall_fault": 0,
+  "mag_fault": 0,
+  "frame_id": 1,
+  "consumed_at": "2022-02-28T01:36:49.454Z"
+},
+{
+  "dev_eui": "440001-1234",
+  "wireless_device_id": "577800002",
   "cumulative_flow": "0.1",
   "allowed_flow": "0.1",
   "battery_level": 100,
@@ -25,5 +39,59 @@
   "mag_fault": 0,
   "frame_id": 1,
   "consumed_at": "2022-02-28T01:36:49.454Z"
+},
+{
+"dev_eui": "540001-1234",
+"wireless_device_id": "577800003",
+"cumulative_flow": "0.1",
+"allowed_flow": "0.1",
+"battery_level": 100,
+"battery_fault": 0,
+"valve_status": 1,
+"valve_fault": 0,
+"hall_fault": 0,
+"mag_fault": 0,
+"frame_id": 1,
+"consumed_at": "2022-02-01T01:36:49.454Z"
+},{
+"dev_eui": "540001-1234",
+"wireless_device_id": "577800003",
+"cumulative_flow": "15000.1",
+"allowed_flow": "15000.1",
+"battery_level": 100,
+"battery_fault": 0,
+"valve_status": 1,
+"valve_fault": 0,
+"hall_fault": 0,
+"mag_fault": 0,
+"frame_id": 1,
+"consumed_at": "2022-02-28T01:36:49.454Z"
+},
+{
+"dev_eui": "640001-1234",
+"wireless_device_id": "577800003",
+"cumulative_flow": "0.1",
+"allowed_flow": "0.1",
+"battery_level": 100,
+"battery_fault": 0,
+"valve_status": 1,
+"valve_fault": 0,
+"hall_fault": 0,
+"mag_fault": 0,
+"frame_id": 1,
+"consumed_at": "2022-02-01T01:36:49.454Z"
+},{
+"dev_eui": "640001-1234",
+"wireless_device_id": "577800004",
+"cumulative_flow": "30000.1",
+"allowed_flow": "30000.1",
+"battery_level": 100,
+"battery_fault": 0,
+"valve_status": 1,
+"valve_fault": 0,
+"hall_fault": 0,
+"mag_fault": 0,
+"frame_id": 1,
+"consumed_at": "2022-02-28T01:36:49.454Z"
 }
 ]

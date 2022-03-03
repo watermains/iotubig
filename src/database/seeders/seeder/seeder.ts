@@ -19,38 +19,45 @@ export class Seeder {
     let _organization = {};
     let _admin = {};
 
-    // await this.organization()
-    //   .then(([completed, org]) => {
-    //     _organization = org;
-    //     Promise.resolve(completed);
-    //   })
-    //   .catch((error) => {
-    //     this.logger.error('Failed seeding organization...');
-    //     Promise.reject(error);
-    //   });
-
-    // await this.admin(_organization)
-    //   .then(([completed, admin]) => {
-    //     _admin = admin;
-    //     Promise.resolve(completed);
-    //   })
-    //   .catch((error) => {
-    //     this.logger.error('Failed seeding admin...');
-    //     Promise.reject(error);
-    //   });
-
-    // await this.configuration(_organization, _admin)
-    //   .then((completed) => {
-    //     Promise.resolve(completed);
-    //   })
-    //   .catch((error) => {
-    //     this.logger.error('Failed seeding configuration...');
-    //     Promise.reject(error);
-    //   });
-
-      await this.consumption().catch((err) => {
-        console.log(err);
+    await this.organization()
+      .then(([completed, org]) => {
+        _organization = org;
+        Promise.resolve(completed);
+      })
+      .catch((error) => {
+        this.logger.error('Failed seeding organization...');
+        Promise.reject(error);
       });
+
+    await this.admin(_organization)
+      .then(([completed, admin]) => {
+        _admin = admin;
+        Promise.resolve(completed);
+      })
+      .catch((error) => {
+        this.logger.error('Failed seeding admin...');
+        Promise.reject(error);
+      });
+
+    await this.configuration(_organization, _admin)
+      .then((completed) => {
+        Promise.resolve(completed);
+      })
+      .catch((error) => {
+        this.logger.error('Failed seeding configuration...');
+        Promise.reject(error);
+      });
+
+    if (process.env.NODE_ENV === 'development') {
+      await this.consumption()
+        .then((completed) => {
+          Promise.resolve(completed);
+        })
+        .catch((err) => {
+          this.logger.error('Failed seeding configuration...');
+          Promise.reject(err);
+        });
+    }
   }
 
   async organization() {
@@ -84,12 +91,11 @@ export class Seeder {
   }
 
   async consumption() {
-    return await this.meterConsumptionSeederService
-      .create()
-      .then((data) => {
-        this.logger.debug(`Created Consumption: ${data}`);
-        return Promise.resolve(true);
+    return Promise.all(await this.meterConsumptionSeederService.create())
+      .then((result) => {
+        this.logger.debug(`Created Consumption: ${result}`);
+        return true;
       })
-      .catch((error) => Promise.reject(error));
+      .catch((error) => error);
   }
 }
