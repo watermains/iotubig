@@ -15,10 +15,12 @@ import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/guard';
 import {
   DocumentsInterceptor,
+  ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
 import { FilterDateDto } from './dto/filter-meter-consumption.dto';
+import { GenerateMeterConsumptionReportsDto } from './dto/generate-meter-consumption-reports.dto';
 import { MeterConsumptionService } from './meter-consumption.service';
 
 @ApiTags('Meter Consumption')
@@ -34,6 +36,15 @@ export class MeterConsumptionController {
   @Post()
   create(@Req() req, @Body() dto: CreateMeterConsumptionDto) {
     return this.meterConsumptionService.create(req.user.org_id, dto);
+  }
+
+  @Get('/reports')
+  @UseInterceptors(ReportsInterceptor)
+  generateReports(@Query() dto: GenerateMeterConsumptionReportsDto) {
+    return this.meterConsumptionService.generateReports(
+      dto.startDate,
+      dto.endDate,
+    );
   }
 
   @Get(':devEUI')
