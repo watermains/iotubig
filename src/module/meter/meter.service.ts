@@ -12,6 +12,7 @@ import { CreateMeterDto } from './dto/create-meter.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
 import { UpdateMeterDto } from './dto/update-meter.dto';
 import { Meter, MeterDocument } from './entities/meter.schema';
+import { ConsumerType } from './enum/consumer-type.enum';
 import { MeterStatus } from './enum/meter.status.enum';
 import { Stats } from './response/stats';
 
@@ -68,6 +69,7 @@ export class MeterService {
     offset: number,
     pageSize: number,
     valve_status?: MeterStatus,
+    consumer_type?: ConsumerType,
     search?: string,
   ) {
     const configuration = await this.configurationModel.findOne({
@@ -80,6 +82,7 @@ export class MeterService {
     const query: {
       deleted_at: null;
       valve_status?: MeterStatus;
+      consumer_type?: ConsumerType;
       $or?: unknown[];
     } = {
       deleted_at: null,
@@ -89,15 +92,12 @@ export class MeterService {
       query.valve_status = valve_status;
     }
 
-    if (search) {
-      const fields = [
-        'meter_name',
-        'site_name',
-        'unit_name',
-        'consumer_type',
-        'dev_eui',
-      ];
+    if (consumer_type) {
+      query.consumer_type = consumer_type;
+    }
 
+    if (search) {
+      const fields = ['meter_name', 'site_name', 'unit_name', 'dev_eui'];
       query.$or = fields.map((field) => ({ [field]: new RegExp(search, 'i') }));
     }
 

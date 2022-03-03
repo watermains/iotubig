@@ -85,6 +85,7 @@ export class MeterController {
       dto.offset,
       dto.pageSize,
       dto.valve_status,
+      dto.consumer_type,
       dto.search,
     );
   }
