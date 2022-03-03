@@ -4,6 +4,7 @@ import { ConfigurationSeederService } from '../configuration/configuration.servi
 import { MeterConsumptionSeederService } from '../consumption/consumption.service';
 import { OrganizationSeederService } from '../organization/organization.service';
 import { TransactionSeederService } from '../transaction/transaction.service';
+import { UserSeederService } from '../user/user.service';
 
 @Injectable()
 export class Seeder {
@@ -14,6 +15,7 @@ export class Seeder {
     private readonly configurationSeederService: ConfigurationSeederService,
     private readonly transactionSeederService: TransactionSeederService,
     private readonly meterConsumptionSeederService: MeterConsumptionSeederService,
+    private readonly userSeederService: UserSeederService,
   ) {}
   async seed() {
     let _organization = {};
@@ -22,40 +24,49 @@ export class Seeder {
     await this.organization()
       .then(([completed, org]) => {
         _organization = org;
-        Promise.resolve(completed);
+        return completed;
       })
       .catch((error) => {
         this.logger.error('Failed seeding organization...');
-        Promise.reject(error);
+        return error;
       });
 
     await this.admin(_organization)
       .then(([completed, admin]) => {
         _admin = admin;
-        Promise.resolve(completed);
+        return completed;
       })
       .catch((error) => {
         this.logger.error('Failed seeding admin...');
-        Promise.reject(error);
+        return error;
       });
 
     await this.configuration(_organization, _admin)
       .then((completed) => {
-        Promise.resolve(completed);
+        return completed;
       })
       .catch((error) => {
         this.logger.error('Failed seeding configuration...');
-        Promise.reject(error);
+        return error;
       });
 
     if (process.env.NODE_ENV === 'development') {
-      await this.consumption()
+      await this.consumption(_organization)
         .then((completed) => {
-          Promise.resolve(completed);
+          return completed;
         })
         .catch((err) => {
           this.logger.error('Failed seeding configuration...');
-          Promise.reject(err);
+          return err;
+        });
+
+      await this.users(_organization)
+        .then((completed) => {
+          return completed;
+        })
+        .catch((err) => {
+          this.logger.error('Failed seeding users...');
+          return err;
         });
     }
   }
@@ -65,9 +76,9 @@ export class Seeder {
       .create()
       .then((createdOrganization) => {
         this.logger.debug(`Created Organization: ${createdOrganization}`);
-        return Promise.resolve([true, createdOrganization]);
+        return [true, createdOrganization];
       })
-      .catch((error) => Promise.reject(error));
+      .catch((error) => error);
   }
 
   async admin(organization) {
@@ -75,9 +86,9 @@ export class Seeder {
       .create(organization)
       .then((createdAdmin) => {
         this.logger.debug(`Created Admin User: ${createdAdmin}`);
-        return Promise.resolve([true, createdAdmin]);
+        return [true, createdAdmin];
       })
-      .catch((error) => Promise.reject(error));
+      .catch((error) => error);
   }
 
   async configuration(organization, admin) {
@@ -85,15 +96,26 @@ export class Seeder {
       .seedConfiguration(organization, admin)
       .then((createdConfig) => {
         this.logger.debug(`Created Configuration: ${createdConfig}`);
-        return Promise.resolve(true);
+        return true;
       })
-      .catch((error) => Promise.reject(error));
+      .catch((error) => error);
   }
 
-  async consumption() {
-    return Promise.all(await this.meterConsumptionSeederService.create())
+  async consumption(organization) {
+    return Promise.all(
+      await this.meterConsumptionSeederService.create(organization),
+    )
       .then((result) => {
         this.logger.debug(`Created Consumption: ${result}`);
+        return true;
+      })
+      .catch((error) => error);
+  }
+
+  async users(organization) {
+    return Promise.all(await this.userSeederService.create(organization))
+      .then((result) => {
+        this.logger.debug(`Created Test Users: ${result}`);
         return true;
       })
       .catch((error) => error);
