@@ -5,6 +5,7 @@ import {
   Configuration,
   ConfigurationDocument,
 } from '../configuration/entities/configuration.schema';
+import { CreateMeterDto } from '../meter/dto/create-meter.dto';
 import { Meter, MeterDocument } from '../meter/entities/meter.schema';
 import { ScreenerService } from '../screener/screener.service';
 import { User, UserDocument } from '../user/entities/user.schema';
@@ -74,10 +75,32 @@ export class MeterConsumptionService {
     });
   }
 
-  async seed(data: []) {
-    data.forEach(async (val) => {
-      console.log(val);
-      await this.meterConsumptionModel.create(val);
+  seed(data: CreateMeterConsumptionDto[], meterData: CreateMeterDto[]) {
+    const consumptions = data.map(async (val) => {
+      return this.meterConsumptionModel.findOneAndUpdate(
+        {
+          dev_eui: val.dev_eui,
+          consumed_at: val.consumed_at,
+        },
+        {
+          ...val,
+        },
+        { upsert: true, new: true },
+      );
     });
+
+    const meters = meterData.map(async (val) => {
+      return this.meterModel.findOneAndUpdate(
+        { dev_eui: val.dev_eui },
+        { ...val },
+        { upsert: true, new: true },
+      );
+    });
+
+    const res = Array<Promise<unknown>>();
+    res.push(...consumptions);
+    res.push(...meters);
+
+    return res;
   }
 }

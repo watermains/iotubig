@@ -8,6 +8,7 @@ export class MeterConsumptionSeederService {
   ) {}
   create() {
     const data = require('./consumption.json');
-    return this.meterConsumptionService.seed(data);
+    const meterData = require('./meters.json');
+    return this.meterConsumptionService.seed(data, meterData);
   }
 }
