@@ -18,9 +18,11 @@ import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
 import {
   AggregatedDocumentsInterceptor,
   DocumentsInterceptor,
+  ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { GenerateTransactionReportsDto } from './dto/generate-transaction-reports.dto';
 import { GetTransactionsTotalAmountsDto } from './dto/get-transactions-total-amounts.dto';
 import { GetTransactionsDto } from './dto/get-transactions.dto';
 import { TransactionService } from './transaction.service';
@@ -58,6 +60,12 @@ export class TransactionController {
   @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
   findAll() {
     return this.transactionService.findAll();
+  }
+
+  @Get('/reports')
+  @UseInterceptors(ReportsInterceptor)
+  generateReports(@Query() dto: GenerateTransactionReportsDto) {
+    return this.transactionService.generateReports(dto.startDate, dto.endDate);
   }
 
   @Post('amounts/total')

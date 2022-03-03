@@ -114,7 +114,6 @@ export class TransactionService {
       {
         $match: {
           date,
-          deleted_at: null,
         },
       },
       {
@@ -131,5 +130,83 @@ export class TransactionService {
         },
       },
     ]);
+  }
+
+  async generateReports(startDate: Date, endDate: Date) {
+    const data = await this.transactionModel.aggregate([
+      {
+        $lookup: {
+          from: 'meters',
+          localField: 'iot_meter_id',
+          foreignField: 'meter_name',
+          as: 'meter',
+        },
+      },
+      {
+        $addFields: {
+          date: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$createdAt',
+            },
+          },
+          volume_cubic_meter: {
+            $divide: ['$volume', 1000],
+          },
+          rate: {
+            $toString: '$rate',
+          },
+          meter: {
+            $first: '$meter',
+          },
+        },
+      },
+      {
+        $match: {
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+      },
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
+    ]);
+
+    const fields = [
+      {
+        label: 'date',
+        value: 'date',
+      },
+      {
+        label: 'meter_name',
+        value: 'meter.meter_name',
+      },
+      {
+        label: 'dev_eui',
+        value: 'meter.dev_eui',
+      },
+      {
+        label: 'unit_name',
+        value: 'meter.unit_name',
+      },
+      {
+        label: 'amount',
+        value: 'amount',
+      },
+      {
+        label: 'volume(cu.m)',
+        value: 'volume_cubic_meter',
+      },
+      {
+        label: 'rate',
+        value: 'rate',
+      },
+    ];
+
+    return { data, fields };
   }
 }
