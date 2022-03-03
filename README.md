@@ -52,6 +52,16 @@ Populate the ff. seeder files for:
 $ npm run seed
 ```
 
+### Meter Consumption & Meter Data
+
+- [consumption.json](./src/database/seeders/consumption/consumption.json)
+- [meters.json](./src/database/seeders/consumption/meters.json)
+
+```bash
+# Run seeder script
+$ npm run seed:dev
+```
+
 ## Running the app
 
 ```bash

@@ -37,7 +37,7 @@ export class TransactionService {
 
     const config = await this.configModel.findOne({ organization_id });
     const rate = config.getConsumptionRate(ref.consumer_type);
-    const volume = ref.getWaterMeterRate(rate) * dto.amount;
+    const volume = dto.amount / ref.getWaterMeterRate(rate);
 
     await this.transactionModel.create({
       ...dto,
