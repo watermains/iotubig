@@ -7,12 +7,14 @@ import {
   TransactionSeederModule,
 } from '..';
 import { MongoDBProviderModule } from '../../providers/provider/provider.module';
+import { UserSeederModule } from '../user/user.module';
 import { Seeder } from './seeder';
 
 @Module({
   imports: [
     MongoDBProviderModule,
     AdminSeederModule,
+    UserSeederModule,
     OrganizationSeederModule,
     ConfigurationSeederModule,
     MeterConsumptionSeederModule,

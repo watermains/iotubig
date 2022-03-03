@@ -6,9 +6,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
+import { Exception } from 'handlebars';
 import { Model } from 'mongoose';
 import { RoleTypes } from 'src/decorators/roles.decorator';
 import { MailerService } from 'src/mailer/mailer.service';
+import { CreateMeterDto } from '../meter/dto/create-meter.dto';
 import { Organization } from '../organization/entities/organization.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -115,12 +117,26 @@ export class UserRepository {
       throw new NotFoundException(['Credentials not found']);
     }
   }
+
   async seedAdmin(body) {
     body.password = await bcrypt.hash(body.password, 10);
     return this.userModel.findOneAndUpdate({ email: body.email }, body, {
       upsert: true,
       new: true,
       setDefaultsOnInsert: true,
+    });
+  }
+
+  async seedUser(data: CreateUserDto[]) {
+    return data.map((user) => {
+      return this.userModel.findOneAndUpdate(
+        { water_meter_id: user.water_meter_id },
+        { ...user, role: RoleTypes.customer },
+        {
+          upsert: true,
+          new: true,
+        },
+      );
     });
   }
 

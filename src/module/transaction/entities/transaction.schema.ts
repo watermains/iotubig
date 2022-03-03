@@ -33,7 +33,7 @@ export class Transaction {
   @Prop({ required: true })
   iot_meter_id: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   dev_eui: string;
 
   @Prop({ default: '' })
