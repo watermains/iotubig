@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as moment from 'moment';
 import { Model } from 'mongoose';
 import {
   Configuration,
@@ -102,5 +103,90 @@ export class MeterConsumptionService {
     res.push(...meters);
 
     return res;
+  }
+
+  async generateReports(startDate: Date, endDate: Date) {
+    let previousDate: moment.Moment | string = moment(startDate).subtract(
+      1,
+      'days',
+    );
+
+    const format = previousDate.creationData().format.toString();
+    previousDate = previousDate.format(format); // Formatted string
+
+    const consumptions = await this.meterConsumptionModel.aggregate([
+      {
+        $lookup: {
+          from: 'meters',
+          localField: 'dev_eui',
+          foreignField: 'dev_eui',
+          as: 'meter',
+        },
+      },
+      {
+        $addFields: {
+          date: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$consumed_at',
+            },
+          },
+          meter: {
+            $first: '$meter',
+          },
+        },
+      },
+      {
+        $match: {
+          date: {
+            $gte: previousDate,
+            $lte: endDate,
+          },
+        },
+      },
+    ]);
+
+    const data = consumptions
+      .map((consumption, index) => {
+        if (consumption.date === previousDate) {
+          return null;
+        }
+
+        let volume_cubic_meter = (() => {
+          if (index > 0) {
+            const previousCumulativeFlow =
+              consumptions[index - 1]?.cumulative_flow || 0;
+
+            return consumption.cumulative_flow - previousCumulativeFlow;
+          }
+
+          return 0;
+        })();
+
+        volume_cubic_meter /= 1000;
+        return { ...consumption, volume_cubic_meter };
+      })
+      .filter(Boolean); // Remove null items
+
+    const fields = [
+      {
+        label: 'meter_name',
+        value: 'meter.meter_name',
+      },
+      {
+        label: 'dev_eui',
+        value: 'meter.dev_eui',
+      },
+      {
+        label: 'unit_name',
+        value: 'meter.unit_name',
+      },
+      {
+        label: 'volume(cu.m)',
+        value: 'volume_cubic_meter',
+      },
+    ];
+
+    return { data, fields };
   }
 }
