@@ -41,7 +41,7 @@ export class TransactionService {
 
     await this.transactionModel.create({
       ...dto,
-      reference_no: 0,
+      reference_no: 0, // TODO: Add format
       iot_meter_id: ref.meter_name,
       volume,
       rate,
