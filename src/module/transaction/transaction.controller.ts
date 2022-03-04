@@ -18,6 +18,7 @@ import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
 import {
   AggregatedDocumentsInterceptor,
   DocumentsInterceptor,
+  FutureInterceptor,
   ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
@@ -39,7 +40,7 @@ export class TransactionController {
   ) {}
 
   @Post()
-  @UseInterceptors(ResponseInterceptor)
+  @UseInterceptors(FutureInterceptor)
   async create(@Req() request: any, @Body() dto: CreateTransactionDto) {
     return this.iotService
       .sendBalanceUpdate(new BalanceUpdateDTO(dto.amount.toString()))
