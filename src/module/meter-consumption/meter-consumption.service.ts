@@ -173,6 +173,10 @@ export class MeterConsumptionService {
 
     const fields = [
       {
+        label: 'date',
+        value: 'date',
+      },
+      {
         label: 'meter_name',
         value: 'meter.meter_name',
       },
