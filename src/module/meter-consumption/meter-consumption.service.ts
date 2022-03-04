@@ -136,9 +136,7 @@ export class MeterConsumptionService {
               date: '$consumed_at',
             },
           },
-          meter: {
-            $first: '$meter',
-          },
+          meter: { $arrayElemAt: ['$meter', 0] },
         },
       },
       {

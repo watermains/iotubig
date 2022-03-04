@@ -156,9 +156,7 @@ export class TransactionService {
           rate: {
             $toString: '$rate',
           },
-          meter: {
-            $first: '$meter',
-          },
+          meter: { $arrayElemAt: ['$meter', 0] },
         },
       },
       {
