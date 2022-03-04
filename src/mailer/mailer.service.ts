@@ -1,11 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import * as fs from 'fs';
 import Handlebars from 'handlebars';
 import * as temp from 'node-ses';
 import { Client } from 'node-ses';
-import { API_KEY, REGION, SECRET } from './mailer.keys';
-
-import * as fs from 'fs';
-import { rejects } from 'assert';
 import * as path from 'path';
 
 export interface EmailOptions {
@@ -19,6 +16,15 @@ export interface EmailOptions {
   replyTo?: string;
 }
 
+export interface NotificationOptions {
+  header: string;
+  firstName: string;
+  message: string;
+  siteName: string;
+  meterName: string;
+  dateTriggered: string;
+}
+
 @Injectable()
 export class MailerService {
   private readonly ses: Client;
@@ -30,26 +36,72 @@ export class MailerService {
     });
   }
 
-  async sendWelcome(
-    firstName: string,
-    options: EmailOptions,
-  ): Promise<boolean> {
-    // const res = await new Promise<string>((resolve, reject) => {
+  private readonly sender = 'noreply@watermains.net';
 
-    const dirContents = await fs.promises.readdir('src/mailer/templates/');
-    const res = fs.readFileSync(
-      path.resolve('src/mailer/templates/', 'welcome.hbs'),
-    );
-    // const res2 = fs.readFileSync(
-    //   path.resolve('src/mailer/templates/', 'welcome.hbs'),
-    // );
+  async sendWelcome(firstName: string, email: string) {
+    const emailOptions: EmailOptions = {
+      from: this.sender,
+      subject: 'Welcome to IoTubig',
+      to: email,
+    };
+
+    const res = this.fetchTemplate('welcome.hbs');
 
     const template = Handlebars.compile(res.toString());
-    options.html = template({ firstName });
-    return this.sendEmail(options);
+    emailOptions.html = template({ firstName });
+
+    this.sendEmail(emailOptions);
   }
 
-  private sendEmail(options: EmailOptions): Promise<boolean> {
+  async sendForgotPassword(firstName: string, email: string, token: string) {
+    const emailOptions: EmailOptions = {
+      from: this.sender,
+      subject: 'Reset your password',
+      to: email,
+    };
+    const res = this.fetchTemplate('reset_password.hbs');
+
+    const template = Handlebars.compile(res.toString());
+
+    // Safely join URLs
+    const url = new URL(
+      path.join(
+        process.env.CUSTOMER_FRONT_END_URL,
+        process.env.RESET_PASSWORD_PATH,
+      ),
+    ).toString();
+
+    const link = new URL(path.join(url, token)).toString();
+
+    emailOptions.html = template({ firstName, link });
+
+    this.sendEmail(emailOptions);
+  }
+
+  async sendNotification(
+    options: NotificationOptions,
+    email: string,
+    subject: string,
+  ) {
+    console.log(options);
+    const emailOptions: EmailOptions = {
+      from: this.sender,
+      subject: subject,
+      to: email,
+    };
+    const res = this.fetchTemplate('balance_alert.hbs');
+
+    const template = Handlebars.compile(res.toString());
+    emailOptions.html = template(options);
+
+    this.sendEmail(emailOptions);
+  }
+
+  private fetchTemplate(name) {
+    return fs.readFileSync(path.resolve('src/mailer/templates/', name));
+  }
+
+  private sendEmail(options: EmailOptions) {
     const email = {
       ...options,
       message: options.html,
@@ -60,7 +112,7 @@ export class MailerService {
       delete email.message;
     }
 
-    return new Promise((resolve, reject) => {
+    const send = new Promise((resolve, reject) => {
       this.ses.sendEmail(email, (err, data, res) => {
         if (err) {
           return reject(err);
@@ -68,5 +120,13 @@ export class MailerService {
         return resolve(res);
       });
     });
+
+    send
+      .then((val) => {
+        // console.log(val);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 }

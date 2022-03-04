@@ -7,9 +7,16 @@ import { Transaction, TransactionSchema } from './entities/transaction.schema';
 import { HttpModule } from '@nestjs/axios';
 import * as AutoIncrementFactory from 'mongoose-sequence';
 import { Meter, MeterSchema } from 'src/module/meter/entities/meter.schema';
+import {
+  Configuration,
+  ConfigurationSchema,
+} from '../configuration/entities/configuration.schema';
 
 @Module({
   imports: [
+    MongooseModule.forFeature([
+      { name: Configuration.name, schema: ConfigurationSchema },
+    ]),
     MongooseModule.forFeatureAsync([
       {
         name: Meter.name,
@@ -40,6 +47,7 @@ import { Meter, MeterSchema } from 'src/module/meter/entities/meter.schema';
     HttpModule,
   ],
   controllers: [TransactionController],
+  exports: [TransactionService],
   providers: [TransactionService, IotService],
 })
 export class TransactionModule {}

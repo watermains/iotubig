@@ -18,12 +18,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  console.log(`APP listening on port ${process.env.PORT}`);
-
   app.useGlobalPipes(new ValidationPipe());
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-  await app.listen(process.env.PORT || 3000);
-
-  console.log(`APP listening on port ${process.env.PORT}`);
+  await app.listen(3000);
 }
 bootstrap();

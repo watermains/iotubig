@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -19,5 +18,15 @@ export class OrganizationRepository {
       new: true,
       setDefaultsOnInsert: true,
     });
+  }
+
+  findAll(offset: number, pageSize: number, search?: string) {
+    const query: { name?: RegExp } = {};
+
+    if (search) {
+      query.name = new RegExp(search, 'i');
+    }
+
+    return this.organizationModel.find(query).skip(offset).limit(pageSize);
   }
 }

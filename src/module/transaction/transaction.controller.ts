@@ -5,6 +5,8 @@ import {
   Get,
   Param,
   Post,
+  Query,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,10 +16,15 @@ import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
 import {
+  AggregatedDocumentsInterceptor,
   DocumentsInterceptor,
+  ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { GenerateTransactionReportsDto } from './dto/generate-transaction-reports.dto';
+import { GetTransactionsTotalAmountsDto } from './dto/get-transactions-total-amounts.dto';
+import { GetTransactionsDto } from './dto/get-transactions.dto';
 import { TransactionService } from './transaction.service';
 
 @ApiTags('Transactions')
@@ -33,16 +40,18 @@ export class TransactionController {
 
   @Post()
   @UseInterceptors(ResponseInterceptor)
-  async create(@Body() dto: CreateTransactionDto) {
+  async create(@Req() request: any, @Body() dto: CreateTransactionDto) {
     return this.iotService
       .sendBalanceUpdate(new BalanceUpdateDTO(dto.amount.toString()))
       .pipe(
         map((obs) => {
           //TODO If OBS says a valid transaction occured, proceed with creating the record
-          return this.transactionService.create(dto).then((value) => {
-            console.log(value);
-            return value;
-          });
+          return this.transactionService
+            .create(request.user.id, request.user.org_id, dto)
+            .then((value) => {
+              console.log(value);
+              return value;
+            });
         }),
       );
   }
@@ -53,11 +62,26 @@ export class TransactionController {
     return this.transactionService.findAll();
   }
 
+  @Get('/reports')
+  @UseInterceptors(ReportsInterceptor)
+  generateReports(@Query() dto: GenerateTransactionReportsDto) {
+    return this.transactionService.generateReports(dto.startDate, dto.endDate);
+  }
+
+  @Post('amounts/total')
+  @UseInterceptors(ResponseInterceptor, AggregatedDocumentsInterceptor)
+  total(
+    @Body()
+    dto: GetTransactionsTotalAmountsDto,
+  ) {
+    return this.transactionService.getTotalAmounts(dto.startDate, dto.endDate);
+  }
+
   @Get(':devEUI')
   @Roles(RoleTypes.customer)
   @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
-  findWhere(@Param('devEUI') devEUI: string) {
-    return this.transactionService.findWhere(devEUI);
+  findWhere(@Param('devEUI') devEUI: string, @Query() dto: GetTransactionsDto) {
+    return this.transactionService.findWhere(devEUI, dto.offset, dto.pageSize);
   }
 
   @Delete(':id')

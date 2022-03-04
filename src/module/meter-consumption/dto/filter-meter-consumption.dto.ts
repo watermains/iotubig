@@ -1,7 +1,5 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString } from 'class-validator';
-import { CreateMeterConsumptionDto } from './create-meter-consumption.dto';
+import { IsDateString, IsOptional } from 'class-validator';
 
 export class FilterDateDto {
   @ApiProperty({
@@ -14,7 +12,9 @@ export class FilterDateDto {
   @ApiProperty({
     type: 'string',
     format: 'date',
+    required: false,
   })
+  @IsOptional()
   @IsDateString()
-  endDate: Date;
+  endDate?: Date;
 }

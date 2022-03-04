@@ -12,26 +12,28 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { request } from 'http';
+import { map } from 'rxjs';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { IotService } from 'src/iot/iot.service';
 import {
   DocumentInterceptor,
-  DocumentsInterceptor,
+  MutableDocumentInterceptor,
+  ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
 import { FindMeterDto, MeterDevEUIDto } from './dto/find-meter.dto';
+import { GetMetersDto } from './dto/get-meters.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
 import { UpdateMeterDto } from './dto/update-meter.dto';
 import { MeterService } from './meter.service';
 
 @ApiTags('Meter')
 @ApiBearerAuth()
-// @Roles(RoleTypes.admin)
-// @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(RoleTypes.admin)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meter')
 export class MeterController {
   constructor(
@@ -51,40 +53,66 @@ export class MeterController {
     type: CreateMeterIOTDto,
   })
   @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
-  createIoT(@Body() dto: CreateMeterIOTDto) {
-    return this.meterService.createIoT(dto);
+  createIoT(@Req() req: any, @Body() dto: CreateMeterIOTDto) {
+    return this.meterService.createIoT(req.user.org_id, dto);
   }
 
   @Post('/valve')
   @UseInterceptors(ResponseInterceptor)
-  changeValve(@Body() dto: UpdateMeterValveDto) {
-    // return this.iotService.sendOpenValveUpdate(dto).pipe(
-    //   map(async (obs) => {
-    //     console.log(obs);
-    //TODO If OBS says a valid transaction occured, proceed with creating the record
-    return this.meterService.updateValve(dto);
-    //   }),
-    // );
+  async changeValve(@Req() req, @Body() dto: UpdateMeterValveDto) {
+    const meter = await this.meterService.findOne(
+      req.user.id,
+      req.user.org_id,
+      undefined,
+      dto.dev_eui,
+    );
+    return this.iotService
+      .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
+      .pipe(
+        map(async (obs) => {
+          console.log(obs);
+          // TODO If OBS says a valid transaction occured, proceed with creating the record
+          return this.meterService.updateValve(dto);
+        }),
+      );
   }
 
   @Get()
-  @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
-  findAll() {
-    return this.meterService.findAll();
+  @UseInterceptors(ResponseInterceptor)
+  findAll(@Req() req, @Query() dto: GetMetersDto) {
+    return this.meterService.findAll(
+      req.user.org_id,
+      dto.offset,
+      dto.pageSize,
+      dto.valve_status,
+      dto.consumer_type,
+      dto.search,
+    );
   }
 
   @Get('/details')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleTypes.customer)
-  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  @UseInterceptors(ResponseInterceptor, MutableDocumentInterceptor)
   findOne(@Req() req, @Query() dto: FindMeterDto) {
-    return this.meterService.findOne(dto.meterName, dto.devEUI, req.user.id);
+    return this.meterService.findOne(
+      req.user.id,
+      req.user.org_id,
+      dto.meterName,
+      dto.devEUI,
+    );
   }
 
   @Get('/stats')
   @UseInterceptors(ResponseInterceptor)
   findStat() {
     return this.meterService.findStats();
+  }
+
+  @Get('/reports')
+  @UseInterceptors(ReportsInterceptor)
+  generateReports(@Req() req) {
+    return this.meterService.generateReports(req.user.org_id);
   }
 
   @Patch(':devEUI')

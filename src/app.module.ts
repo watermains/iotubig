@@ -17,11 +17,16 @@ import {
   OrganizationModule,
   TransactionModule,
   UserModule,
+  ScreenerModule,
 } from './module';
 import { MailerModule } from './mailer/mailer.module';
-
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronService } from './cron/cron.service';
+import { BalanceCheckService } from './cron/balance.check';
+import { CronModule } from './cron/cron.module';
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     MongoDBProviderModule,
     AdminSeederModule,
@@ -35,6 +40,8 @@ import { MailerModule } from './mailer/mailer.module';
     TransactionModule,
     UserModule,
     MailerModule,
+    ScreenerModule,
+    CronModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDecimal, IsInt, IsString } from 'class-validator';
+import { MeterCheck, MeterField } from 'src/validators/meter.validator';
 import { CreateMeterDto } from './create-meter.dto';
 
 export class CreateMeterIOTDto {

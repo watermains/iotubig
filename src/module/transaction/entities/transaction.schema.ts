@@ -14,6 +14,9 @@ export class Transaction {
   @Prop({ required: true })
   volume: number;
 
+  @Prop({ required: true })
+  current_meter_volume: number;
+
   @Prop({
     required: true,
     type: MongooseSchema.Types.Decimal128,
@@ -29,6 +32,15 @@ export class Transaction {
 
   @Prop({ required: true })
   iot_meter_id: string;
+
+  @Prop({ required: true })
+  dev_eui: string;
+
+  @Prop({ default: '' })
+  site_name: string;
+
+  @Prop({ default: '' })
+  unit_name: string;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

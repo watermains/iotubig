@@ -1,12 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { ConsumerType } from '../enum/consumer-type.enum';
 import { MeterStatus } from '../enum/meter.status.enum';
 
 export type MeterDocument = Meter & Document;
 
 @Schema({ timestamps: true, toJSON: { getters: true } })
 export class Meter {
-  @Prop({ required: true, unique: true })
+  @Prop({ unique: true })
   meter_name: string;
 
   @Prop({ required: true, unique: true })
@@ -53,8 +54,8 @@ export class Meter {
   @Prop({ default: '' })
   unit_name: string;
 
-  @Prop({ default: 'residential' })
-  consumer_type: string;
+  @Prop({ default: ConsumerType.Residential })
+  consumer_type: ConsumerType;
 
   @Prop({ default: null })
   deleted_by: string;
@@ -73,6 +74,11 @@ export class Meter {
 
   @Prop()
   balanceInPeso: number;
+
+  getWaterMeterRate: (consumption_rate: number) => number;
+  getEstimatedBalance: (consumption_rate: number) => number;
+  addFlow: (current_flow: number, volume: number) => number;
+  getCubicMeterBalance: (consumption_rate: number) => number;
 }
 
 export const MeterSchema = SchemaFactory.createForClass(Meter);
@@ -95,3 +101,30 @@ MeterSchema.virtual('valve_status_name').get(function () {
       return 'N/A';
   }
 });
+
+MeterSchema.methods.addFlow = function (
+  current_flow: number,
+  volume: number,
+): number {
+  const res = Number(current_flow) + Number(volume);
+  return res;
+};
+
+MeterSchema.methods.getWaterMeterRate = function (
+  consumption_rate: number,
+): number {
+  return (consumption_rate / 1000) || 0;
+};
+
+MeterSchema.methods.getEstimatedBalance = function (
+  consumption_rate: number,
+): number {
+  const water_meter_rate = this.getWaterMeterRate(consumption_rate);
+  return (Number(this.allowed_flow) || 0) * water_meter_rate;
+};
+
+MeterSchema.methods.getCubicMeterBalance = function (
+  consumption_rate: number,
+): number {
+  return ((Number(this.allowed_flow) || 0) * consumption_rate) / 1000;
+};

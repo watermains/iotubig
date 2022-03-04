@@ -1,16 +1,24 @@
 import { Logger, Module } from '@nestjs/common';
+import {
+  AdminSeederModule,
+  ConfigurationSeederModule,
+  MeterConsumptionSeederModule,
+  OrganizationSeederModule,
+  TransactionSeederModule,
+} from '..';
 import { MongoDBProviderModule } from '../../providers/provider/provider.module';
-import { AdminSeederModule } from '../admin/admin.module';
-import { ConfigurationSeederModule } from '../configuration/configuration.module';
-import { OrganizationSeederModule } from '../organization/organization.module';
+import { UserSeederModule } from '../user/user.module';
 import { Seeder } from './seeder';
 
 @Module({
   imports: [
     MongoDBProviderModule,
     AdminSeederModule,
+    UserSeederModule,
     OrganizationSeederModule,
     ConfigurationSeederModule,
+    MeterConsumptionSeederModule,
+    TransactionSeederModule,
   ],
   providers: [Logger, Seeder],
 })
