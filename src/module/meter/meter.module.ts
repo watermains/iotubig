@@ -1,9 +1,10 @@
 import { HttpModule } from '@nestjs/axios';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { IotService } from 'src/iot/iot.service';
+import { APIKeyMiddleware } from 'src/middleware/apikey.middleware';
 import { MeterCheckConstraint } from 'src/validators/meter.validator';
 import {
   Configuration,
@@ -12,7 +13,7 @@ import {
 import { ScreenerModule } from '../screener/screener.module';
 import { User, UserSchema } from '../user/entities/user.schema';
 import { Meter, MeterSchema } from './entities/meter.schema';
-import { MeterController } from './meter.controller';
+import { ExternalMeterController, MeterController } from './meter.controller';
 import { MeterRepository } from './meter.repository';
 import { MeterService } from './meter.service';
 
@@ -39,8 +40,14 @@ import { MeterService } from './meter.service';
     HttpModule,
     ScreenerModule,
   ],
-  controllers: [MeterController],
+  controllers: [MeterController, ExternalMeterController],
   providers: [MeterService, MeterRepository, IotService, MeterCheckConstraint],
   exports: [MeterService],
 })
-export class MeterModule {}
+export class MeterModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(APIKeyMiddleware)
+      .forRoutes({ path: 'meter/iot', method: RequestMethod.POST });
+  }
+}
