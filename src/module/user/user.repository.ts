@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Exception } from 'handlebars';
 import { Model } from 'mongoose';
 import { RoleTypes } from 'src/decorators/roles.decorator';
