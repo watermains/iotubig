@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsDecimal, IsPositive } from 'class-validator';
+import { IsOptional, IsPositive, IsString } from 'class-validator';
 import { MeterCheck, MeterField } from 'src/validators/meter.validator';
 
 export class CreateTransactionDto {
@@ -8,6 +8,7 @@ export class CreateTransactionDto {
   amount: number;
 
   @ApiProperty({ type: 'string' })
+  @IsOptional()
   @IsString()
   iot_meter_id: string;
 
