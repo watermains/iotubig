@@ -4,6 +4,22 @@
 
 [NestJS](https://nestjs.com/) Backend for IoTubig.
 
+## Table of Contents
+
+- [Dependencies](#dependencies)
+- [Environment Variables](#environment-variables)
+- [Installation](#installation)
+- [Seed](#seed)
+  - [Admin](#admin)
+  - [Configuration](#configuration)
+  - [Organization](#organization)
+  - [Meter Consumption](#meter-consumption)
+  - [Meter Data](#meter-data)
+- [Running the app](#running-the-app)
+- [Test](#test)
+- [Docker](#docker)
+- [Migrations](#migrations)
+
 ## Dependencies
 
 - [Node.js v12](https://nodejs.org/download/release/latest-v12.x/)
@@ -52,9 +68,12 @@ Populate the ff. seeder files for:
 $ npm run seed
 ```
 
-### Meter Consumption & Meter Data
+### Meter Consumption
 
 - [consumption.json](./src/database/seeders/consumption/consumption.json)
+
+### Meter Data
+
 - [meters.json](./src/database/seeders/consumption/meters.json)
 
 ```bash
@@ -98,8 +117,29 @@ $ docker compose build
 $ docker compose up -d
 ```
 
-## Cron Job
+## Migrations
 
-### Disabling Cron
+Further information can be found [here](https://www.npmjs.com/package/migrate-mongoose).
 
-Comment out <pre>providers: [**Service1**, **Service2**, **Service3**]</pre> in [cron.module.ts](./src/cron/cron.module.ts)
+```bash
+# Lists all migrations and their current state
+npm run migrate -- list
+
+# Creates a new migration file
+npm run migrate -- create <migration-name>
+
+# Migrates all the migration files that have not yet
+# been run in chronological order. Not including
+# [migration-name] will run UP on all migrations that
+# are in a DOWN state
+npm run migrate -- up <migration-name>
+
+# Rolls back all migrations down to given name (if down
+# function was provided)
+npm run migrate -- down <migration-name>
+
+# Allows you to delete extraneous migrations by
+# removing extraneous local migration files/database
+# migrations
+npm run migrate -- prune
+```
