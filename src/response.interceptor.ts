@@ -138,28 +138,3 @@ export class AggregatedDocumentsInterceptor implements NestInterceptor {
     );
   }
 }
-
-@Injectable()
-export class FutureInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    return next.handle().pipe(
-      map(async (data) => {
-        if (data) {
-          data = await data;
-
-          return {
-            statusCode: context.switchToHttp().getResponse().statusCode,
-            message: data.message,
-            data: data.response,
-            error: data.error,
-          };
-        } else {
-          return {
-            statusCode: context.switchToHttp().getResponse().statusCode,
-            error: 'No data',
-          };
-        }
-      }),
-    );
-  }
-}

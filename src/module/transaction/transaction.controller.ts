@@ -11,6 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { lastValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
@@ -18,7 +19,6 @@ import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
 import {
   AggregatedDocumentsInterceptor,
   DocumentsInterceptor,
-  FutureInterceptor,
   ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
@@ -40,21 +40,25 @@ export class TransactionController {
   ) {}
 
   @Post()
-  @UseInterceptors(FutureInterceptor)
+  @UseInterceptors(ResponseInterceptor)
   async create(@Req() request: any, @Body() dto: CreateTransactionDto) {
-    return this.iotService
-      .sendBalanceUpdate(new BalanceUpdateDTO(dto.amount.toString()))
-      .pipe(
-        map((obs) => {
-          //TODO If OBS says a valid transaction occured, proceed with creating the record
-          return this.transactionService
-            .create(request.user.id, request.user.org_id, dto)
-            .then((value) => {
-              console.log(value);
-              return value;
-            });
-        }),
-      );
+    const value = await lastValueFrom(
+      this.iotService
+        .sendBalanceUpdate(new BalanceUpdateDTO(dto.amount.toString()))
+        .pipe(
+          map((obs) => {
+            //TODO If OBS says a valid transaction occured, proceed with creating the record
+            return this.transactionService
+              .create(request.user.id, request.user.org_id, dto)
+              .then((value) => {
+                console.log(value);
+                return value;
+              });
+          }),
+        ),
+    );
+
+    return value;
   }
 
   @Get()
