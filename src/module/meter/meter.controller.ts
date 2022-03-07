@@ -11,7 +11,8 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiBody, ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { map } from 'rxjs';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
@@ -45,16 +46,6 @@ export class MeterController {
   @UseInterceptors(ResponseInterceptor)
   create(@Body() dto: CreateMeterDto) {
     return this.meterService.create(dto);
-  }
-
-  //TODO expose endpoint only for 1 specific user
-  @Post('/iot')
-  @ApiBody({
-    type: CreateMeterIOTDto,
-  })
-  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
-  createIoT(@Req() req: any, @Body() dto: CreateMeterIOTDto) {
-    return this.meterService.createIoT(req.user.org_id, dto);
   }
 
   @Post('/valve')
@@ -125,5 +116,21 @@ export class MeterController {
   @UseInterceptors(ResponseInterceptor)
   remove(@Param() devEuiDto: MeterDevEUIDto) {
     return this.meterService.remove(devEuiDto.devEUI);
+  }
+}
+
+@ApiTags('Meter')
+@Controller('meter')
+export class ExternalMeterController {
+  constructor(private readonly meterService: MeterService) {}
+
+  @Post('/iot')
+  @ApiSecurity('api_key', ['x-api-key'])
+  @ApiBody({
+    type: CreateMeterIOTDto,
+  })
+  @UseInterceptors(ResponseInterceptor, DocumentInterceptor)
+  createIoT(@Req() req: any, @Body() dto: CreateMeterIOTDto) {
+    return this.meterService.createIoT(req.org_id, dto);
   }
 }

@@ -1,9 +1,8 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
-import { IotService } from 'src/iot/iot.service';
 import { MailerService } from 'src/mailer/mailer.service';
 import {
   Configuration,
@@ -15,7 +14,6 @@ import {
 } from 'src/module/meter-consumption/entities/meter-consumption.schema';
 import { Meter, MeterDocument } from 'src/module/meter/entities/meter.schema';
 import { ConsumerType } from 'src/module/meter/enum/consumer-type.enum';
-import { MeterService } from 'src/module/meter/meter.service';
 import {
   Organization,
   OrganizationDocument,

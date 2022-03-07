@@ -37,6 +37,6 @@ import { CronService } from './cron.service';
     TransactionModule,
     MailerModule,
   ],
-  providers: [BalanceCheckService],
+  // providers: [BalanceCheckService],
 })
 export class CronModule {}

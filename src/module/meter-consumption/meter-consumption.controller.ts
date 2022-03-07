@@ -10,7 +10,14 @@ import {
   UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiHeaders,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/guard';
 import {
@@ -33,11 +40,6 @@ export class MeterConsumptionController {
     private readonly meterConsumptionService: MeterConsumptionService,
   ) {}
 
-  @Post()
-  create(@Req() req, @Body() dto: CreateMeterConsumptionDto) {
-    return this.meterConsumptionService.create(req.user.org_id, dto);
-  }
-
   @Get('/reports')
   @UseInterceptors(ReportsInterceptor)
   generateReports(@Query() dto: GenerateMeterConsumptionReportsDto) {
@@ -58,5 +60,19 @@ export class MeterConsumptionController {
       dto.startDate,
       dto.endDate,
     );
+  }
+}
+
+@ApiTags('Meter Consumption')
+@ApiSecurity('api_key', ['x-api-key'])
+@Controller('meter-consumption')
+export class ExternalMeterConsumptionController {
+  constructor(
+    private readonly meterConsumptionService: MeterConsumptionService,
+  ) {}
+  @Post()
+  create(@Req() req, @Body() dto: CreateMeterConsumptionDto) {
+    console.log(req.org_id);
+    return this.meterConsumptionService.create(req.org_id, dto);
   }
 }

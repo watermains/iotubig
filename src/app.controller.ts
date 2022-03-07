@@ -22,8 +22,8 @@ export class AppController {
   private readonly logger = new Logger(AppController.name);
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  alive(): string {
+    return this.appService.alive();
   }
 
   @Post('/confirmation')
