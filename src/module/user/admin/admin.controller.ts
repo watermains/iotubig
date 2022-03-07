@@ -32,4 +32,12 @@ export class AdminController {
   me(@Req() req) {
     return this.adminService.findOneByEmail(req.user.email);
   }
+
+  @Post('auth/me')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleTypes.admin)
+  @UseInterceptors(ResponseInterceptor)
+  generate(@Req() req) {
+    return this.adminService.findOneByEmail(req.user.email);
+  }
 }

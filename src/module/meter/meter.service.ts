@@ -156,6 +156,8 @@ export class MeterService {
       organization_id,
     });
 
+    const battery_level_threshold = configuration.battery_level_threshold;
+
     const meter = await this.meterModel.findOne({
       ...params,
       deleted_at: null,
@@ -170,7 +172,11 @@ export class MeterService {
 
     return {
       document: meter,
-      custom_fields: { water_meter_rate, estimated_balance },
+      custom_fields: {
+        water_meter_rate,
+        estimated_balance,
+        battery_level_threshold,
+      },
     };
   }
 

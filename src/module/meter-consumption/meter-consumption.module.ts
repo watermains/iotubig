@@ -1,6 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { MeterConsumptionService } from './meter-consumption.service';
-import { MeterConsumptionController } from './meter-consumption.controller';
+import {
+  MeterConsumptionController,
+  ExternalMeterConsumptionController,
+} from './meter-consumption.controller';
 import {
   MeterConsumption,
   MeterConsumptionSchema,
@@ -13,6 +16,7 @@ import {
 } from '../configuration/entities/configuration.schema';
 import { User, UserSchema } from '../user/entities/user.schema';
 import { Meter, MeterSchema } from '../meter/entities/meter.schema';
+import { APIKeyMiddleware } from 'src/middleware/apikey.middleware';
 
 @Module({
   imports: [
@@ -40,7 +44,13 @@ import { Meter, MeterSchema } from '../meter/entities/meter.schema';
     ]),
     ScreenerModule,
   ],
-  controllers: [MeterConsumptionController],
+  controllers: [MeterConsumptionController, ExternalMeterConsumptionController],
   providers: [MeterConsumptionService],
 })
-export class MeterConsumptionModule {}
+export class MeterConsumptionModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(APIKeyMiddleware)
+      .forRoutes({ path: 'meter-consumption', method: RequestMethod.POST });
+  }
+}

@@ -32,8 +32,8 @@ export class TransactionService {
     organization_id: string,
     dto: CreateTransactionDto,
   ) {
-    const meter_name = dto.iot_meter_id;
-    const ref = await this.meterModel.findOne({ meter_name });
+    const dev_eui = dto.dev_eui;
+    const ref = await this.meterModel.findOne({ dev_eui });
 
     const config = await this.configModel.findOne({ organization_id });
     const rate = config.getConsumptionRate(ref.consumer_type);
@@ -41,8 +41,8 @@ export class TransactionService {
 
     await this.transactionModel.create({
       ...dto,
-      reference_no: 0,
-      dev_eui: ref.dev_eui,
+      reference_no: 0, // TODO: Add format
+      iot_meter_id: ref.meter_name,
       volume,
       rate,
       site_name: ref.site_name,
@@ -156,9 +156,7 @@ export class TransactionService {
           rate: {
             $toString: '$rate',
           },
-          meter: {
-            $first: '$meter',
-          },
+          meter: { $arrayElemAt: ['$meter', 0] },
         },
       },
       {

@@ -5,3 +5,4 @@ export { OrganizationModule } from './organization/organization.module';
 export { TransactionModule } from './transaction/transaction.module';
 export { UserModule } from './user/user.module';
 export { ScreenerModule } from './screener/screener.module';
+export { AuthModule } from './auth/auth.module';

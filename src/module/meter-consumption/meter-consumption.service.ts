@@ -136,9 +136,7 @@ export class MeterConsumptionService {
               date: '$consumed_at',
             },
           },
-          meter: {
-            $first: '$meter',
-          },
+          meter: { $arrayElemAt: ['$meter', 0] },
         },
       },
       {
@@ -174,6 +172,10 @@ export class MeterConsumptionService {
       .filter(Boolean); // Remove null items
 
     const fields = [
+      {
+        label: 'date',
+        value: 'date',
+      },
       {
         label: 'meter_name',
         value: 'meter.meter_name',
