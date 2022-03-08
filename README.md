@@ -103,3 +103,4 @@ $ docker compose up -d
 ### Disabling Cron
 
 Comment out <pre>providers: [**Service1**, **Service2**, **Service3**]</pre> in [cron.module.ts](./src/cron/cron.module.ts)
+
