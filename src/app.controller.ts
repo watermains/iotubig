@@ -26,13 +26,8 @@ export class AppController {
     return this.appService.alive();
   }
 
-  @Post('/meter/iot/confirmation')
-  confirmationMeterIot(@Query() dto: ConfirmationTokenDto) {
-    this.logger.debug(`AWS TOKEN: ${dto.confirmationToken}`);
-  }
-
-  @Post('/meter-consumption/confirmation')
-  confirmationMeterConsumption(@Query() dto: ConfirmationTokenDto) {
+  @Post('/')
+  confirmationMeter(@Query() dto: ConfirmationTokenDto) {
     this.logger.debug(`AWS TOKEN: ${dto.confirmationToken}`);
   }
 }
