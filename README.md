@@ -104,3 +104,15 @@ $ docker compose up -d
 
 Comment out <pre>providers: [**Service1**, **Service2**, **Service3**]</pre> in [cron.module.ts](./src/cron/cron.module.ts)
 
+## Migrate
+
+```bash
+# Migrate Up
+$ npm run migrate:up
+
+# Migrate Down
+$ npm run migrate:down
+
+# Create Migration Script
+$ npm run migrate:create
+```
