@@ -30,6 +30,12 @@ export class UserRepository {
     return this.userModel.findOne({ email });
   }
 
+  async isOwned(water_meter_id: string) {
+    return this.userModel.find({
+      water_meter_id,
+    });
+  }
+
   async create(dto: CreateUserDto) {
     console.log(dto);
     const createdUser = new this.userModel(dto);

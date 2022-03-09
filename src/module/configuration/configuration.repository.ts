@@ -27,7 +27,7 @@ export class ConfigurationRepository {
       organization_id,
     });
 
-    return { response: configuration };
+    return configuration;
   }
 
   async update(organization_id: string, dto: UpdateConfigurationDto) {
@@ -37,6 +37,6 @@ export class ConfigurationRepository {
       { upsert: false, new: true },
     );
 
-    return { response: configuration, message: 'Settings saved successfully' };
+    return configuration;
   }
 }

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { TransactionService } from 'src/module/transaction/transaction.service';
+import { TransactionRepository } from 'src/module/transaction/transaction.repository';
 
 @Injectable()
 export class TransactionSeederService {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(private readonly repo: TransactionRepository) {}
   create() {
     const data = require('./transaction.json');
-    return this.transactionService.seed(data);
+    return this.repo.seed(data);
   }
 }

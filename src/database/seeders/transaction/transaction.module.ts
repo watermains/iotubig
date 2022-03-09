@@ -10,7 +10,7 @@ import {
   Transaction,
   TransactionSchema,
 } from 'src/module/transaction/entities/transaction.schema';
-import { TransactionService } from 'src/module/transaction/transaction.service';
+import { TransactionRepository } from 'src/module/transaction/transaction.repository';
 import { TransactionSeederService } from './transaction.service';
 
 @Module({
@@ -32,7 +32,7 @@ import { TransactionSeederService } from './transaction.service';
       },
     ]),
   ],
-  providers: [TransactionSeederService, TransactionService],
+  providers: [TransactionSeederService, TransactionRepository],
   exports: [TransactionSeederService],
 })
 export class TransactionSeederModule {}

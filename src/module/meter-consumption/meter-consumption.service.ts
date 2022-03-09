@@ -1,16 +1,17 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
-import {
-  Configuration,
-  ConfigurationDocument,
-} from '../configuration/entities/configuration.schema';
+import { ConfigurationRepository } from '../configuration/configuration.repository';
+import { ConfigurationService } from '../configuration/configuration.service';
+import { Configuration } from '../configuration/entities/configuration.schema';
 import { CreateMeterDto } from '../meter/dto/create-meter.dto';
 import { Meter, MeterDocument } from '../meter/entities/meter.schema';
 import { OrganizationDocument } from '../organization/entities/organization.schema';
 import { ScreenerService } from '../screener/screener.service';
 import { User, UserDocument } from '../user/entities/user.schema';
+import { UserRepository } from '../user/user.repository';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
 import {
   MeterConsumption,
@@ -24,15 +25,17 @@ export class MeterConsumptionService {
     private meterConsumptionModel: Model<MeterConsumptionDocument>,
     @InjectModel(Meter.name)
     private meterModel: Model<MeterDocument>,
-    @InjectModel(Configuration.name)
-    private configurationModel: Model<ConfigurationDocument>,
+    private readonly configRepo: ConfigurationRepository,
+    private readonly userRepo: UserRepository,
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
     private readonly screenerService: ScreenerService,
   ) {}
 
   async create(organization_id: string, dto: CreateMeterConsumptionDto) {
-    const config = await this.configurationModel.findOne({ organization_id });
+    const config = (await this.configRepo.findOne(
+      organization_id,
+    )) as Configuration;
     const consumption = await this.meterConsumptionModel.create(dto);
 
     delete dto.is_last;
@@ -43,9 +46,7 @@ export class MeterConsumptionService {
       { upsert: true, new: true },
     );
 
-    const users = await this.userModel.find({
-      water_meter_id: meter.meter_name,
-    });
+    const users = await this.userRepo.isOwned(meter.meter_name);
 
     const rate = config.getConsumptionRate(meter.consumer_type);
     const perRate = meter.getWaterMeterRate(rate);

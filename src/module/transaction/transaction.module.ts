@@ -11,6 +11,7 @@ import {
   Configuration,
   ConfigurationSchema,
 } from '../configuration/entities/configuration.schema';
+import { TransactionRepository } from './transaction.repository';
 
 @Module({
   imports: [
@@ -48,6 +49,6 @@ import {
   ],
   controllers: [TransactionController],
   exports: [TransactionService],
-  providers: [TransactionService, IotService],
+  providers: [TransactionService, IotService, TransactionRepository],
 })
 export class TransactionModule {}
