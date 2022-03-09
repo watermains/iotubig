@@ -20,7 +20,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "ts-node -r tsconfig-paths/register src/seeder.ts",
-    "seed:dev": "NODE_ENV=development ts-node -r tsconfig-paths/register src/seeder.ts"
+    "seed:dev": "NODE_ENV=development ts-node -r tsconfig-paths/register src/seeder.ts",
+    "migrate": "ts-node -r tsconfig-paths/register src/database/migrations/migrate.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^0.0.4",
@@ -39,6 +40,7 @@
     "class-validator": "^0.13.2",
     "handlebars": "^4.7.7",
     "json2csv": "^5.0.6",
+    "migrate-mongoose": "^4.0.0",
     "moment": "^2.29.1",
     "mongoose": "^6.1.8",
     "mongoose-sequence": "^5.3.1",
