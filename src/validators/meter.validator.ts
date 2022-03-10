@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { Model } from 'mongoose';
 import { Meter, MeterDocument } from 'src/module/meter/entities/meter.schema';
+import { MeterRepository } from 'src/module/meter/meter.repository';
 
 export enum MeterField {
   devEUI = 'dev_eui',
@@ -23,7 +24,7 @@ export class MeterValidationOptions {
 @ValidatorConstraint({ async: true })
 @Injectable()
 export class MeterCheckConstraint implements ValidatorConstraintInterface {
-  constructor(@InjectModel(Meter.name) private meter: Model<MeterDocument>) {}
+  constructor(private readonly repo: MeterRepository) {}
 
   async validate(value: any, args: ValidationArguments) {
     const constraints = args.constraints;
@@ -35,9 +36,9 @@ export class MeterCheckConstraint implements ValidatorConstraintInterface {
     }
     const params = constraints[0] as MeterValidationOptions;
     const field = params.field;
-    const whereClause = {};
+    const whereClause = new Map<string, unknown>();
     whereClause[field] = value;
-    const meter = await this.meter.findOne(whereClause);
+    const meter = await this.repo.findMeter(whereClause);
     if (
       (params.exist === undefined && params.unique === undefined) ||
       (params.exist !== undefined && params.unique !== undefined)

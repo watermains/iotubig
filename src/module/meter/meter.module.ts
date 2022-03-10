@@ -42,7 +42,10 @@ import { MeterService } from './meter.service';
   ],
   controllers: [MeterController, ExternalMeterController],
   providers: [MeterService, MeterRepository, IotService, MeterCheckConstraint],
-  exports: [MeterService],
+  exports: [
+    MongooseModule.forFeature([{ name: Meter.name, schema: MeterSchema }]),
+    MeterRepository,
+  ],
 })
 export class MeterModule {
   configure(consumer: MiddlewareConsumer) {

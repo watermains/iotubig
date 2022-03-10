@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MeterModule } from 'src/module';
 import {
   Configuration,
   ConfigurationSchema,
@@ -9,8 +10,7 @@ import {
   MeterConsumption,
   MeterConsumptionSchema,
 } from 'src/module/meter-consumption/entities/meter-consumption.schema';
-import { MeterConsumptionService } from 'src/module/meter-consumption/meter-consumption.service';
-import { Meter, MeterSchema } from 'src/module/meter/entities/meter.schema';
+import { MeterConsumptionRepository } from 'src/module/meter-consumption/meter-consumption.repository';
 import { ScreenerModule } from 'src/module/screener/screener.module';
 import { User, UserSchema } from 'src/module/user/entities/user.schema';
 import { MeterConsumptionSeederService } from './consumption.service';
@@ -22,21 +22,13 @@ import { MeterConsumptionSeederService } from './consumption.service';
     MongooseModule.forFeature([
       { name: Configuration.name, schema: ConfigurationSchema },
     ]),
-    MongooseModule.forFeatureAsync([
-      {
-        name: Meter.name,
-        useFactory: async () => {
-          const schema = MeterSchema;
-          return schema;
-        },
-      },
-    ]),
     MongooseModule.forFeature([
       { name: MeterConsumption.name, schema: MeterConsumptionSchema },
     ]),
+    MeterModule,
     ScreenerModule,
   ],
-  providers: [MeterConsumptionSeederService, MeterConsumptionService],
+  providers: [MeterConsumptionSeederService, MeterConsumptionRepository],
   exports: [MeterConsumptionSeederService],
 })
 export class MeterConsumptionSeederModule {}

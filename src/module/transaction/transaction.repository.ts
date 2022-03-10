@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import {
-  Configuration,
-  ConfigurationDocument,
-} from '../configuration/entities/configuration.schema';
-import {
   Transaction,
   TransactionDocument,
 } from './entities/transaction.schema';
-import { Meter, MeterDocument } from '../meter/entities/meter.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { ConfigurationRepository } from '../configuration/configuration.repository';
+import { MeterRepository } from '../meter/meter.repository';
 
 export interface ITransaction {
   create(user_id: string, organization_id: string, dto: CreateTransactionDto);
@@ -31,10 +28,8 @@ export class TransactionRepository implements ITransaction {
   constructor(
     @InjectModel(Transaction.name)
     private transactionModel: Model<TransactionDocument>,
-    @InjectModel(Meter.name)
-    private meterModel: Model<MeterDocument>,
-    @InjectModel(Configuration.name)
-    private configModel: Model<ConfigurationDocument>,
+    private readonly meterRepository: MeterRepository,
+    private readonly configRepository: ConfigurationRepository,
   ) {}
   async create(
     user_id: string,
@@ -42,9 +37,9 @@ export class TransactionRepository implements ITransaction {
     dto: CreateTransactionDto,
   ) {
     const dev_eui = dto.dev_eui;
-    const ref = await this.meterModel.findOne({ dev_eui });
+    const ref = await this.meterRepository.findByDevEui(dev_eui);
 
-    const config = await this.configModel.findOne({ organization_id });
+    const config = await this.configRepository.findOne(organization_id);
     const rate = config.getConsumptionRate(ref.consumer_type);
     const volume = dto.amount / ref.getWaterMeterRate(rate);
 
@@ -82,9 +77,8 @@ export class TransactionRepository implements ITransaction {
     offset: number,
     pageSize: number,
   ): Promise<unknown[]> {
-    const { meter_name: iot_meter_id } = await this.meterModel.findOne({
-      dev_eui,
-    });
+    const { meter_name: iot_meter_id } =
+      await this.meterRepository.findByDevEui(dev_eui);
 
     return await this.transactionModel
       .find({

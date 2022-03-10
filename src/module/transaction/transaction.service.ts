@@ -1,24 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Aggregate, Model } from 'mongoose';
-import { start } from 'repl';
-import {
-  Configuration,
-  ConfigurationDocument,
-} from '../configuration/entities/configuration.schema';
-import { Meter, MeterDocument } from '../meter/entities/meter.schema';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import {
-  Transaction,
-  TransactionDocument,
-} from './entities/transaction.schema';
 import { TransactionRepository } from './transaction.repository';
 
 @Injectable()
 export class TransactionService {
-  constructor(
-    private readonly repo: TransactionRepository,
-  ) {}
+  constructor(private readonly repo: TransactionRepository) {}
 
   async create(
     user_id: string,
