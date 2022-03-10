@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import Double from '@mongoosejs/double';
 
 export type TransactionDocument = Transaction & Document;
 
@@ -19,7 +20,7 @@ export class Transaction {
 
   @Prop({
     required: true,
-    type: MongooseSchema.Types.Decimal128,
+    type: Double,
     get: (val) => val.toString(),
   })
   rate: number;
