@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { ConsumerType } from '../enum/consumer-type.enum';
 import { MeterStatus } from '../enum/meter.status.enum';
+import Double from '@mongoosejs/double';
 
 export type MeterDocument = Meter & Document;
 
@@ -18,14 +19,14 @@ export class Meter {
 
   @Prop({
     default: 0.0,
-    type: MongooseSchema.Types.Decimal128,
+    type: Double,
     get: (val) => val.toString(),
   })
   cumulative_flow: number;
 
   @Prop({
     default: 0.0,
-    type: MongooseSchema.Types.Decimal128,
+    type: Double,
     get: (val) => val.toString(),
   })
   allowed_flow: number;
