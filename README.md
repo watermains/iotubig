@@ -68,12 +68,9 @@ Populate the ff. seeder files for:
 $ npm run seed
 ```
 
-### Meter Consumption
+### Meter Consumption & Meter Data
 
 - [consumption.json](./src/database/seeders/consumption/consumption.json)
-
-### Meter Data
-
 - [meters.json](./src/database/seeders/consumption/meters.json)
 
 ```bash
@@ -117,29 +114,21 @@ $ docker compose build
 $ docker compose up -d
 ```
 
-## Migrations
+## Cron Job
 
-Further information can be found [here](https://www.npmjs.com/package/migrate-mongoose).
+### Disabling Cron
+
+Comment out <pre>providers: [**Service1**, **Service2**, **Service3**]</pre> in [cron.module.ts](./src/cron/cron.module.ts)
+
+## Migrate
 
 ```bash
-# Lists all migrations and their current state
-npm run migrate -- list
+# Migrate Up
+$ npm run migrate:up
 
-# Creates a new migration file
-npm run migrate -- create <migration-name>
+# Migrate Down
+$ npm run migrate:down
 
-# Migrates all the migration files that have not yet
-# been run in chronological order. Not including
-# [migration-name] will run UP on all migrations that
-# are in a DOWN state
-npm run migrate -- up <migration-name>
-
-# Rolls back all migrations down to given name (if down
-# function was provided)
-npm run migrate -- down <migration-name>
-
-# Allows you to delete extraneous migrations by
-# removing extraneous local migration files/database
-# migrations
-npm run migrate -- prune
+# Create Migration Script
+$ npm run migrate:create
 ```

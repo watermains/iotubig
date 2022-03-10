@@ -7,7 +7,7 @@ export type MeterDocument = Meter & Document;
 
 @Schema({ timestamps: true, toJSON: { getters: true } })
 export class Meter {
-  @Prop({ unique: true })
+  @Prop({ unique: true, sparse: true })
   meter_name: string;
 
   @Prop({ required: true, unique: true })
@@ -113,7 +113,7 @@ MeterSchema.methods.addFlow = function (
 MeterSchema.methods.getWaterMeterRate = function (
   consumption_rate: number,
 ): number {
-  return (consumption_rate / 1000) || 0;
+  return consumption_rate / 1000 || 0;
 };
 
 MeterSchema.methods.getEstimatedBalance = function (
