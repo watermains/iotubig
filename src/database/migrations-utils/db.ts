@@ -3,8 +3,8 @@ import { MongoClient } from 'mongodb';
 
 export const getDb = async () => {
   ConfigModule.forRoot();
-  const client: any = await MongoClient.connect(process.env.MONGO_URL, {
+  const client: MongoClient = await MongoClient.connect(process.env.MONGO_URL, {
     directConnection: true,
   });
-  return client.db();
+  return client.db('iotubig-db');
 };
