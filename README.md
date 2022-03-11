@@ -18,7 +18,7 @@
 - [Running the app](#running-the-app)
 - [Test](#test)
 - [Docker](#docker)
-- [Migrations](#migrations)
+- [Migrate](#migrate)
 
 ## Dependencies
 
@@ -68,9 +68,12 @@ Populate the ff. seeder files for:
 $ npm run seed
 ```
 
-### Meter Consumption & Meter Data
+### Meter Consumption
 
 - [consumption.json](./src/database/seeders/consumption/consumption.json)
+
+### Meter Data
+
 - [meters.json](./src/database/seeders/consumption/meters.json)
 
 ```bash
@@ -113,12 +116,6 @@ $ docker compose build
 # Run
 $ docker compose up -d
 ```
-
-## Cron Job
-
-### Disabling Cron
-
-Comment out <pre>providers: [**Service1**, **Service2**, **Service3**]</pre> in [cron.module.ts](./src/cron/cron.module.ts)
 
 ## Migrate
 
