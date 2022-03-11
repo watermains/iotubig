@@ -37,6 +37,7 @@ import { MeterModule } from '../meter/meter.module';
   ],
   controllers: [TransactionController],
   exports: [
+    TransactionService,
     TransactionRepository,
     MongooseModule.forFeatureAsync([
       {
