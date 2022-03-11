@@ -36,6 +36,7 @@ import { TransactionService } from './transaction.service';
   ],
   controllers: [TransactionController],
   exports: [
+    TransactionService,
     TransactionRepository,
     MongooseModule.forFeatureAsync([
       {
