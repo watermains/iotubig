@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigurationRepository } from './configuration.repository';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
-import { Configuration } from './entities/configuration.schema';
 @Injectable()
 export class ConfigurationService {
   constructor(
@@ -9,8 +8,10 @@ export class ConfigurationService {
   ) {}
 
   async findOne(organization_id: string): Promise<unknown> {
-    const configuration = this.configurationRepository.findOne(organization_id);
-
+    const configuration = await this.configurationRepository.findOne(
+      organization_id,
+    );
+    console.log(configuration);
     return { response: configuration };
   }
 
