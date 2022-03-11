@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { map } from 'rxjs';
+import { lastValueFrom, map } from 'rxjs';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { IotService } from 'src/iot/iot.service';
@@ -56,15 +56,18 @@ export class MeterController {
       undefined,
       dto.dev_eui,
     );
-    return this.iotService
-      .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
-      .pipe(
-        map(async (obs) => {
-          console.log(obs);
-          // TODO If OBS says a valid transaction occured, proceed with creating the record
-          return this.meterService.updateValve(dto);
-        }),
-      );
+
+    return lastValueFrom(
+      this.iotService
+        .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
+        .pipe(
+          map(async (obs) => {
+            console.log(obs);
+            // TODO If OBS says a valid transaction occured, proceed with creating the record
+            return this.meterService.updateValve(dto);
+          }),
+        ),
+    );
   }
 
   @Get()

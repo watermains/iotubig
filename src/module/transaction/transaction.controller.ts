@@ -42,7 +42,7 @@ export class TransactionController {
   @Post()
   @UseInterceptors(ResponseInterceptor)
   async create(@Req() request: any, @Body() dto: CreateTransactionDto) {
-    const value = await lastValueFrom(
+    return lastValueFrom(
       this.iotService
         .sendBalanceUpdate(new BalanceUpdateDTO(dto.amount.toString()))
         .pipe(
@@ -57,8 +57,6 @@ export class TransactionController {
           }),
         ),
     );
-
-    return value;
   }
 
   @Get()
