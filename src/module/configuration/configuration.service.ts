@@ -8,16 +8,22 @@ export class ConfigurationService {
   ) {}
 
   async findOne(organization_id: string): Promise<unknown> {
-    return this.configurationRepository.findOne(organization_id);
+    const configuration = await this.configurationRepository.findOne(
+      organization_id,
+    );
+    console.log(configuration);
+    return { response: configuration };
   }
 
   async update(
     organization_id: string,
     updateConfigurationDto: UpdateConfigurationDto,
   ): Promise<unknown> {
-    return this.configurationRepository.update(
+    const configuration = await this.configurationRepository.update(
       organization_id,
       updateConfigurationDto,
     );
+
+    return { response: configuration, message: 'Settings saved successfully' };
   }
 }

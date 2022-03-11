@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { constants } from 'fs';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { MailerService } from 'src/mailer/mailer.service';
@@ -40,7 +41,7 @@ export class BalanceCheckService {
 
   @Cron(
     process.env.NODE_ENV === 'development'
-      ? '*/30 * * * * *'
+      ? '*/10 * * * * *'
       : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
     {
       timeZone: 'Asia/Manila',
@@ -107,11 +108,14 @@ export class BalanceCheckService {
 
       orgMeters.forEach(async (val) => {
         let minimum = 0;
+        let rate = 0;
         if (val.consumer_type == ConsumerType.Commercial) {
           minimum = commercialMinimum;
+          rate = perCommercialRate;
         }
         if (val.consumer_type == ConsumerType.Residential) {
           minimum = residentialMinimum;
+          rate = perResidentialRate;
         }
 
         const startConsume = await this.consumptionModel.findOne({
@@ -150,13 +154,16 @@ export class BalanceCheckService {
             `deltaFlow: ${deltaFlow}; with threshold: ${minimum}L`,
           );
           if (deltaFlow < minimum) {
+            const normalizedDeductionAmount = Math.round(
+              rate * (minimum - deltaFlow) * -1,
+            );
             this.transactionService.create('-1', orgID, {
-              amount: config.minimum_monthly_consumer_deduction * -1,
+              amount: normalizedDeductionAmount,
               iot_meter_id: val.meter_name,
               dev_eui: val.dev_eui,
             });
             this.logger.debug(
-              `FOR DEDUCTION: ${val.meter_name} with DEV EUI: ${val.dev_eui}`,
+              `FOR DEDUCTION: ${val.meter_name} with DEV EUI: ${val.dev_eui} with AMOUNT: ${normalizedDeductionAmount}`,
             );
           } else {
             this.logger.debug(

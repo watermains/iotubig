@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as moment from 'moment';
 import { MailerService } from 'src/mailer/mailer.service';
-import { ConfigurationDocument } from '../configuration/entities/configuration.schema';
+import { Configuration } from '../configuration/entities/configuration.schema';
 import { UserDocument } from '../user/entities/user.schema';
 
 export interface MeterScreenerInfo {
@@ -16,7 +16,7 @@ export class ScreenerService {
   constructor(private readonly mailerService: MailerService) {}
 
   async checkMeters(
-    config: ConfigurationDocument,
+    config: Configuration,
     meter: MeterScreenerInfo,
     users: UserDocument[],
   ) {

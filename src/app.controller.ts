@@ -1,15 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Logger, Post, Query } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { AppService } from './app.service';
-
 
 class ConfirmationTokenDto {
   @ApiProperty()

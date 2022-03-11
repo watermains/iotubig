@@ -114,7 +114,7 @@ MeterSchema.methods.addFlow = function (
 MeterSchema.methods.getWaterMeterRate = function (
   consumption_rate: number,
 ): number {
-  return (consumption_rate / 1000) || 0;
+  return consumption_rate / 1000 || 0;
 };
 
 MeterSchema.methods.getEstimatedBalance = function (

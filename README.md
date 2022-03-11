@@ -4,6 +4,22 @@
 
 [NestJS](https://nestjs.com/) Backend for IoTubig.
 
+## Table of Contents
+
+- [Dependencies](#dependencies)
+- [Environment Variables](#environment-variables)
+- [Installation](#installation)
+- [Seed](#seed)
+  - [Admin](#admin)
+  - [Configuration](#configuration)
+  - [Organization](#organization)
+  - [Meter Consumption](#meter-consumption)
+  - [Meter Data](#meter-data)
+- [Running the app](#running-the-app)
+- [Test](#test)
+- [Docker](#docker)
+- [Migrate](#migrate)
+
 ## Dependencies
 
 - [Node.js v12](https://nodejs.org/download/release/latest-v12.x/)
@@ -52,9 +68,12 @@ Populate the ff. seeder files for:
 $ npm run seed
 ```
 
-### Meter Consumption & Meter Data
+### Meter Consumption
 
 - [consumption.json](./src/database/seeders/consumption/consumption.json)
+
+### Meter Data
+
 - [meters.json](./src/database/seeders/consumption/meters.json)
 
 ```bash
@@ -97,12 +116,6 @@ $ docker compose build
 # Run
 $ docker compose up -d
 ```
-
-## Cron Job
-
-### Disabling Cron
-
-Comment out <pre>providers: [**Service1**, **Service2**, **Service3**]</pre> in [cron.module.ts](./src/cron/cron.module.ts)
 
 ## Migrate
 

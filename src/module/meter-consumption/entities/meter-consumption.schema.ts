@@ -49,6 +49,9 @@ export class MeterConsumption {
 
   @Prop({ default: 1 })
   frame_id: number;
+
+  @Prop({ default: false })
+  last_uplink: boolean;
 }
 
 export const MeterConsumptionSchema =
