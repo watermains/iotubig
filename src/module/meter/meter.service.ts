@@ -142,7 +142,7 @@ export class MeterService {
     const meter = await this.repo.findMeter(params);
 
     if (!meter) {
-      throw new NotFoundException('Meter not found');
+      throw new NotFoundException('Meter does not exist');
     }
 
     const consumption_rate = configuration.getConsumptionRate(
