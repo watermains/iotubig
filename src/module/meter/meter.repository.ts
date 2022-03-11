@@ -14,15 +14,19 @@ import { MeterStatus } from './enum/meter.status.enum';
 import { Stats } from './response/stats';
 
 export interface IMeter {
-  create(dto: CreateMeterDto);
+  createMeter(dto: CreateMeterDto);
+  updateMeter(devEUI: string, updateMeterDto: UpdateMeterDto);
+  updateValve(dto: UpdateMeterValveDto);
   upsertMeterViaIoT(dto: CreateMeterIOTDto);
   upsertMeterViaConsumption(dto: CreateMeterConsumptionDto);
   findByDevEui(dev_eui: string);
+  findMeter(whereClause: object);
   seed(organization: OrganizationDocument, meterData: CreateMeterDto[]);
-  findMeter(whereClause: Map<string, unknown>);
+  findStats(): Promise<Stats>;
+  removeMeter(devEUI: string);
 }
 @Injectable()
-export class MeterRepository {
+export class MeterRepository implements IMeter {
   constructor(
     @InjectModel(Meter.name) private meterModel: Model<MeterDocument>,
   ) {}
