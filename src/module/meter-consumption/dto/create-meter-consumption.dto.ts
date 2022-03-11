@@ -9,5 +9,5 @@ export class CreateMeterConsumptionDto extends CreateMeterIOTDto {
 
   @ApiProperty({ type: 'boolean' })
   @IsOptional()
-  is_last: boolean;
+  last_uplink: boolean;
 }

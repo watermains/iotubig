@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
@@ -13,12 +13,11 @@ import { IsEmailAlreadyExistConstraint } from 'src/decorators/unique-email.decor
 import { IsEmailExistConstraint } from 'src/decorators/exist-email.decorator';
 import { MeterCheckConstraint } from 'src/validators/meter.validator';
 import { MailerModule } from 'src/mailer/mailer.module';
-import { MeterRepository } from '../meter/meter.repository';
 import { MeterModule } from '../meter/meter.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    MeterModule,
+    forwardRef(() => MeterModule),
     MailerModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.register({

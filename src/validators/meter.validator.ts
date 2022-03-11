@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   registerDecorator,
@@ -36,7 +36,7 @@ export class MeterCheckConstraint implements ValidatorConstraintInterface {
     }
     const params = constraints[0] as MeterValidationOptions;
     const field = params.field;
-    const whereClause = new Map<string, unknown>();
+    const whereClause = {};
     whereClause[field] = value;
     const meter = await this.repo.findMeter(whereClause);
     if (

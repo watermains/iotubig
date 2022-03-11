@@ -11,8 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiBody, ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { map } from 'rxjs';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
@@ -51,7 +50,7 @@ export class MeterController {
   @Post('/valve')
   @UseInterceptors(ResponseInterceptor)
   async changeValve(@Req() req, @Body() dto: UpdateMeterValveDto) {
-    const meter = await this.meterService.findOne(
+    const meter = await this.meterService.findMeterDetails(
       req.user.id,
       req.user.org_id,
       undefined,
@@ -86,7 +85,7 @@ export class MeterController {
   @Roles(RoleTypes.customer)
   @UseInterceptors(ResponseInterceptor, MutableDocumentInterceptor)
   findOne(@Req() req, @Query() dto: FindMeterDto) {
-    return this.meterService.findOne(
+    return this.meterService.findMeterDetails(
       req.user.id,
       req.user.org_id,
       dto.meterName,
@@ -109,13 +108,13 @@ export class MeterController {
   @Patch(':devEUI')
   @UseInterceptors(ResponseInterceptor)
   update(@Param() devEuiDto: MeterDevEUIDto, @Body() dto: UpdateMeterDto) {
-    return this.meterService.update(devEuiDto.devEUI, dto);
+    return this.meterService.updateMeter(devEuiDto.devEUI, dto);
   }
 
   @Delete(':devEUI')
   @UseInterceptors(ResponseInterceptor)
   remove(@Param() devEuiDto: MeterDevEUIDto) {
-    return this.meterService.remove(devEuiDto.devEUI);
+    return this.meterService.removeMeter(devEuiDto.devEUI);
   }
 }
 
