@@ -159,4 +159,8 @@ export class UserRepository {
 
     return organization_id;
   }
+
+  updateMany(filter: object, update: object): any {
+    return this.userModel.updateMany(filter, update);
+  }
 }

@@ -1,20 +1,19 @@
-import { Module } from '@nestjs/common';
-import { TransactionService } from './transaction.service';
-import { TransactionController } from './transaction.controller';
-import { IotService } from 'src/iot/iot.service';
-import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
-import { Transaction, TransactionSchema } from './entities/transaction.schema';
 import { HttpModule } from '@nestjs/axios';
+import { forwardRef, Module } from '@nestjs/common';
+import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import * as AutoIncrementFactory from 'mongoose-sequence';
-import { Meter, MeterSchema } from 'src/module/meter/entities/meter.schema';
-import { TransactionRepository } from './transaction.repository';
+import { IotService } from 'src/iot/iot.service';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { MeterModule } from '../meter/meter.module';
+import { Transaction, TransactionSchema } from './entities/transaction.schema';
+import { TransactionController } from './transaction.controller';
+import { TransactionRepository } from './transaction.repository';
+import { TransactionService } from './transaction.service';
 
 @Module({
   imports: [
     ConfigurationModule,
-    MeterModule,
+    forwardRef(() => MeterModule),
     MongooseModule.forFeatureAsync([
       {
         name: Transaction.name,

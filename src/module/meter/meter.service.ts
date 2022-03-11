@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { from, lastValueFrom, tap } from 'rxjs';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { ScreenerService } from '../screener/screener.service';
+import { TransactionRepository } from '../transaction/transaction.repository';
 import { UserRepository } from '../user/user.repository';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
@@ -17,6 +19,7 @@ export class MeterService {
     private readonly userRepo: UserRepository,
     private readonly screenerService: ScreenerService,
     private readonly repo: MeterRepository,
+    private readonly transactionRepo: TransactionRepository,
   ) {}
 
   async create(dto: CreateMeterDto) {
@@ -24,10 +27,7 @@ export class MeterService {
     return { message: 'Meter created successfully' };
   }
 
-  async createIoT(
-    organization_id: string,
-    dto: CreateMeterIOTDto,
-  ) {
+  async createIoT(organization_id: string, dto: CreateMeterIOTDto) {
     const config = await this.configRepo.findOne(organization_id);
     const meter = await this.repo.upsertMeterViaIoT(dto);
 
@@ -161,8 +161,31 @@ export class MeterService {
   }
 
   async updateMeter(devEUI: string, dto: UpdateMeterDto): Promise<unknown> {
-    const response = this.repo.updateMeter(devEUI, dto);
-    return { response, message: 'Meter updated successfully' };
+    const meter = await this.repo.findByDevEui(devEUI);
+    const old_meter_name = meter.meter_name;
+
+    return lastValueFrom(
+      from(
+        (async () => {
+          const response = await this.repo.updateMeter(devEUI, dto);
+          return { response, message: 'Meter updated successfully' };
+        })(),
+      ).pipe(
+        tap({
+          complete: async () => {
+            await this.userRepo.updateMany(
+              { water_meter_id: old_meter_name },
+              { water_meter_id: dto.meter_name },
+            );
+
+            await this.transactionRepo.updateMany(
+              { iot_meter_id: old_meter_name },
+              { iot_meter_id: dto.meter_name },
+            );
+          },
+        }),
+      ),
+    );
   }
 
   async removeMeter(devEUI: string) {

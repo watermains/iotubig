@@ -12,6 +12,7 @@ import { APIKeyMiddleware } from 'src/middleware/apikey.middleware';
 import { MeterCheckConstraint } from 'src/validators/meter.validator';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { ScreenerModule } from '../screener/screener.module';
+import { TransactionModule } from '../transaction/transaction.module';
 import { UserModule } from '../user/user.module';
 import { Meter, MeterSchema } from './entities/meter.schema';
 import { ExternalMeterController, MeterController } from './meter.controller';
@@ -31,6 +32,7 @@ import { MeterService } from './meter.service';
       },
     ]),
     forwardRef(() => UserModule),
+    forwardRef(() => TransactionModule),
     ConfigurationModule,
     HttpModule,
     ScreenerModule,

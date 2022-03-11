@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { ConfigurationRepository } from '../configuration/configuration.repository';
+import { MeterRepository } from '../meter/meter.repository';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 import {
   Transaction,
   TransactionDocument,
 } from './entities/transaction.schema';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { ConfigurationRepository } from '../configuration/configuration.repository';
-import { MeterRepository } from '../meter/meter.repository';
 
 export interface ITransaction {
   create(user_id: string, organization_id: string, dto: CreateTransactionDto);
@@ -210,5 +210,9 @@ export class TransactionRepository implements ITransaction {
     ];
 
     return { data, fields };
+  }
+
+  updateMany(filter: object, update: object): any {
+    return this.transactionModel.updateMany(filter, update);
   }
 }
