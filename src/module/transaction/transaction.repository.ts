@@ -46,7 +46,7 @@ export class TransactionRepository implements ITransaction {
 
     await this.transactionModel.create({
       ...dto,
-      reference_no: 0, // TODO: Add format
+      reference_no: 0,
       iot_meter_id: ref.meter_name,
       volume,
       rate,
