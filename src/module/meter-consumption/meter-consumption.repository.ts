@@ -9,7 +9,6 @@ import {
 import * as moment from 'moment';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { MeterRepository } from '../meter/meter.repository';
 
 export interface IMeterConsumption {
   create(dto: CreateMeterConsumptionDto);

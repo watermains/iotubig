@@ -10,16 +10,7 @@ import {
 } from './entities/meter-consumption.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScreenerModule } from '../screener/screener.module';
-import {
-  Configuration,
-  ConfigurationSchema,
-} from '../configuration/entities/configuration.schema';
-import { User, UserSchema } from '../user/entities/user.schema';
-import { Meter, MeterSchema } from '../meter/entities/meter.schema';
 import { APIKeyMiddleware } from 'src/middleware/apikey.middleware';
-import { MeterRepository } from '../meter/meter.repository';
-import { UserRepository } from '../user/user.repository';
-import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { MeterModule } from '../meter/meter.module';
 import { UserModule } from '../user/user.module';
