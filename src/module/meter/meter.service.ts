@@ -1,16 +1,11 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { off } from 'process';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { ScreenerService } from '../screener/screener.service';
-import { User, UserDocument } from '../user/entities/user.schema';
 import { UserRepository } from '../user/user.repository';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
 import { UpdateMeterDto } from './dto/update-meter.dto';
-import { Meter, MeterDocument } from './entities/meter.schema';
 import { ConsumerType } from './enum/consumer-type.enum';
 import { MeterStatus } from './enum/meter.status.enum';
 import { MeterRepository } from './meter.repository';
@@ -18,8 +13,6 @@ import { MeterRepository } from './meter.repository';
 @Injectable()
 export class MeterService {
   constructor(
-    @InjectModel(Meter.name)
-    private meterModel: Model<MeterDocument>,
     private readonly configRepo: ConfigurationRepository,
     private readonly userRepo: UserRepository,
     private readonly screenerService: ScreenerService,
@@ -173,6 +166,7 @@ export class MeterService {
   }
 
   async removeMeter(devEUI: string) {
+    //TODO check if meter not yet deleted
     await this.repo.removeMeter(devEUI);
     return { message: 'Meter deleted successfully' };
   }
