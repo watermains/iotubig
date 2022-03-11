@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, PipelineStage } from 'mongoose';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { MeterRepository } from '../meter/meter.repository';
+import { PaginatedData } from '../pagination/paginate';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import {
   Transaction,
@@ -17,7 +18,7 @@ export interface ITransaction {
     dev_eui: string,
     offset: number,
     pageSize: number,
-  ): Promise<unknown[]>;
+  ): Promise<PaginatedData>;
   remove(id: number);
   getTotalAmounts(startDate: Date, endDate?: Date): Promise<unknown>;
   generateReports(startDate: Date, endDate: Date);
@@ -76,18 +77,51 @@ export class TransactionRepository implements ITransaction {
     dev_eui: string,
     offset: number,
     pageSize: number,
-  ): Promise<unknown[]> {
-    const { meter_name: iot_meter_id } =
-      await this.meterRepository.findByDevEui(dev_eui);
+  ): Promise<PaginatedData> {
+    const transactionsPipeline: PipelineStage[] = [
+      {
+        $lookup: {
+          from: 'meters',
+          localField: 'iot_meter_id',
+          foreignField: 'meter_name',
+          as: 'meter',
+        },
+      },
+      {
+        $addFields: {
+          meter: { $arrayElemAt: ['$meter', 0] },
+        },
+      },
+      {
+        $match: {
+          'meter.dev_eui': dev_eui,
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ];
 
-    return await this.transactionModel
-      .find({
-        iot_meter_id,
-        deleted_at: null,
-      })
-      .skip(offset)
-      .limit(pageSize)
-      .sort({ createdAt: '-1' });
+    const transactions = await this.transactionModel.aggregate([
+      ...transactionsPipeline,
+      {
+        $skip: Number(offset),
+      },
+      {
+        $limit: Number(pageSize),
+      },
+    ]);
+
+    const [{ total_rows }] = await this.transactionModel.aggregate([
+      ...transactionsPipeline,
+      {
+        $count: 'total_rows',
+      },
+    ]);
+
+    return new PaginatedData(transactions, total_rows);
   }
 
   async remove(id: number) {

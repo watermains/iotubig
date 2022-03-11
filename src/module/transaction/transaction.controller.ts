@@ -84,7 +84,7 @@ export class TransactionController {
 
   @Get(':devEUI')
   @Roles(RoleTypes.customer)
-  @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
+  @UseInterceptors(ResponseInterceptor)
   findWhere(@Param('devEUI') devEUI: string, @Query() dto: GetTransactionsDto) {
     return this.transactionService.findWhere(devEUI, dto.offset, dto.pageSize);
   }

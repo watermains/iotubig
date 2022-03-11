@@ -22,8 +22,14 @@ export class TransactionService {
     dev_eui: string,
     offset: number,
     pageSize: number,
-  ): Promise<unknown[]> {
-    return this.repo.findWhere(dev_eui, offset, pageSize);
+  ): Promise<unknown> {
+    const { data: transactions, total_rows } = await this.repo.findWhere(
+      dev_eui,
+      offset,
+      pageSize,
+    );
+
+    return { response: { transactions, total_rows } };
   }
 
   async remove(id: number) {
