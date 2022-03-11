@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { off } from 'process';
@@ -140,6 +140,10 @@ export class MeterService {
     const battery_level_threshold = configuration.battery_level_threshold;
 
     const meter = await this.repo.findMeter(params);
+
+    if (!meter) {
+      throw new NotFoundException('Meter not found');
+    }
 
     const consumption_rate = configuration.getConsumptionRate(
       meter.consumer_type,
