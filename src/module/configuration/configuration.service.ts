@@ -19,7 +19,7 @@ export class ConfigurationService {
     organization_id: string,
     updateConfigurationDto: UpdateConfigurationDto,
   ): Promise<unknown> {
-    const configuration = this.configurationRepository.update(
+    const configuration = await this.configurationRepository.update(
       organization_id,
       updateConfigurationDto,
     );

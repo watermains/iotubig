@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { MeterRepository } from '../meter/meter.repository';
 import { ScreenerService } from '../screener/screener.service';
-
 import { UserRepository } from '../user/user.repository';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
 import { MeterConsumptionRepository } from './meter-consumption.repository';
@@ -48,7 +47,7 @@ export class MeterConsumptionService {
     return this.meterConsRepo.findMeterConsumption(devEUI, startDate, endDate);
   }
 
-  async generateReports(startDate: Date, endDate: Date) {
-    return this.generateReports(startDate, endDate);
+  generateReports(startDate: Date, endDate: Date) {
+    return this.meterConsRepo.generateReports(startDate, endDate);
   }
 }
