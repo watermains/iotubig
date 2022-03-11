@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { TransactionController } from './transaction.controller';
 import { IotService } from 'src/iot/iot.service';
@@ -7,25 +7,14 @@ import { Transaction, TransactionSchema } from './entities/transaction.schema';
 import { HttpModule } from '@nestjs/axios';
 import * as AutoIncrementFactory from 'mongoose-sequence';
 import { Meter, MeterSchema } from 'src/module/meter/entities/meter.schema';
-import {
-  Configuration,
-  ConfigurationSchema,
-} from '../configuration/entities/configuration.schema';
+import { TransactionRepository } from './transaction.repository';
+import { ConfigurationModule } from '../configuration/configuration.module';
+import { MeterModule } from '../meter/meter.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Configuration.name, schema: ConfigurationSchema },
-    ]),
-    MongooseModule.forFeatureAsync([
-      {
-        name: Meter.name,
-        useFactory: async () => {
-          const schema = MeterSchema;
-          return schema;
-        },
-      },
-    ]),
+    ConfigurationModule,
+    MeterModule,
     MongooseModule.forFeatureAsync([
       {
         name: Transaction.name,
@@ -47,7 +36,27 @@ import {
     HttpModule,
   ],
   controllers: [TransactionController],
-  exports: [TransactionService],
-  providers: [TransactionService, IotService],
+  exports: [
+    TransactionRepository,
+    MongooseModule.forFeatureAsync([
+      {
+        name: Transaction.name,
+        useFactory: async (connection) => {
+          const schema = TransactionSchema;
+          const AutoIncrement = AutoIncrementFactory(connection);
+          schema.plugin(AutoIncrement, {
+            inc_field: 'reference_no',
+          });
+          schema.pre('save', function (next) {
+            // this.created_by = this.$locals.user_id;
+            next();
+          });
+          return schema;
+        },
+        inject: [getConnectionToken()],
+      },
+    ]),
+  ],
+  providers: [TransactionService, IotService, TransactionRepository],
 })
 export class TransactionModule {}

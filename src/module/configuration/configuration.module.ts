@@ -26,6 +26,12 @@ import {
     }),
     MailerModule,
   ],
+  exports: [
+    MongooseModule.forFeature([
+      { name: Configuration.name, schema: ConfigurationSchema },
+    ]),
+    ConfigurationRepository,
+  ],
   controllers: [ConfigurationController],
   providers: [
     ConfigurationService,

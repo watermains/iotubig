@@ -1,53 +1,37 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import {
-  Configuration,
-  ConfigurationDocument,
-} from '../configuration/entities/configuration.schema';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { ScreenerService } from '../screener/screener.service';
-import { User, UserDocument } from '../user/entities/user.schema';
+import { UserRepository } from '../user/user.repository';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
 import { CreateMeterDto } from './dto/create-meter.dto';
 import { UpdateMeterValveDto } from './dto/update-meter-valve.dto';
 import { UpdateMeterDto } from './dto/update-meter.dto';
-import { Meter, MeterDocument } from './entities/meter.schema';
 import { ConsumerType } from './enum/consumer-type.enum';
 import { MeterStatus } from './enum/meter.status.enum';
-import { Stats } from './response/stats';
+import { MeterRepository } from './meter.repository';
 
 @Injectable()
 export class MeterService {
   constructor(
-    @InjectModel(Meter.name)
-    private meterModel: Model<MeterDocument>,
-    @InjectModel(User.name)
-    private userModel: Model<UserDocument>,
-    @InjectModel(Configuration.name)
-    private configurationModel: Model<ConfigurationDocument>,
+    private readonly configRepo: ConfigurationRepository,
+    private readonly userRepo: UserRepository,
     private readonly screenerService: ScreenerService,
+    private readonly repo: MeterRepository,
   ) {}
 
-  async create(createMeterDto: CreateMeterDto) {
-    await this.meterModel.create({
-      ...createMeterDto,
-    });
+  async create(dto: CreateMeterDto) {
+    await this.repo.createMeter(dto);
     return { message: 'Meter created successfully' };
   }
 
   async createIoT(
     organization_id: string,
     dto: CreateMeterIOTDto,
-  ): Promise<Meter> {
-    const config = await this.configurationModel.findOne({ organization_id });
-    const meter = await this.meterModel.findOneAndUpdate(
-      { dev_eui: dto.dev_eui },
-      { ...dto },
-      { upsert: true, new: true },
-    );
-    const users = await this.userModel.find({
-      water_meter_id: meter.meter_name,
-    });
+  ) {
+    const config = await this.configRepo.findOne(organization_id);
+    const meter = await this.repo.upsertMeterViaIoT(dto);
+
+    const users = await this.userRepo.isOwned(meter.meter_name);
 
     const rate = config.getConsumptionRate(meter.consumer_type);
     const perRate = meter.getWaterMeterRate(rate);
@@ -72,9 +56,7 @@ export class MeterService {
     consumer_type?: ConsumerType,
     search?: string,
   ) {
-    const configuration = await this.configurationModel.findOne({
-      organization_id,
-    });
+    const configuration = await this.configRepo.findOne(organization_id);
 
     const low_balance_threshold = configuration.water_alarm_threshold;
     const battery_level_threshold = configuration.battery_level_threshold;
@@ -101,16 +83,11 @@ export class MeterService {
       query.$or = fields.map((field) => ({ [field]: new RegExp(search, 'i') }));
     }
 
-    const meters = await this.meterModel
-      .find(query)
-      .skip(offset)
-      .limit(pageSize);
-
-    const total_rows = await this.meterModel.find(query).count();
+    const paginatedData = await this.repo.findAll(query, offset, pageSize);
 
     return {
       response: {
-        meters: meters.map((meter) => {
+        meters: paginatedData.data.map((meter) => {
           const consumption_rate = configuration.getConsumptionRate(
             meter.consumer_type,
           );
@@ -124,21 +101,19 @@ export class MeterService {
             battery_level_threshold,
           };
         }),
-        total_rows,
+        total_rows: paginatedData.total_rows,
       },
     };
   }
 
-  async findOne(
+  async findMeterDetails(
     user_id: string,
     organization_id: string,
     meter_name?: string,
     dev_eui?: string,
   ) {
     if (!meter_name && !dev_eui) {
-      const { water_meter_id } = await this.userModel.findOne({
-        _id: user_id,
-      });
+      const { water_meter_id } = await this.userRepo.findOneByID(user_id);
 
       meter_name = water_meter_id;
     }
@@ -146,22 +121,22 @@ export class MeterService {
     const params = {
       meter_name,
       dev_eui,
+      deleted_at: null,
     };
 
     Object.keys(params).forEach((key) =>
       params[key] === undefined ? delete params[key] : {},
     );
 
-    const configuration = await this.configurationModel.findOne({
-      organization_id,
-    });
+    const configuration = await this.configRepo.findOne(organization_id);
 
     const battery_level_threshold = configuration.battery_level_threshold;
 
-    const meter = await this.meterModel.findOne({
-      ...params,
-      deleted_at: null,
-    });
+    const meter = await this.repo.findMeter(params);
+
+    if (!meter) {
+      throw new NotFoundException('Meter does not exist');
+    }
 
     const consumption_rate = configuration.getConsumptionRate(
       meter.consumer_type,
@@ -180,150 +155,29 @@ export class MeterService {
     };
   }
 
-  private getStatus(open: boolean, force: boolean): number {
-    if (force) {
-      if (open) {
-        return MeterStatus.open;
-      } else {
-        return MeterStatus.close;
-      }
-    } else {
-      if (open) {
-        return MeterStatus.pendingOpen;
-      } else {
-        return MeterStatus.pendingClose;
-      }
-    }
-  }
-
   async updateValve(dto: UpdateMeterValveDto): Promise<unknown> {
-    const response = await this.meterModel.findOneAndUpdate(
-      { dev_eui: dto.dev_eui },
-      { valve_status: this.getStatus(dto.is_open, dto.force) },
-      { upsert: false, new: true },
-    );
-
+    const response = await this.repo.updateValve(dto);
     return { response, message: 'Meter valve status updated successfully' };
   }
 
-  async update(
-    devEUI: string,
-    updateMeterDto: UpdateMeterDto,
-  ): Promise<unknown> {
-    const response = await this.meterModel.findOneAndUpdate(
-      { dev_eui: devEUI },
-      { ...updateMeterDto },
-      { upsert: false, new: true },
-    );
-
+  async updateMeter(devEUI: string, dto: UpdateMeterDto): Promise<unknown> {
+    const response = this.repo.updateMeter(devEUI, dto);
     return { response, message: 'Meter updated successfully' };
   }
 
-  async upsert(dev_eui: string, dto: CreateMeterIOTDto): Promise<Meter> {
-    return await this.meterModel.findOneAndUpdate(
-      { dev_eui },
-      { ...dto },
-      { upsert: true },
-    );
-  }
-
-  async remove(devEUI: string) {
-    const forRemove = await this.meterModel.findOne({ dev_eui: devEUI });
-    forRemove.deleted_at = new Date();
-    await forRemove.save();
+  async removeMeter(devEUI: string) {
+    //TODO check if meter not yet deleted
+    await this.repo.removeMeter(devEUI);
     return { message: 'Meter deleted successfully' };
   }
 
-  async findStats(): Promise<unknown> {
-    const stats = new Stats();
-    stats.idle = await this.meterModel.count({
-      valve_status: MeterStatus.idle,
-    });
-    stats.open = await this.meterModel.count({
-      valve_status: MeterStatus.open,
-    });
-    stats.close = await this.meterModel.count({
-      valve_status: MeterStatus.close,
-    });
-    stats.fault = await this.meterModel.count({
-      valve_status: MeterStatus.fault,
-    });
-    stats.pending_open = await this.meterModel.count({
-      valve_status: MeterStatus.pendingOpen,
-    });
-    stats.pending_close = await this.meterModel.count({
-      valve_status: MeterStatus.pendingClose,
-    });
-    return { response: stats };
+  async findStats() {
+    const res = await this.repo.findStats();
+    return { response: res };
   }
 
   async generateReports(organization_id: string) {
-    const meters = await this.meterModel.find({});
-
-    const configuration = await this.configurationModel.findOne({
-      organization_id,
-    });
-
-    const data = meters.map((meter) => {
-      const consumption_rate = configuration.getConsumptionRate(
-        meter.consumer_type,
-      );
-
-      const balance = meter.getCubicMeterBalance(consumption_rate);
-      return { ...meter.toJSON(), balance };
-    });
-
-    const fields = [
-      {
-        label: 'meter_name',
-        value: 'meter_name',
-      },
-      {
-        label: 'site_name',
-        value: 'site_name',
-      },
-      {
-        label: 'unit_name',
-        value: 'unit_name',
-      },
-      {
-        label: 'consumer_type',
-        value: 'consumer_type',
-      },
-      {
-        label: 'balance(cu.m)',
-        value: 'balance',
-      },
-      {
-        label: 'battery_level',
-        value: 'battery_level',
-      },
-      {
-        label: 'valve_status',
-        value: 'valve_status',
-      },
-      {
-        label: 'battery_fault',
-        value: 'battery_fault',
-      },
-      {
-        label: 'valve_fault',
-        value: 'valve_fault',
-      },
-      {
-        label: 'hall_fault',
-        value: 'hall_fault',
-      },
-      {
-        label: 'mag_fault',
-        value: 'mag_fault',
-      },
-      {
-        label: 'wireless_device_id',
-        value: 'wireless_device_id',
-      },
-    ];
-
-    return { data, fields };
+    const configuration = await this.configRepo.findOne(organization_id);
+    return this.repo.generateReports(configuration);
   }
 }

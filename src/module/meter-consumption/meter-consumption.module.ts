@@ -10,29 +10,17 @@ import {
 } from './entities/meter-consumption.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScreenerModule } from '../screener/screener.module';
-import {
-  Configuration,
-  ConfigurationSchema,
-} from '../configuration/entities/configuration.schema';
-import { User, UserSchema } from '../user/entities/user.schema';
-import { Meter, MeterSchema } from '../meter/entities/meter.schema';
 import { APIKeyMiddleware } from 'src/middleware/apikey.middleware';
+import { ConfigurationModule } from '../configuration/configuration.module';
+import { MeterModule } from '../meter/meter.module';
+import { UserModule } from '../user/user.module';
+import { MeterConsumptionRepository } from './meter-consumption.repository';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    MongooseModule.forFeature([
-      { name: Configuration.name, schema: ConfigurationSchema },
-    ]),
-    MongooseModule.forFeatureAsync([
-      {
-        name: Meter.name,
-        useFactory: async () => {
-          const schema = MeterSchema;
-          return schema;
-        },
-      },
-    ]),
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forFeatureAsync([
       {
         name: MeterConsumption.name,
@@ -42,10 +30,17 @@ import { APIKeyMiddleware } from 'src/middleware/apikey.middleware';
         },
       },
     ]),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: process.env.JWT_EXPIRATION },
+    }),
     ScreenerModule,
+    MeterModule,
+    UserModule,
+    ConfigurationModule,
   ],
   controllers: [MeterConsumptionController, ExternalMeterConsumptionController],
-  providers: [MeterConsumptionService],
+  providers: [MeterConsumptionService, MeterConsumptionRepository],
 })
 export class MeterConsumptionModule {
   configure(consumer: MiddlewareConsumer) {

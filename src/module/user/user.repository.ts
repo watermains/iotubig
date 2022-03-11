@@ -6,11 +6,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
-import { Exception } from 'handlebars';
 import { Model } from 'mongoose';
 import { RoleTypes } from 'src/decorators/roles.decorator';
 import { MailerService } from 'src/mailer/mailer.service';
-import { CreateMeterDto } from '../meter/dto/create-meter.dto';
 import { Organization } from '../organization/entities/organization.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -28,6 +26,16 @@ export class UserRepository {
 
   async findOneByEmail(email: string) {
     return this.userModel.findOne({ email });
+  }
+
+  async findOneByID(id: string) {
+    return this.userModel.findOne({ _id: id });
+  }
+
+  async isOwned(water_meter_id: string) {
+    return this.userModel.find({
+      water_meter_id,
+    });
   }
 
   async create(dto: CreateUserDto) {

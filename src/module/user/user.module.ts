@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
@@ -12,15 +12,14 @@ import { AdminController } from './admin/admin.controller';
 import { IsEmailAlreadyExistConstraint } from 'src/decorators/unique-email.decorator';
 import { IsEmailExistConstraint } from 'src/decorators/exist-email.decorator';
 import { MeterCheckConstraint } from 'src/validators/meter.validator';
-import { Meter, MeterSchema } from '../meter/entities/meter.schema';
 import { MailerModule } from 'src/mailer/mailer.module';
-import { MailerService } from 'src/mailer/mailer.service';
+import { MeterModule } from '../meter/meter.module';
 @Module({
   imports: [
-    MailerModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    forwardRef(() => MeterModule),
+    MailerModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    MongooseModule.forFeature([{ name: Meter.name, schema: MeterSchema }]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },
@@ -36,6 +35,6 @@ import { MailerService } from 'src/mailer/mailer.service';
     AdminService,
     MeterCheckConstraint,
   ],
-  exports: [UserService, AdminService],
+  exports: [UserService, AdminService, UserRepository],
 })
 export class UserModule {}

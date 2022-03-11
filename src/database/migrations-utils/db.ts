@@ -6,5 +6,5 @@ export const getDb = async () => {
   const client: MongoClient = await MongoClient.connect(process.env.MONGO_URL, {
     directConnection: true,
   });
-  return client.db('iotubig-db');
+  return client.db();
 };
