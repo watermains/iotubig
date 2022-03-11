@@ -9,7 +9,7 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "migrate --migrations-dir=\"./src/database/migrations\" --compiler=\"ts:./src/database/migrations-utils/ts-compiler.js\" up && nest start",
     "start:dev": "NODE_ENV=development nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -21,9 +21,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "ts-node -r tsconfig-paths/register src/seeder.ts",
     "seed:dev": "NODE_ENV=development ts-node -r tsconfig-paths/register src/seeder.ts",
-    "migrate": "ts-node -r tsconfig-paths/register src/database/migrations/migrate.ts"
+    "migrate:create": "migrate create --template-file ./src/database/migrations-utils/template.ts --migrations-dir=\"./src/database/migrations\" --compiler=\"ts:./src/database/migrations-utils/ts-compiler.js\"",
+    "migrate:up": "migrate --migrations-dir=\"./src/database/migrations\" --compiler=\"ts:./src/database/migrations-utils/ts-compiler.js\" up",
+    "migrate:down": "migrate --migrations-dir=\"./src/database/migrations\" --compiler=\"ts:./src/database/migrations-utils/ts-compiler.js\" down"
   },
   "dependencies": {
+    "@mongoosejs/double": "^0.2.0",
     "@nestjs/axios": "^0.0.4",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.1.6",
@@ -40,8 +43,9 @@
     "class-validator": "^0.13.2",
     "handlebars": "^4.7.7",
     "json2csv": "^5.0.6",
-    "migrate-mongoose": "^4.0.0",
+    "migrate": "^1.7.0",
     "moment": "^2.29.1",
+    "mongodb": "^4.4.1",
     "mongoose": "^6.1.8",
     "mongoose-sequence": "^5.3.1",
     "node-ses": "^3.0.3",

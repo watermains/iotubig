@@ -1,15 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Logger, Post, Query } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { AppService } from './app.service';
-
 
 class ConfirmationTokenDto {
   @ApiProperty()
@@ -26,13 +17,8 @@ export class AppController {
     return this.appService.alive();
   }
 
-  @Post('/meter/iot/confirmation')
-  confirmationMeterIot(@Query() dto: ConfirmationTokenDto) {
-    this.logger.debug(`AWS TOKEN: ${dto.confirmationToken}`);
-  }
-
-  @Post('/meter-consumption/confirmation')
-  confirmationMeterConsumption(@Query() dto: ConfirmationTokenDto) {
+  @Post('/')
+  confirmationMeter(@Query() dto: ConfirmationTokenDto) {
     this.logger.debug(`AWS TOKEN: ${dto.confirmationToken}`);
   }
 }

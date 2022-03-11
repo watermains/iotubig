@@ -1,31 +1,19 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
-import { TransactionService } from './transaction.service';
-import { TransactionController } from './transaction.controller';
-import { IotService } from 'src/iot/iot.service';
-import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
-import { Transaction, TransactionSchema } from './entities/transaction.schema';
 import { HttpModule } from '@nestjs/axios';
+import { forwardRef, Module } from '@nestjs/common';
+import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import * as AutoIncrementFactory from 'mongoose-sequence';
-import { Meter, MeterSchema } from 'src/module/meter/entities/meter.schema';
-import {
-  Configuration,
-  ConfigurationSchema,
-} from '../configuration/entities/configuration.schema';
+import { IotService } from 'src/iot/iot.service';
+import { ConfigurationModule } from '../configuration/configuration.module';
+import { MeterModule } from '../meter/meter.module';
+import { Transaction, TransactionSchema } from './entities/transaction.schema';
+import { TransactionController } from './transaction.controller';
+import { TransactionRepository } from './transaction.repository';
+import { TransactionService } from './transaction.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Configuration.name, schema: ConfigurationSchema },
-    ]),
-    MongooseModule.forFeatureAsync([
-      {
-        name: Meter.name,
-        useFactory: async () => {
-          const schema = MeterSchema;
-          return schema;
-        },
-      },
-    ]),
+    ConfigurationModule,
+    forwardRef(() => MeterModule),
     MongooseModule.forFeatureAsync([
       {
         name: Transaction.name,
@@ -47,7 +35,28 @@ import {
     HttpModule,
   ],
   controllers: [TransactionController],
-  exports: [TransactionService],
-  providers: [TransactionService, IotService],
+  exports: [
+    TransactionService,
+    TransactionRepository,
+    MongooseModule.forFeatureAsync([
+      {
+        name: Transaction.name,
+        useFactory: async (connection) => {
+          const schema = TransactionSchema;
+          const AutoIncrement = AutoIncrementFactory(connection);
+          schema.plugin(AutoIncrement, {
+            inc_field: 'reference_no',
+          });
+          schema.pre('save', function (next) {
+            // this.created_by = this.$locals.user_id;
+            next();
+          });
+          return schema;
+        },
+        inject: [getConnectionToken()],
+      },
+    ]),
+  ],
+  providers: [TransactionService, IotService, TransactionRepository],
 })
 export class TransactionModule {}

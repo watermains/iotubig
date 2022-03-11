@@ -2,12 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { ConsumerType } from '../enum/consumer-type.enum';
 import { MeterStatus } from '../enum/meter.status.enum';
+import Double from '@mongoosejs/double';
 
 export type MeterDocument = Meter & Document;
 
 @Schema({ timestamps: true, toJSON: { getters: true } })
 export class Meter {
-  @Prop({ unique: true })
+  @Prop({ unique: true, sparse: true })
   meter_name: string;
 
   @Prop({ required: true, unique: true })
@@ -18,14 +19,14 @@ export class Meter {
 
   @Prop({
     default: 0.0,
-    type: MongooseSchema.Types.Decimal128,
+    type: Double,
     get: (val) => val.toString(),
   })
   cumulative_flow: number;
 
   @Prop({
     default: 0.0,
-    type: MongooseSchema.Types.Decimal128,
+    type: Double,
     get: (val) => val.toString(),
   })
   allowed_flow: number;
@@ -113,7 +114,7 @@ MeterSchema.methods.addFlow = function (
 MeterSchema.methods.getWaterMeterRate = function (
   consumption_rate: number,
 ): number {
-  return (consumption_rate / 1000) || 0;
+  return consumption_rate / 1000 || 0;
 };
 
 MeterSchema.methods.getEstimatedBalance = function (

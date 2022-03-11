@@ -11,9 +11,8 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiBody, ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { map } from 'rxjs';
+import { ApiBearerAuth, ApiBody, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { lastValueFrom, map } from 'rxjs';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { IotService } from 'src/iot/iot.service';
@@ -51,21 +50,24 @@ export class MeterController {
   @Post('/valve')
   @UseInterceptors(ResponseInterceptor)
   async changeValve(@Req() req, @Body() dto: UpdateMeterValveDto) {
-    const meter = await this.meterService.findOne(
+    const meter = await this.meterService.findMeterDetails(
       req.user.id,
       req.user.org_id,
       undefined,
       dto.dev_eui,
     );
-    return this.iotService
-      .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
-      .pipe(
-        map(async (obs) => {
-          console.log(obs);
-          // TODO If OBS says a valid transaction occured, proceed with creating the record
-          return this.meterService.updateValve(dto);
-        }),
-      );
+
+    return lastValueFrom(
+      this.iotService
+        .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
+        .pipe(
+          map(async (obs) => {
+            console.log(obs);
+            // TODO If OBS says a valid transaction occured, proceed with creating the record
+            return this.meterService.updateValve(dto);
+          }),
+        ),
+    );
   }
 
   @Get()
@@ -86,7 +88,7 @@ export class MeterController {
   @Roles(RoleTypes.customer)
   @UseInterceptors(ResponseInterceptor, MutableDocumentInterceptor)
   findOne(@Req() req, @Query() dto: FindMeterDto) {
-    return this.meterService.findOne(
+    return this.meterService.findMeterDetails(
       req.user.id,
       req.user.org_id,
       dto.meterName,
@@ -109,13 +111,13 @@ export class MeterController {
   @Patch(':devEUI')
   @UseInterceptors(ResponseInterceptor)
   update(@Param() devEuiDto: MeterDevEUIDto, @Body() dto: UpdateMeterDto) {
-    return this.meterService.update(devEuiDto.devEUI, dto);
+    return this.meterService.updateMeter(devEuiDto.devEUI, dto);
   }
 
   @Delete(':devEUI')
   @UseInterceptors(ResponseInterceptor)
   remove(@Param() devEuiDto: MeterDevEUIDto) {
-    return this.meterService.remove(devEuiDto.devEUI);
+    return this.meterService.removeMeter(devEuiDto.devEUI);
   }
 }
 

@@ -11,7 +11,9 @@ describe('MeterConsumptionController', () => {
       providers: [MeterConsumptionService],
     }).compile();
 
-    controller = module.get<MeterConsumptionController>(MeterConsumptionController);
+    controller = module.get<MeterConsumptionController>(
+      MeterConsumptionController,
+    );
   });
 
   it('should be defined', () => {

@@ -102,5 +102,26 @@
   "meter_name": "METER-NO USER",
   "createdAt": "2022-02-14T09:31:21.678Z",
   "updatedAt": "2022-02-14T09:31:21.678Z"
+},
+{
+  "frame_id": 1,
+  "deleted_at": null,
+  "deleted_by": null,
+  "consumer_type": "Residential",
+  "unit_name": "METER-FULL MINIMUM DEDUCTION",
+  "site_name": "METER-FULL MINIMUM DEDUCTION",
+  "mag_fault": 0,
+  "hall_fault": 0,
+  "valve_fault": 0,
+  "valve_status": 0,
+  "battery_fault": 0,
+  "battery_level": 0,
+  "allowed_flow": "0",
+  "cumulative_flow": "0",
+  "wireless_device_id": "577800006",
+  "dev_eui": "840001-1234",
+  "meter_name": "METER-FULL MINIMUM DEDUCTION",
+  "createdAt": "2022-02-14T09:31:21.678Z",
+  "updatedAt": "2022-02-14T09:31:21.678Z"
 }
 ]
