@@ -7,6 +7,7 @@ import { UserDocument } from '../user/entities/user.schema';
 export interface MeterScreenerInfo {
   perRate: number;
   allowedFlow: number;
+  battery_level: number;
   siteName: string;
   meterName: string;
 }
@@ -23,6 +24,7 @@ export class ScreenerService {
     const lowThreshold = config.water_alarm_threshold / meter.perRate;
     const belowZeroThreshold = 0;
     const overdrawThreshold = config.overdraw_limitation / meter.perRate;
+    const lowBattThreshold = config.battery_level_threshold;
 
     let message = '';
     console.log(`${meter.allowedFlow} < ${overdrawThreshold}`);
@@ -37,6 +39,12 @@ export class ScreenerService {
     if (meter.allowedFlow <= lowThreshold && message == '') {
       message = `Low Balance`;
     }
+
+    //CHECK FOR BATTERY THRESHOLD
+    if (meter.battery_level <= lowBattThreshold) {
+      message += '\nLow Battery';
+    }
+
     if (message != '') {
       if (users !== undefined && users.length > 0) {
         const triggerDate = moment().format('MMMM Do YYYY, h:mm:ss a');
