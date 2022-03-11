@@ -27,7 +27,7 @@ export class MeterService {
   async createIoT(
     organization_id: string,
     dto: CreateMeterIOTDto,
-  ): Promise<Meter> {
+  ) {
     const config = await this.configRepo.findOne(organization_id);
     const meter = await this.repo.upsertMeterViaIoT(dto);
 
