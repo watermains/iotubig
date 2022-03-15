@@ -18,10 +18,10 @@ import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
 import {
   AggregatedDocumentsInterceptor,
-  DocumentsInterceptor,
   ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
+import { MeterService } from '../meter/meter.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { GenerateTransactionReportsDto } from './dto/generate-transaction-reports.dto';
 import { GetTransactionsTotalAmountsDto } from './dto/get-transactions-total-amounts.dto';
@@ -37,32 +37,45 @@ export class TransactionController {
   constructor(
     private readonly transactionService: TransactionService,
     private readonly iotService: IotService,
+<<<<<<< HEAD
   ) { }
+=======
+    private readonly meterService: MeterService,
+  ) {}
+>>>>>>> a47907f (Squashed commit of the following )
 
   @Post()
   @UseInterceptors(ResponseInterceptor)
   async create(@Req() request: any, @Body() dto: CreateTransactionDto) {
+    const meter = await this.meterService.findMeterDetails(
+      request.user.id,
+      request.user.org_id,
+      undefined,
+      dto.dev_eui,
+    );
+
     return lastValueFrom(
       this.iotService
-        .sendBalanceUpdate(new BalanceUpdateDTO(dto.amount.toString()))
+        .sendBalanceUpdate(
+          meter.document.wireless_device_id,
+          new BalanceUpdateDTO(dto.amount.toString()),
+        )
         .pipe(
           map((obs) => {
-            //TODO If OBS says a valid transaction occured, proceed with creating the record
-            return this.transactionService
-              .create(request.user.id, request.user.org_id, dto)
-              .then((value) => {
-                console.log(value);
-                return value;
-              });
+            return this.transactionService.create(
+              request.user.id,
+              request.user.org_id,
+              dto,
+            );
           }),
         ),
     );
   }
 
   @Get()
-  @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
-  findAll() {
-    return this.transactionService.findAll();
+  @UseInterceptors(ResponseInterceptor)
+  findAll(@Query() dto: GetTransactionsDto) {
+    return this.transactionService.findAll(dto.offset, dto.pageSize);
   }
 
   @Get('/reports')

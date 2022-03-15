@@ -42,6 +42,7 @@ import { MeterService } from './meter.service';
   exports: [
     MongooseModule.forFeature([{ name: Meter.name, schema: MeterSchema }]),
     MeterRepository,
+    MeterService,
   ],
 })
 export class MeterModule {

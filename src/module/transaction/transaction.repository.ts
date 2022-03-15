@@ -13,11 +13,10 @@ import {
 export interface ITransaction {
   create(user_id: string, organization_id: string, dto: CreateTransactionDto);
   seed(data: []);
-  findAll(): Promise<unknown[]>;
   findWhere(
-    dev_eui: string,
     offset: number,
     pageSize: number,
+    dev_eui?: string,
   ): Promise<PaginatedData>;
   remove(id: number);
   getTotalAmounts(startDate: Date, endDate?: Date): Promise<unknown>;
@@ -65,18 +64,10 @@ export class TransactionRepository implements ITransaction {
     data.forEach(async (val) => await this.transactionModel.create(val));
   }
 
-  async findAll(): Promise<TransactionDocument[]> {
-    return await this.transactionModel
-      .find({
-        deleted_at: null,
-      })
-      .sort({ createdAt: '-1' });
-  }
-
   async findWhere(
-    dev_eui: string,
     offset: number,
     pageSize: number,
+    dev_eui?: string,
   ): Promise<PaginatedData> {
     const transactionsPipeline: PipelineStage[] = [
       {
@@ -92,11 +83,15 @@ export class TransactionRepository implements ITransaction {
           meter: { $arrayElemAt: ['$meter', 0] },
         },
       },
-      {
-        $match: {
-          'meter.dev_eui': dev_eui,
-        },
-      },
+      ...(dev_eui
+        ? [
+            {
+              $match: {
+                'meter.dev_eui': dev_eui,
+              },
+            },
+          ]
+        : []),
       {
         $sort: {
           createdAt: -1,
