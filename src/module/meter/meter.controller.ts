@@ -62,8 +62,6 @@ export class MeterController {
         .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
         .pipe(
           map(async (obs) => {
-            console.log(obs);
-            // TODO If OBS says a valid transaction occured, proceed with creating the record
             return this.meterService.updateValve(dto);
           }),
         ),

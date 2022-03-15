@@ -14,8 +14,13 @@ export class TransactionService {
     return this.repo.create(user_id, organization_id, dto);
   }
 
-  async findAll(): Promise<unknown[]> {
-    return this.repo.findAll();
+  async findAll(offset: number, pageSize: number): Promise<unknown> {
+    const { data: transactions, total_rows } = await this.repo.findWhere(
+      offset,
+      pageSize,
+    );
+
+    return { response: { transactions, total_rows } };
   }
 
   async findWhere(
@@ -24,9 +29,9 @@ export class TransactionService {
     pageSize: number,
   ): Promise<unknown> {
     const { data: transactions, total_rows } = await this.repo.findWhere(
-      dev_eui,
       offset,
       pageSize,
+      dev_eui,
     );
 
     return { response: { transactions, total_rows } };

@@ -1,13 +1,11 @@
 import { HttpService } from '@nestjs/axios';
-import { AxiosResponse } from 'axios';
 import { Injectable } from '@nestjs/common';
+import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs/internal/Observable';
 import { map } from 'rxjs/operators';
-import { lastValueFrom } from 'rxjs';
-import { observeNotification } from 'rxjs/internal/Notification';
+import { UpdateConfigurationDto } from 'src/module/configuration/dto/update-configuration.dto';
 import { UpdateMeterValveDto } from 'src/module/meter/dto/update-meter-valve.dto';
 import { isPositive } from 'src/validation';
-import { UpdateConfigurationDto } from 'src/module/configuration/dto/update-configuration.dto';
 
 export class BalanceUpdateDTO {
   balance: string;
@@ -43,9 +41,12 @@ export class IotService {
     );
   }
 
-  sendBalanceUpdate(dto: BalanceUpdateDTO): Observable<AxiosResponse<unknown>> {
+  sendBalanceUpdate(
+    device_id: string,
+    dto: BalanceUpdateDTO,
+  ): Observable<AxiosResponse<unknown>> {
     return this.send(
-      'db7e0725-647d-4b54-bd66-0ee6c352feab',
+      device_id,
       isPositive(dto.balance) ? 'SBALADD' : 'SBALDEDUCT',
       { data: dto.balance },
       1,
