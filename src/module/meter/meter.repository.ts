@@ -17,6 +17,7 @@ export interface IMeter {
   createMeter(dto: CreateMeterDto);
   updateMeter(devEUI: string, updateMeterDto: UpdateMeterDto);
   updateValve(dto: UpdateMeterValveDto);
+  updateFlow(dev_eui: string, volume: number);
   upsertMeterViaIoT(dto: CreateMeterIOTDto);
   upsertMeterViaConsumption(dto: CreateMeterConsumptionDto);
   findByDevEui(dev_eui: string);
@@ -43,6 +44,12 @@ export class MeterRepository implements IMeter {
       { ...updateMeterDto },
       { upsert: false, new: true },
     );
+  }
+
+  async updateFlow(dev_eui: string, volume: number) {
+    const meter = await this.meterModel.findOne({ dev_eui });
+    meter.allowed_flow = meter.addFlow(meter.allowed_flow, volume);
+    meter.save();
   }
 
   private getStatus(open: boolean, force: boolean): number {

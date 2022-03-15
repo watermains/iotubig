@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import Handlebars from 'handlebars';
 import * as temp from 'node-ses';
@@ -24,9 +24,13 @@ export interface NotificationOptions {
   meterName: string;
   dateTriggered: string;
 }
-
 export interface MeterStatusNotificationOptions extends NotificationOptions {
   meterStatus: string;
+}
+
+export interface CreditNotificationOptions extends NotificationOptions {
+  amount: string;
+  balanceStatus: string;
 }
 @Injectable()
 export class MailerService {
@@ -38,34 +42,19 @@ export class MailerService {
       secret: process.env.SECRET,
     });
   }
-
+  private readonly logger = new Logger(MailerService.name);
   private readonly sender = 'noreply@watermains.net';
 
   async sendWelcome(firstName: string, email: string) {
-    const emailOptions: EmailOptions = {
-      from: this.sender,
-      subject: 'Welcome to IoTubig',
-      to: email,
-    };
-
-    const res = this.fetchTemplate('welcome.hbs');
-
-    const template = Handlebars.compile(res.toString());
-    emailOptions.html = template({ firstName });
-
-    this.sendEmail(emailOptions);
+    this.sendEmailWithTemplateOptions(
+      email,
+      'Welcome to IoTubig',
+      'welcome.hbs',
+      { firstName },
+    );
   }
 
   async sendForgotPassword(firstName: string, email: string, token: string) {
-    const emailOptions: EmailOptions = {
-      from: this.sender,
-      subject: 'Reset your password',
-      to: email,
-    };
-    const res = this.fetchTemplate('reset_password.hbs');
-
-    const template = Handlebars.compile(res.toString());
-
     // Safely join URLs
     const url = new URL(
       path.join(
@@ -76,9 +65,20 @@ export class MailerService {
 
     const link = new URL(path.join(url, token)).toString();
 
-    emailOptions.html = template({ firstName, link });
+    this.sendEmailWithTemplateOptions(
+      email,
+      'Reset your password',
+      'reset_password.hbs',
+      { firstName, link },
+    );
+  }
 
-    this.sendEmail(emailOptions);
+  async sendCreditNotification(
+    options: CreditNotificationOptions,
+    email: string,
+    subject: string,
+  ) {
+    this.sendEmailWithTemplateOptions(email, subject, 'reload.hbs', options);
   }
 
   async sendNotification(
@@ -86,18 +86,12 @@ export class MailerService {
     email: string,
     subject: string,
   ) {
-    console.log(options);
-    const emailOptions: EmailOptions = {
-      from: this.sender,
-      subject: subject,
-      to: email,
-    };
-    const res = this.fetchTemplate('balance_alert.hbs');
-
-    const template = Handlebars.compile(res.toString());
-    emailOptions.html = template(options);
-
-    this.sendEmail(emailOptions);
+    this.sendEmailWithTemplateOptions(
+      email,
+      subject,
+      'balance_alert.hbs',
+      options,
+    );
   }
 
   async sendMeterStatusNotification(
@@ -105,22 +99,37 @@ export class MailerService {
     email: string,
     subject: string,
   ) {
-    console.log(options);
+    this.sendEmailWithTemplateOptions(
+      email,
+      subject,
+      'meter_valve.hbs',
+      options,
+    );
+  }
+
+  private fetchTemplate(name) {
+    return fs.readFileSync(path.resolve('src/mailer/templates/', name));
+  }
+
+  private sendEmailWithTemplateOptions(
+    email: string,
+    subject: string,
+    templateName: string,
+    templateOptions: object,
+  ) {
+    this.logger.debug(templateOptions);
+    const res = this.fetchTemplate(templateName);
+
     const emailOptions: EmailOptions = {
       from: this.sender,
       subject: subject,
       to: email,
     };
-    const res = this.fetchTemplate('meter_valve.hbs');
 
     const template = Handlebars.compile(res.toString());
-    emailOptions.html = template(options);
+    emailOptions.html = template(templateOptions);
 
     this.sendEmail(emailOptions);
-  }
-
-  private fetchTemplate(name) {
-    return fs.readFileSync(path.resolve('src/mailer/templates/', name));
   }
 
   private sendEmail(options: EmailOptions) {

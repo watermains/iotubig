@@ -21,7 +21,7 @@ export interface MeterScreenerInfo {
 
 @Injectable()
 export class ScreenerService {
-  constructor(private readonly mailerService: MailerService) { }
+  constructor(private readonly mailerService: MailerService) {}
 
   private readonly logger = new Logger(ScreenerService.name);
 

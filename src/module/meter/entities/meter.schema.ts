@@ -102,6 +102,7 @@ MeterSchema.virtual('valve_status_name').get(function () {
       return 'N/A';
   }
 });
+MeterSchema.set('toObject', { getters: true, virtuals: true });
 
 MeterSchema.methods.addFlow = function (
   current_flow: number,

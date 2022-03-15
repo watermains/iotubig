@@ -4,13 +4,13 @@
     alt="logo" />
   <h2><b>{{header}}</b></h2>
   <p>Hi {{firstName}},</p>
-  <p>This is to inform you that your water meter {{meterName}} in {{siteName}} has been {{meterStatus}} as of
-    {{dateTriggered}}.
-  </p>
-  {{#each messages}}
-  <p><b>{{this}}</b></p>
+  <p>This is to inform you that your water meter {{meterName}} in {{siteName}} 
+    has been {{balanceStatus}} with {{amount}} as of {{dateTriggered}}.</p>
   <br />
-  {{/each}}
+  <p>Note:<i> Credit application to the meter is not in real time and will be 
+    delayed to the next update window. Please check your IoTubig account in the 
+    next three hours for your updated balance.</i></p>
+  <br />
   <p>For other concerns, please contact your Administrator.</p>
   <br />
   <p>Best regards,<br />IoTubig Team</p>

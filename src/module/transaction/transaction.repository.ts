@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, PipelineStage } from 'mongoose';
-import { ConfigurationRepository } from '../configuration/configuration.repository';
-import { MeterRepository } from '../meter/meter.repository';
+import { Configuration } from '../configuration/entities/configuration.schema';
+import { Meter } from '../meter/entities/meter.schema';
 import { PaginatedData } from '../pagination/paginate';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import {
@@ -11,7 +11,12 @@ import {
 } from './entities/transaction.schema';
 
 export interface ITransaction {
-  create(user_id: string, organization_id: string, dto: CreateTransactionDto);
+  create(
+    user_id: string,
+    dto: CreateTransactionDto,
+    meter: Meter,
+    config: Configuration,
+  );
   seed(data: []);
   findWhere(
     offset: number,
@@ -28,36 +33,30 @@ export class TransactionRepository implements ITransaction {
   constructor(
     @InjectModel(Transaction.name)
     private transactionModel: Model<TransactionDocument>,
-    private readonly meterRepository: MeterRepository,
-    private readonly configRepository: ConfigurationRepository,
   ) {}
   async create(
     user_id: string,
-    organization_id: string,
     dto: CreateTransactionDto,
+    meter: Meter,
+    config: Configuration,
   ) {
-    const dev_eui = dto.dev_eui;
-    const ref = await this.meterRepository.findByDevEui(dev_eui);
+    const rate = config.getConsumptionRate(meter.consumer_type);
 
-    const config = await this.configRepository.findOne(organization_id);
-    const rate = config.getConsumptionRate(ref.consumer_type);
-    const volume = dto.amount / ref.getWaterMeterRate(rate);
+    const volume = dto.amount / meter.getWaterMeterRate(rate);
 
-    await this.transactionModel.create({
+    const transaction = await this.transactionModel.create({
       ...dto,
       reference_no: 0,
-      iot_meter_id: ref.meter_name,
+      iot_meter_id: meter.meter_name,
       volume,
       rate,
-      site_name: ref.site_name,
-      unit_name: ref.unit_name,
-      current_meter_volume: ref.allowed_flow,
+      site_name: meter.site_name,
+      unit_name: meter.unit_name,
+      current_meter_volume: meter.allowed_flow,
       created_by: user_id,
     });
 
-    ref.allowed_flow = ref.addFlow(ref.allowed_flow, volume);
-    await ref.save();
-    return { message: 'Transaction successfully recorded.' };
+    return transaction;
   }
 
   seed(data: []) {

@@ -3,8 +3,10 @@ import { forwardRef, Module } from '@nestjs/common';
 import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import * as AutoIncrementFactory from 'mongoose-sequence';
 import { IotService } from 'src/iot/iot.service';
+import { MailerModule } from 'src/mailer/mailer.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { MeterModule } from '../meter/meter.module';
+import { UserModule } from '../user/user.module';
 import { Transaction, TransactionSchema } from './entities/transaction.schema';
 import { TransactionController } from './transaction.controller';
 import { TransactionRepository } from './transaction.repository';
@@ -14,6 +16,7 @@ import { TransactionService } from './transaction.service';
   imports: [
     ConfigurationModule,
     forwardRef(() => MeterModule),
+    UserModule,
     MongooseModule.forFeatureAsync([
       {
         name: Transaction.name,
@@ -33,6 +36,7 @@ import { TransactionService } from './transaction.service';
       },
     ]),
     HttpModule,
+    MailerModule,
   ],
   controllers: [TransactionController],
   exports: [
