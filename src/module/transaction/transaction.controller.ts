@@ -37,12 +37,8 @@ export class TransactionController {
   constructor(
     private readonly transactionService: TransactionService,
     private readonly iotService: IotService,
-<<<<<<< HEAD
-  ) { }
-=======
     private readonly meterService: MeterService,
-  ) {}
->>>>>>> a47907f (Squashed commit of the following )
+  ) { }
 
   @Post()
   @UseInterceptors(ResponseInterceptor)
