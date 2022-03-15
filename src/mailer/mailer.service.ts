@@ -19,7 +19,7 @@ export interface EmailOptions {
 export interface NotificationOptions {
   header: string;
   firstName: string;
-  message: string;
+  messages: string[];
   siteName: string;
   meterName: string;
   dateTriggered: string;
