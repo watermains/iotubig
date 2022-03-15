@@ -25,6 +25,9 @@ export interface NotificationOptions {
   dateTriggered: string;
 }
 
+export interface MeterStatusNotificationOptions extends NotificationOptions {
+  meterStatus: string;
+}
 @Injectable()
 export class MailerService {
   private readonly ses: Client;
@@ -90,6 +93,25 @@ export class MailerService {
       to: email,
     };
     const res = this.fetchTemplate('balance_alert.hbs');
+
+    const template = Handlebars.compile(res.toString());
+    emailOptions.html = template(options);
+
+    this.sendEmail(emailOptions);
+  }
+
+  async sendMeterStatusNotification(
+    options: MeterStatusNotificationOptions,
+    email: string,
+    subject: string,
+  ) {
+    console.log(options);
+    const emailOptions: EmailOptions = {
+      from: this.sender,
+      subject: subject,
+      to: email,
+    };
+    const res = this.fetchTemplate('meter_valve.hbs');
 
     const template = Handlebars.compile(res.toString());
     emailOptions.html = template(options);

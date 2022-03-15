@@ -20,7 +20,7 @@ export class MeterService {
     private readonly screenerService: ScreenerService,
     private readonly repo: MeterRepository,
     private readonly transactionRepo: TransactionRepository,
-  ) {}
+  ) { }
 
   async create(dto: CreateMeterDto) {
     await this.repo.createMeter(dto);
@@ -29,6 +29,7 @@ export class MeterService {
 
   async createIoT(organization_id: string, dto: CreateMeterIOTDto) {
     const config = await this.configRepo.findOne(organization_id);
+    const oldMeter = await this.repo.findByDevEui(dto.dev_eui);
     const meter = await this.repo.upsertMeterViaIoT(dto);
 
     const users = await this.userRepo.isOwned(meter.meter_name);
@@ -43,6 +44,10 @@ export class MeterService {
         siteName: meter.site_name,
         meterName: meter.meter_name,
         allowedFlow: meter.allowed_flow,
+        status: {
+          isChanged: meter.valve_status !== oldMeter.valve_status,
+          current: meter.valve_status,
+        },
       },
       users,
     );
