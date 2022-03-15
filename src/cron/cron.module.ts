@@ -39,4 +39,4 @@ import { CronService } from './cron.service';
   ],
   providers: [BalanceCheckService],
 })
-export class CronModule {}
+export class CronModule { }

@@ -37,7 +37,7 @@ export class TransactionController {
   constructor(
     private readonly transactionService: TransactionService,
     private readonly iotService: IotService,
-  ) {}
+  ) { }
 
   @Post()
   @UseInterceptors(ResponseInterceptor)

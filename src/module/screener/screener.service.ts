@@ -14,18 +14,19 @@ export interface MeterScreenerInfo {
 
 @Injectable()
 export class ScreenerService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailerService: MailerService) { }
 
   async checkMeters(
     config: Configuration,
     meter: MeterScreenerInfo,
     users: UserDocument[],
   ) {
+    const meterName = meter.meterName ?? 'Unspecified';
     const lowThreshold = config.water_alarm_threshold / meter.perRate;
     const belowZeroThreshold = 0;
     const overdrawThreshold = config.overdraw_limitation / meter.perRate;
     const lowBattThreshold = config.battery_level_threshold;
-
+    const messages = [];
     let message = '';
     console.log(`${meter.allowedFlow} < ${overdrawThreshold}`);
     if (meter.allowedFlow <= overdrawThreshold && message == '') {
@@ -39,10 +40,14 @@ export class ScreenerService {
     if (meter.allowedFlow <= lowThreshold && message == '') {
       message = `Low Balance`;
     }
+    if (message != '') {
+      message += `(${meter.allowedFlow}L)`;
+      messages.push(message);
+    }
 
     //CHECK FOR BATTERY THRESHOLD
     if (meter.battery_level <= lowBattThreshold) {
-      message += '\nLow Battery';
+      messages.push('Low Battery');
     }
 
     if (message != '') {
@@ -53,15 +58,15 @@ export class ScreenerService {
           console.log(user);
           this.mailerService.sendNotification(
             {
-              header: `Water Meter (${meter.meterName}) Alert`,
+              header: `Water Meter (${meterName}) Alert`,
               firstName: `${user.first_name}`,
               dateTriggered: triggerDate,
-              message: `${message} (${meter.allowedFlow}L)`,
+              messages: messages,
               siteName: meter.siteName,
-              meterName: meter.meterName,
+              meterName: meterName,
             },
             `${user.email}`,
-            `Water Meter (${meter.meterName}) Alert`,
+            `Water Meter (${meterName}) Alert`,
           );
         });
       }
