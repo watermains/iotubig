@@ -36,7 +36,7 @@ export class BalanceCheckService {
     private readonly userModel: Model<UserDocument>,
     private readonly mailerService: MailerService,
     private readonly transactionService: TransactionService,
-  ) {}
+  ) { }
   private readonly logger = new Logger(BalanceCheckService.name);
 
   @Cron(
@@ -48,7 +48,7 @@ export class BalanceCheckService {
     },
   )
   async triggerBalanceCheck() {
-    this.logger.debug('triggerBalanceCheck');
+    this.logger.debug('CRON: triggerBalanceCheck');
     const organizations = await this.orgModel.find();
 
     //get first day of last month

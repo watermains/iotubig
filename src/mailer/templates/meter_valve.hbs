@@ -1,0 +1,23 @@
+<div style="font-family: Arial, sans-serif; padding: 0 24px">
+  <img
+    src="https://s3.ap-northeast-1.amazonaws.com/dev-admin.dev.watermains.net-ap-northeast-1-898969037144/iotubig_logo.png"
+    alt="logo" />
+  <h2><b>{{header}}</b></h2>
+  <p>Hi {{firstName}},</p>
+  <p>This is to inform you that your water meter {{meterName}} in {{siteName}} has been {{meterStatus}} as of
+    {{dateTriggered}}.
+  </p>
+  {{#each messages}}
+  <p><b>{{this}}</b></p>
+  <br />
+  {{/each}}
+  <p>For other concerns, please contact your Administrator.</p>
+  <br />
+  <p>Best regards,<br />IoTubig Team</p>
+  <hr />
+  &lt;Organization&gt;<br />&lt;Office Address&gt;
+  <p>
+    You received this email because this email was used to register an IoTubig
+    account.
+  </p>
+</div>

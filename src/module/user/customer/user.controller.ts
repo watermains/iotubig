@@ -41,6 +41,7 @@ export class UserController {
     return this.userService.login(body);
   }
 
+  //TODO REMOVE THIS VULNERABILITY FOR PROD
   @Post('auth/mail')
   @UseInterceptors(ResponseInterceptor)
   mailMe(@Body() body: EmailDto) {

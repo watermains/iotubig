@@ -14,7 +14,7 @@ export class MeterConsumptionService {
     private readonly meterConsRepo: MeterConsumptionRepository,
     private readonly userRepo: UserRepository,
     private readonly screenerService: ScreenerService,
-  ) {}
+  ) { }
 
   async create(organization_id: string, dto: CreateMeterConsumptionDto) {
     const config = await this.configRepo.findOne(organization_id);
@@ -22,6 +22,7 @@ export class MeterConsumptionService {
 
     delete dto.last_uplink;
     delete dto.consumed_at;
+    const oldMeter = await this.meterRepo.findByDevEui(dto.dev_eui);
     const meter = await this.meterRepo.upsertMeterViaConsumption(dto);
 
     const users = await this.userRepo.isOwned(meter.meter_name);
@@ -37,6 +38,10 @@ export class MeterConsumptionService {
           siteName: meter.site_name,
           meterName: meter.meter_name,
           allowedFlow: meter.allowed_flow,
+          status: {
+            isChanged: meter.valve_status !== oldMeter.valve_status,
+            current: meter.valve_status,
+          },
         },
         users,
       );
