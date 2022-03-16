@@ -25,10 +25,11 @@ export class IotService {
 
   //TODO
   sendOverdrawUpdate(
+    device_id: string,
     dto: UpdateConfigurationDto,
   ): Observable<AxiosResponse<unknown>> {
     return this.send(
-      'db7e0725-647d-4b54-bd66-0ee6c352feab',
+      device_id,
       'SOVERDRAW',
       { data: dto.overdraw_limitation ?? 0 },
       1,
@@ -36,10 +37,11 @@ export class IotService {
   }
 
   sendLowBalanceUpdate(
+    device_id: string,
     dto: UpdateConfigurationDto,
   ): Observable<AxiosResponse<unknown>> {
     return this.send(
-      'db7e0725-647d-4b54-bd66-0ee6c352feab',
+      device_id,
       'SLOWBAL',
       { data: dto.water_alarm_threshold ?? 0 },
       1,

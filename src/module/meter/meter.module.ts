@@ -33,7 +33,7 @@ import { MeterService } from './meter.service';
     ]),
     forwardRef(() => UserModule),
     forwardRef(() => TransactionModule),
-    ConfigurationModule,
+    forwardRef(() => ConfigurationModule),
     HttpModule,
     ScreenerModule,
   ],

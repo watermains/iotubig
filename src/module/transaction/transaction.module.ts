@@ -14,7 +14,7 @@ import { TransactionService } from './transaction.service';
 
 @Module({
   imports: [
-    ConfigurationModule,
+    forwardRef(() => ConfigurationModule),
     forwardRef(() => MeterModule),
     UserModule,
     MongooseModule.forFeatureAsync([
