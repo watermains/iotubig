@@ -108,7 +108,8 @@ export class MailerService {
   }
 
   private fetchTemplate(name) {
-    return fs.readFileSync(path.resolve('src/mailer/templates/', name));
+    const mailerPath = path.join(__dirname, '/templates/');
+    return fs.readFileSync(path.resolve(mailerPath, name));
   }
 
   private sendEmailWithTemplateOptions(

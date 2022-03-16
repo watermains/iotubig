@@ -22,6 +22,7 @@ export interface IMeter {
   upsertMeterViaConsumption(dto: CreateMeterConsumptionDto);
   findByDevEui(dev_eui: string);
   findMeter(whereClause: object);
+  findMetersWhere(whereClause: object);
   seed(organization: OrganizationDocument, meterData: CreateMeterDto[]);
   findStats(): Promise<Stats>;
   removeMeter(devEUI: string);
@@ -153,6 +154,10 @@ export class MeterRepository implements IMeter {
     const total_rows = await this.meterModel.find(query).count();
 
     return new PaginatedData(meters, total_rows);
+  }
+
+  async findMetersWhere(query: object) {
+    return await this.meterModel.find(query).lean();
   }
 
   async generateReports(configuration: ConfigurationDocument) {

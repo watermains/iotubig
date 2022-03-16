@@ -54,6 +54,10 @@ export class MeterService {
     return meter;
   }
 
+  async findOrgMeters(organization_id: string) {
+    return this.repo.findMetersWhere({ organization_id });
+  }
+
   async findAll(
     organization_id: string,
     offset: number,
