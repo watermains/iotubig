@@ -1,5 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs/internal/Observable';
 import { map } from 'rxjs/operators';
@@ -17,6 +21,7 @@ export class BalanceUpdateDTO {
 @Injectable()
 export class IotService {
   constructor(private httpService: HttpService) {}
+  private readonly logger = new Logger(IotService.name);
 
   //TODO
   sendOverdrawUpdate(
@@ -74,6 +79,12 @@ export class IotService {
       })
       .pipe(
         map((obs) => {
+          if (obs.data.errorType) {
+            this.logger.error(obs.data);
+            throw new InternalServerErrorException();
+          }
+
+          this.logger.debug(obs.data);
           return obs.data;
         }),
       );
