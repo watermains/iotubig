@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { from, lastValueFrom, tap } from 'rxjs';
 import { IotService } from 'src/iot/iot.service';
-import { MeterRepository } from '../meter/meter.repository';
+import { MeterService } from '../meter/meter.service';
 import { ConfigurationRepository } from './configuration.repository';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 @Injectable()
 export class ConfigurationService {
   constructor(
     private readonly configurationRepository: ConfigurationRepository,
-    private readonly meterRepo: MeterRepository,
+    private readonly meterService: MeterService,
     private readonly iotService: IotService,
   ) {}
 
@@ -23,13 +24,44 @@ export class ConfigurationService {
     organization_id: string,
     updateConfigurationDto: UpdateConfigurationDto,
   ): Promise<unknown> {
-    
-    const configuration = await this.configurationRepository.update(
-      organization_id,
-      updateConfigurationDto,
+    return lastValueFrom(
+      from(
+        (async () => {
+          const configuration = await this.configurationRepository.update(
+            organization_id,
+            updateConfigurationDto,
+          );
+
+          return {
+            response: configuration,
+            message: 'Settings saved successfully',
+          };
+        })(),
+      ).pipe(
+        tap({
+          complete: async () => {
+            const meters = await this.meterService.findOrgMeters(
+              organization_id,
+            );
+
+            meters.forEach((meter) => {
+              lastValueFrom(
+                this.iotService.sendOverdrawUpdate(
+                  meter.wireless_device_id,
+                  updateConfigurationDto,
+                ),
+              );
+
+              lastValueFrom(
+                this.iotService.sendLowBalanceUpdate(
+                  meter.wireless_device_id,
+                  updateConfigurationDto,
+                ),
+              );
+            });
+          },
+        }),
+      ),
     );
-
-
-    return { response: configuration, message: 'Settings saved successfully' };
   }
 }
