@@ -120,6 +120,7 @@ export class BalanceCheckService {
 
         const startConsume = await this.consumptionModel.findOne({
           dev_eui: val.dev_eui,
+          last_uplink: true,
           consumed_at: {
             $gte: startDate,
             $lt: startDatePlus,
@@ -127,6 +128,7 @@ export class BalanceCheckService {
         });
         const endConsume = await this.consumptionModel.findOne({
           dev_eui: val.dev_eui,
+          last_uplink: true,
           consumed_at: {
             $gte: endDate,
             $lt: endDatePlus,
