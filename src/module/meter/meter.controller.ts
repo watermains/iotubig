@@ -12,10 +12,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { lastValueFrom, map } from 'rxjs';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
-import { IotService } from 'src/iot/iot.service';
 import {
   DocumentInterceptor,
   MutableDocumentInterceptor,
@@ -36,10 +34,7 @@ import { MeterService } from './meter.service';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meter')
 export class MeterController {
-  constructor(
-    private readonly meterService: MeterService,
-    private readonly iotService: IotService,
-  ) {}
+  constructor(private readonly meterService: MeterService) {}
 
   @Post()
   @UseInterceptors(ResponseInterceptor)
@@ -50,22 +45,7 @@ export class MeterController {
   @Post('/valve')
   @UseInterceptors(ResponseInterceptor)
   async changeValve(@Req() req, @Body() dto: UpdateMeterValveDto) {
-    const meter = await this.meterService.findMeterDetails(
-      req.user.id,
-      req.user.org_id,
-      undefined,
-      dto.dev_eui,
-    );
-
-    return lastValueFrom(
-      this.iotService
-        .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
-        .pipe(
-          map(async (obs) => {
-            return this.meterService.updateValve(dto);
-          }),
-        ),
-    );
+    return this.meterService.changeValve(req.user.id, req.user.org_id, dto);
   }
 
   @Get()

@@ -1,8 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as moment from 'moment';
+import { lastValueFrom, map } from 'rxjs';
+import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
 import { MailerService } from 'src/mailer/mailer.service';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { MeterRepository } from '../meter/meter.repository';
+import { MeterService } from '../meter/meter.service';
 import { UserRepository } from '../user/user.repository';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionRepository } from './transaction.repository';
@@ -15,6 +18,8 @@ export class TransactionService {
     private readonly configRepo: ConfigurationRepository,
     private readonly mailerService: MailerService,
     private readonly userRepo: UserRepository,
+    private readonly iotService: IotService,
+    private readonly meterService: MeterService,
   ) {}
 
   async create(
@@ -92,5 +97,31 @@ export class TransactionService {
 
   async generateReports(startDate: Date, endDate: Date) {
     return this.repo.generateReports(startDate, endDate);
+  }
+
+  async sendBalanceUpdate(
+    user_id: string,
+    organization_id: string,
+    dto: CreateTransactionDto,
+  ) {
+    const meter = await this.meterService.findMeterDetails(
+      user_id,
+      organization_id,
+      undefined,
+      dto.dev_eui,
+    );
+
+    return lastValueFrom(
+      this.iotService
+        .sendBalanceUpdate(
+          meter.document.wireless_device_id,
+          new BalanceUpdateDTO(dto.amount.toString()),
+        )
+        .pipe(
+          map((obs) => {
+            return this.create(user_id, organization_id, dto);
+          }),
+        ),
+    );
   }
 }

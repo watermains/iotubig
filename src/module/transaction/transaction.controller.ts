@@ -11,17 +11,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { lastValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
-import { BalanceUpdateDTO, IotService } from 'src/iot/iot.service';
 import {
   AggregatedDocumentsInterceptor,
   ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
-import { MeterService } from '../meter/meter.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { GenerateTransactionReportsDto } from './dto/generate-transaction-reports.dto';
 import { GetTransactionsTotalAmountsDto } from './dto/get-transactions-total-amounts.dto';
@@ -34,37 +30,15 @@ import { TransactionService } from './transaction.service';
 @Roles(RoleTypes.admin)
 @Controller('transactions')
 export class TransactionController {
-  constructor(
-    private readonly transactionService: TransactionService,
-    private readonly iotService: IotService,
-    private readonly meterService: MeterService,
-  ) { }
+  constructor(private readonly transactionService: TransactionService) {}
 
   @Post()
   @UseInterceptors(ResponseInterceptor)
   async create(@Req() request: any, @Body() dto: CreateTransactionDto) {
-    const meter = await this.meterService.findMeterDetails(
+    return this.transactionService.sendBalanceUpdate(
       request.user.id,
       request.user.org_id,
-      undefined,
-      dto.dev_eui,
-    );
-
-    return lastValueFrom(
-      this.iotService
-        .sendBalanceUpdate(
-          meter.document.wireless_device_id,
-          new BalanceUpdateDTO(dto.amount.toString()),
-        )
-        .pipe(
-          map((obs) => {
-            return this.transactionService.create(
-              request.user.id,
-              request.user.org_id,
-              dto,
-            );
-          }),
-        ),
+      dto,
     );
   }
 
