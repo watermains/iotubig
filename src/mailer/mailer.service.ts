@@ -1,8 +1,7 @@
+import { SendEmailCommand, SES } from '@aws-sdk/client-ses';
 import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import Handlebars from 'handlebars';
-import * as temp from 'node-ses';
-import { Client } from 'node-ses';
 import * as path from 'path';
 
 export interface EmailOptions {
@@ -34,12 +33,14 @@ export interface CreditNotificationOptions extends NotificationOptions {
 }
 @Injectable()
 export class MailerService {
-  private readonly ses: Client;
+  private readonly ses: SES;
   constructor() {
-    this.ses = temp.createClient({
-      key: process.env.MAIL_API_KEY,
-      amazon: `https://email.${process.env.REGION}.amazonaws.com`,
-      secret: process.env.SECRET,
+    this.ses = new SES({
+      credentials: {
+        accessKeyId: process.env.MAIL_API_KEY,
+        secretAccessKey: process.env.SECRET,
+      },
+      region: process.env.REGION,
     });
   }
   private readonly logger = new Logger(MailerService.name);
@@ -144,21 +145,39 @@ export class MailerService {
       delete email.message;
     }
 
-    const send = new Promise((resolve, reject) => {
-      this.ses.sendEmail(email, (err, data, res) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(res);
-      });
-    });
+    const input = {
+      Source: options.from,
+      Destination: {
+        ToAddresses: [options.to],
+      },
+      Message: {
+        Body: {
+          Html: {
+            Data: options.html,
+          },
+        },
+        Subject: {
+          Data: options.subject,
+        },
+      },
+    };
 
-    send
-      .then((val) => {
-        // console.log(val);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    this.ses.sendEmail(input);
+    // const send = new Promise((resolve, reject) => {
+    //   this.ses.sendEmail(a, (err, data, res) => {
+    //     if (err) {
+    //       return reject(err);
+    //     }
+    //     return resolve(res);
+    //   });
+    // });
+
+    // send
+    //   .then((val) => {
+    //     // console.log(val);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   }
 }

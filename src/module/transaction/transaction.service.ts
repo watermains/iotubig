@@ -115,6 +115,7 @@ export class TransactionService {
       this.iotService
         .sendBalanceUpdate(
           meter.document.wireless_device_id,
+          dto.amount > 0 ? true : false,
           new BalanceUpdateDTO(dto.amount.toString()),
         )
         .pipe(

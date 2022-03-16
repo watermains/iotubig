@@ -26,6 +26,7 @@
     "migrate:down": "migrate --migrations-dir=\"./src/database/migrations\" --compiler=\"ts:./src/database/migrations-utils/ts-compiler.js\" down"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.54.1",
     "@mongoosejs/double": "^0.2.0",
     "@nestjs/axios": "^0.0.4",
     "@nestjs/common": "^8.0.0",
@@ -48,7 +49,6 @@
     "mongodb": "^4.4.1",
     "mongoose": "^6.1.8",
     "mongoose-sequence": "^5.3.1",
-    "node-ses": "^3.0.3",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
     "reflect-metadata": "^0.1.13",
@@ -84,7 +84,8 @@
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "webpack": "^5.70.0"
   },
   "jest": {
     "moduleFileExtensions": [
