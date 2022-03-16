@@ -23,6 +23,7 @@ import {
 import { MailerModule } from './mailer/mailer.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronModule } from './cron/cron.module';
+import { LogModule } from './log/log.module';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -42,6 +43,7 @@ import { CronModule } from './cron/cron.module';
     ScreenerModule,
     CronModule,
     AuthModule,
+    LogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

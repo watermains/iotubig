@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Log, LogDocument } from './entities/log.entity';
+import { Log, LogDocument } from './entities/log.schema';
+import { LogRepository } from './log.repository';
 
 export enum Action {
   open = 'open valve',
@@ -10,18 +11,23 @@ export enum Action {
   deduct = 'deduct',
 }
 
+export class LogData {
+  meter_name: string;
+  action: string;
+  data: string;
+  created_by: string;
+  organization_id: string;
+}
+
 @Injectable()
 export class LogService {
-  constructor(@InjectModel(Log.name) private log: Model<LogDocument>) {}
+  constructor(private readonly repo: LogRepository) {}
 
-  async findAll(): Promise<Log[]> {
-    return await this.log.find().limit(50);
+  async findAll(organization_id: string): Promise<Log[]> {
+    return await this.repo.findLogs(organization_id);
   }
 
-  async create(meter_name: string, action: Action) {
-    await this.log.create({
-      meter_name,
-      action,
-    });
+  async create(data: LogData) {
+    return await this.repo.createLog(data);
   }
 }
