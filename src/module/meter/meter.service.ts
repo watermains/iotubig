@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { from, lastValueFrom, tap } from 'rxjs';
+import { from, lastValueFrom, map, tap } from 'rxjs';
+import { IotService } from 'src/iot/iot.service';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { ScreenerService } from '../screener/screener.service';
 import { TransactionRepository } from '../transaction/transaction.repository';
@@ -20,7 +21,8 @@ export class MeterService {
     private readonly screenerService: ScreenerService,
     private readonly repo: MeterRepository,
     private readonly transactionRepo: TransactionRepository,
-  ) { }
+    private readonly iotService: IotService,
+  ) {}
 
   async create(dto: CreateMeterDto) {
     await this.repo.createMeter(dto);
@@ -212,5 +214,28 @@ export class MeterService {
   async generateReports(organization_id: string) {
     const configuration = await this.configRepo.findOne(organization_id);
     return this.repo.generateReports(configuration);
+  }
+
+  async changeValve(
+    user_id: string,
+    organization_id: string,
+    dto: UpdateMeterValveDto,
+  ) {
+    const meter = await this.findMeterDetails(
+      user_id,
+      organization_id,
+      undefined,
+      dto.dev_eui,
+    );
+
+    return lastValueFrom(
+      this.iotService
+        .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
+        .pipe(
+          map(async (obs) => {
+            return this.updateValve(dto);
+          }),
+        ),
+    );
   }
 }
