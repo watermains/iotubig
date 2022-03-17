@@ -23,11 +23,12 @@ export class IotService {
   constructor(private httpService: HttpService) {}
   private readonly logger = new Logger(IotService.name);
 
-  //TODO
   sendOverdrawUpdate(
     device_id: string,
     dto: UpdateConfigurationDto,
   ): Observable<AxiosResponse<unknown>> {
+    //TODO convert peso to liter
+    //TODO overdraw should be converted to its absolute value
     return this.send(
       device_id,
       'SOVERDRAW',
@@ -40,6 +41,7 @@ export class IotService {
     device_id: string,
     dto: UpdateConfigurationDto,
   ): Observable<AxiosResponse<unknown>> {
+    //TODO convert peso to liter
     return this.send(
       device_id,
       'SLOWBAL',
@@ -50,11 +52,13 @@ export class IotService {
 
   sendBalanceUpdate(
     device_id: string,
+    isTopup: boolean,
     dto: BalanceUpdateDTO,
   ): Observable<AxiosResponse<unknown>> {
+    //TODO convert peso to liter
     return this.send(
       device_id,
-      isPositive(dto.balance) ? 'SBALADD' : 'SBALDEDUCT',
+      isTopup ? 'SBALADD' : 'SBALDEDUCT',
       { data: dto.balance },
       1,
     );
