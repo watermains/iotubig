@@ -165,7 +165,7 @@ export class TransactionRepository implements ITransaction {
   }
 
   async generateReports(startDate: Date, endDate: Date) {
-    const data = await this.transactionModel.aggregate([
+    const transactions = await this.transactionModel.aggregate([
       {
         $lookup: {
           from: 'meters',
@@ -185,9 +185,6 @@ export class TransactionRepository implements ITransaction {
           volume_cubic_meter: {
             $divide: ['$volume', 1000],
           },
-          rate: {
-            $toString: '$rate',
-          },
           meter: { $arrayElemAt: ['$meter', 0] },
         },
       },
@@ -205,6 +202,11 @@ export class TransactionRepository implements ITransaction {
         },
       },
     ]);
+
+    const data = transactions.map((transaction) => {
+      const model = new this.transactionModel(transaction);
+      return { ...transaction, ...model.toJSON() };
+    });
 
     const fields = [
       {
