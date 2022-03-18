@@ -40,40 +40,52 @@ export class ConfigurationService {
       ).pipe(
         tap({
           complete: async () => {
-            const config = await this.configurationRepository.findOne(
-              organization_id,
-            );
-            const meters = await this.meterService.findOrgMeters(
-              organization_id,
-            );
+            if (
+              updateConfigurationDto.overdraw_limitation ||
+              updateConfigurationDto.water_alarm_threshold
+            ) {
+              const config = await this.configurationRepository.findOne(
+                organization_id,
+              );
+              const meters = await this.meterService.findOrgMeters(
+                organization_id,
+              );
 
-            meters.forEach((meter) => {
-              const rate = config.getConsumptionRate(meter.consumer_type);
+              meters.forEach((meter) => {
+                const rate = config.getConsumptionRate(meter.consumer_type);
 
-              if (updateConfigurationDto.overdraw_limitation) {
-                const overDrawVolume =
-                  config.overdraw_limitation / meter.getWaterMeterRate(rate);
+                if (
+                  updateConfigurationDto.overdraw_limitation &&
+                  meter.wireless_device_id
+                ) {
+                  const overDrawVolume =
+                    config.overdraw_limitation / meter.getWaterMeterRate(rate);
 
-                lastValueFrom(
-                  this.iotService.sendOverdrawUpdate(
-                    meter.wireless_device_id,
-                    overDrawVolume,
-                  ),
-                );
-              }
+                  lastValueFrom(
+                    this.iotService.sendOverdrawUpdate(
+                      meter.wireless_device_id,
+                      overDrawVolume,
+                    ),
+                  );
+                }
 
-              if (updateConfigurationDto.water_alarm_threshold) {
-                const lowVolume =
-                  config.water_alarm_threshold / meter.getWaterMeterRate(rate);
+                if (
+                  updateConfigurationDto.water_alarm_threshold &&
+                  meter.wireless_device_id
+                ) {
+                  const lowVolume =
+                    config.water_alarm_threshold /
+                    meter.getWaterMeterRate(rate);
 
-                lastValueFrom(
-                  this.iotService.sendLowBalanceUpdate(
-                    meter.wireless_device_id,
-                    lowVolume,
-                  ),
-                );
-              }
-            });
+                  lastValueFrom(
+                    this.iotService.sendLowBalanceUpdate(
+                      meter.wireless_device_id,
+                      lowVolume,
+                    ),
+                  );
+                }
+              });
+            }
           },
         }),
       ),
