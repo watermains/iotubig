@@ -145,15 +145,22 @@ export class TransactionService {
     );
 
     if (meter === undefined) {
-      throw new InternalServerErrorException('No meter found');
+      throw new BadRequestException('No meter found');
     }
 
     const config = await this.configRepo.findOne(organization_id);
     if (meter.document === undefined) {
-      throw new InternalServerErrorException(
-        'No configuration found for this meter.',
-      );
+      throw new BadRequestException('No configuration found for this meter.');
     }
+
+    if (!meter.document.meter_name) {
+      throw new BadRequestException('No meter name found for this meter');
+    }
+
+    if (!meter.document.wireless_device_id) {
+      throw new BadRequestException('No wiress device id found for this meter');
+    }
+
     const rate = config.getConsumptionRate(meter.document.consumer_type);
     const volume = dto.amount / meter.document.getWaterMeterRate(rate);
 
