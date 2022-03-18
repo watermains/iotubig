@@ -49,26 +49,30 @@ export class ConfigurationService {
 
             meters.forEach((meter) => {
               const rate = config.getConsumptionRate(meter.consumer_type);
-              const overDrawVolume =
-                updateConfigurationDto.overdraw_limitation /
-                meter.getWaterMeterRate(rate);
-              const lowVolume =
-                updateConfigurationDto.water_alarm_threshold /
-                meter.getWaterMeterRate(rate);
 
-              lastValueFrom(
-                this.iotService.sendOverdrawUpdate(
-                  meter.wireless_device_id,
-                  overDrawVolume,
-                ),
-              );
+              if (updateConfigurationDto.overdraw_limitation) {
+                const overDrawVolume =
+                  config.overdraw_limitation / meter.getWaterMeterRate(rate);
 
-              lastValueFrom(
-                this.iotService.sendLowBalanceUpdate(
-                  meter.wireless_device_id,
-                  lowVolume,
-                ),
-              );
+                lastValueFrom(
+                  this.iotService.sendOverdrawUpdate(
+                    meter.wireless_device_id,
+                    overDrawVolume,
+                  ),
+                );
+              }
+
+              if (updateConfigurationDto.water_alarm_threshold) {
+                const lowVolume =
+                  config.water_alarm_threshold / meter.getWaterMeterRate(rate);
+
+                lastValueFrom(
+                  this.iotService.sendLowBalanceUpdate(
+                    meter.wireless_device_id,
+                    lowVolume,
+                  ),
+                );
+              }
             });
           },
         }),
