@@ -5,6 +5,7 @@ import * as AutoIncrementFactory from 'mongoose-sequence';
 import { IotService } from 'src/iot/iot.service';
 import { MailerModule } from 'src/mailer/mailer.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
+import { LogModule } from '../log/log.module';
 import { MeterModule } from '../meter/meter.module';
 import { UserModule } from '../user/user.module';
 import { Transaction, TransactionSchema } from './entities/transaction.schema';
@@ -37,6 +38,7 @@ import { TransactionService } from './transaction.service';
     ]),
     HttpModule,
     MailerModule,
+    LogModule,
   ],
   controllers: [TransactionController],
   exports: [

@@ -40,22 +40,33 @@ export class ConfigurationService {
       ).pipe(
         tap({
           complete: async () => {
+            const config = await this.configurationRepository.findOne(
+              organization_id,
+            );
             const meters = await this.meterService.findOrgMeters(
               organization_id,
             );
 
             meters.forEach((meter) => {
+              const rate = config.getConsumptionRate(meter.consumer_type);
+              const overDrawVolume =
+                updateConfigurationDto.overdraw_limitation /
+                meter.getWaterMeterRate(rate);
+              const lowVolume =
+                updateConfigurationDto.water_alarm_threshold /
+                meter.getWaterMeterRate(rate);
+
               lastValueFrom(
                 this.iotService.sendOverdrawUpdate(
                   meter.wireless_device_id,
-                  updateConfigurationDto,
+                  overDrawVolume,
                 ),
               );
 
               lastValueFrom(
                 this.iotService.sendLowBalanceUpdate(
                   meter.wireless_device_id,
-                  updateConfigurationDto,
+                  lowVolume,
                 ),
               );
             });

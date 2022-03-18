@@ -1,4 +1,4 @@
-import { SendEmailCommand, SES } from '@aws-sdk/client-ses';
+import { SES } from '@aws-sdk/client-ses';
 import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import Handlebars from 'handlebars';
@@ -162,7 +162,14 @@ export class MailerService {
       },
     };
 
-    this.ses.sendEmail(input);
+    this.ses
+      .sendEmail(input)
+      .then((val) => {
+        this.logger.debug(val);
+      })
+      .catch((err) => {
+        this.logger.error(err);
+      });
     // const send = new Promise((resolve, reject) => {
     //   this.ses.sendEmail(a, (err, data, res) => {
     //     if (err) {

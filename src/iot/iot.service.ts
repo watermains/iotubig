@@ -7,15 +7,10 @@ import {
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs/internal/Observable';
 import { map } from 'rxjs/operators';
-import { UpdateConfigurationDto } from 'src/module/configuration/dto/update-configuration.dto';
 import { UpdateMeterValveDto } from 'src/module/meter/dto/update-meter-valve.dto';
-import { isPositive } from 'src/validation';
 
 export class BalanceUpdateDTO {
   balance: string;
-  constructor(balance) {
-    this.balance = balance;
-  }
 }
 
 @Injectable()
@@ -25,27 +20,27 @@ export class IotService {
 
   sendOverdrawUpdate(
     device_id: string,
-    dto: UpdateConfigurationDto,
+    overdraw_limitation: number,
   ): Observable<AxiosResponse<unknown>> {
     //TODO convert peso to liter
     //TODO overdraw should be converted to its absolute value
     return this.send(
       device_id,
       'SOVERDRAW',
-      { data: dto.overdraw_limitation ?? 0 },
+      { data: overdraw_limitation ?? 0 },
       1,
     );
   }
 
   sendLowBalanceUpdate(
     device_id: string,
-    dto: UpdateConfigurationDto,
+    water_alarm_threshold: number,
   ): Observable<AxiosResponse<unknown>> {
     //TODO convert peso to liter
     return this.send(
       device_id,
       'SLOWBAL',
-      { data: dto.water_alarm_threshold ?? 0 },
+      { data: water_alarm_threshold ?? 0 },
       1,
     );
   }
