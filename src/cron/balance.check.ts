@@ -1,14 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { constants } from 'fs';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
-import { MailerService } from 'src/mailer/mailer.service';
-import {
-  Configuration,
-  ConfigurationDocument,
-} from 'src/module/configuration/entities/configuration.schema';
+import { ConfigurationRepository } from 'src/module/configuration/configuration.repository';
 import {
   MeterConsumption,
   MeterConsumptionDocument,
@@ -26,17 +21,15 @@ import { User, UserDocument } from 'src/module/user/entities/user.schema';
 export class BalanceCheckService {
   constructor(
     @InjectModel(Meter.name) private readonly meterModel: Model<MeterDocument>,
-    @InjectModel(Configuration.name)
-    private readonly configModel: Model<ConfigurationDocument>,
     @InjectModel(Organization.name)
     private readonly orgModel: Model<OrganizationDocument>,
     @InjectModel(MeterConsumption.name)
     private readonly consumptionModel: Model<MeterConsumptionDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
-    private readonly mailerService: MailerService,
+    private readonly configRepo: ConfigurationRepository,
     private readonly transactionService: TransactionService,
-  ) { }
+  ) {}
   private readonly logger = new Logger(BalanceCheckService.name);
 
   @Cron(
@@ -76,8 +69,7 @@ export class BalanceCheckService {
         iot_organization_id: orgID,
       });
 
-      const config = await this.configModel.findOne({ organization_id: orgID });
-
+      const config = await this.configRepo.findOne(orgID);
       if (!config) {
         this.logger.error(`no config`);
         return;
@@ -159,11 +151,17 @@ export class BalanceCheckService {
             const normalizedDeductionAmount = Math.round(
               rate * (minimum - deltaFlow) * -1,
             );
-            this.transactionService.create('-1', orgID, {
-              amount: normalizedDeductionAmount,
-              iot_meter_id: val.meter_name,
-              dev_eui: val.dev_eui,
-            });
+            //TODO replace ID;
+            this.transactionService.create(
+              '-1',
+              orgID,
+              {
+                amount: normalizedDeductionAmount,
+                iot_meter_id: val.meter_name,
+                dev_eui: val.dev_eui,
+              },
+              config,
+            );
             this.logger.debug(
               `FOR DEDUCTION: ${val.meter_name} with DEV EUI: ${val.dev_eui} with AMOUNT: ${normalizedDeductionAmount}`,
             );

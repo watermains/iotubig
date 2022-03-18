@@ -19,11 +19,11 @@ import {
   UserModule,
   ScreenerModule,
   AuthModule,
+  LogModule,
 } from './module';
 import { MailerModule } from './mailer/mailer.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronModule } from './cron/cron.module';
-import { LogModule } from './log/log.module';
 @Module({
   imports: [
     ScheduleModule.forRoot(),

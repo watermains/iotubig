@@ -6,3 +6,4 @@ export { TransactionModule } from './transaction/transaction.module';
 export { UserModule } from './user/user.module';
 export { ScreenerModule } from './screener/screener.module';
 export { AuthModule } from './auth/auth.module';
+export { LogModule } from './log/log.module';

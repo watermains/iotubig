@@ -14,6 +14,7 @@ export class LogRepository implements ILog {
   constructor(@InjectModel(Log.name) private log: Model<LogDocument>) {}
 
   async findLogs(organization_id: string) {
+    console.log(organization_id);
     return await this.log.find({ organization_id });
   }
 
