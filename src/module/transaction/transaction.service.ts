@@ -35,7 +35,6 @@ export class TransactionService {
     dto: CreateTransactionDto,
     config: Configuration,
   ) {
-    const config = await this.configRepo.findOne(organization_id);
     const meter = await this.meterRepo.findByDevEui(dto.dev_eui);
     const transaction = await this.repo.create(user_id, dto, meter, config);
     if (transaction === undefined) {
