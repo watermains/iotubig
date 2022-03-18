@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
+
 import { MailerService } from 'src/mailer/mailer.service';
 import { Configuration } from '../configuration/entities/configuration.schema';
 import { Meter } from '../meter/entities/meter.schema';
@@ -64,7 +65,7 @@ export class ScreenerService {
       message = `Low Balance`;
     }
     if (message != '') {
-      message += `(${meter.allowedFlow}L)`;
+      message += ` (${meter.allowedFlow}L)`;
       messages.push(message);
     }
 
@@ -75,12 +76,12 @@ export class ScreenerService {
       } < ${lowBattThreshold} = ${meter.battery_level < lowBattThreshold}`,
     );
     if (meter.battery_level <= lowBattThreshold) {
-      messages.push('Low Battery');
+      messages.push(`Low Battery ${meter.battery_level}%`);
     }
 
     if (messages.length != 0) {
       if (users !== undefined && users.length > 0) {
-        const triggerDate = moment().format('MMMM Do YYYY, h:mm:ss a');
+        const triggerDate = moment().tz('Asia/Manila').format('MMMM Do YYYY, h:mm:ss a');
 
         users.forEach((user) => {
           this.mailerService.sendNotification(
