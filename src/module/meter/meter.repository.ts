@@ -157,7 +157,7 @@ export class MeterRepository implements IMeter {
   }
 
   async findMetersWhere(query: object) {
-    return await this.meterModel.find(query).lean();
+    return await this.meterModel.find(query);
   }
 
   async generateReports(configuration: ConfigurationDocument) {

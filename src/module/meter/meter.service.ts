@@ -63,7 +63,7 @@ export class MeterService {
   }
 
   async findOrgMeters(organization_id: string) {
-    return this.repo.findMetersWhere({ organization_id });
+    return this.repo.findMetersWhere({ iot_organization_id: organization_id });
   }
 
   async findAll(
