@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { from, lastValueFrom, map, tap } from 'rxjs';
 import { IotService } from 'src/iot/iot.service';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
+import { Action, LogService } from '../log/log.service';
 import { ScreenerService } from '../screener/screener.service';
 import { TransactionRepository } from '../transaction/transaction.repository';
 import { UserRepository } from '../user/user.repository';
@@ -22,6 +27,7 @@ export class MeterService {
     private readonly repo: MeterRepository,
     private readonly transactionRepo: TransactionRepository,
     private readonly iotService: IotService,
+    private readonly logService: LogService,
   ) {}
 
   async create(dto: CreateMeterDto) {
@@ -228,12 +234,30 @@ export class MeterService {
       dto.dev_eui,
     );
 
+    const data = {};
+
     return lastValueFrom(
       this.iotService
         .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
         .pipe(
           map(async (obs) => {
-            return this.updateValve(dto);
+            const response = await this.repo.updateValve(dto);
+            this.logService.create({
+              action: dto.is_open ? Action.open : Action.close,
+              meter_name: meter.document.meter_name,
+              data: data.toString(),
+              created_by: user_id,
+              organization_id,
+            });
+            if (response === undefined) {
+              throw new InternalServerErrorException(
+                'Meter opening/closing failed. Contact your administrator.',
+              );
+            }
+            return {
+              response,
+              message: 'Meter valve status updated successfully',
+            };
           }),
         ),
     );
