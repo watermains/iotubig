@@ -245,7 +245,7 @@ export class MeterService {
             this.logService.create({
               action: dto.is_open ? Action.open : Action.close,
               meter_name: meter.document.meter_name,
-              data: data.toString(),
+              data: JSON.stringify(data),
               created_by: user_id,
               organization_id,
             });
