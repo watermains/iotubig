@@ -44,6 +44,7 @@ export class TransactionService {
     }
 
     if (transaction !== undefined) {
+      //TODO should we update instantly or not?
       this.meterRepo.updateFlow(meter.dev_eui, transaction.volume);
 
       const data = {

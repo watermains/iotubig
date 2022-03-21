@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MailerModule } from 'src/mailer/mailer.module';
 import { MailerService } from 'src/mailer/mailer.service';
-import { TransactionModule } from 'src/module';
+import { ConfigurationModule, TransactionModule } from 'src/module';
 import {
   Configuration,
   ConfigurationSchema,
@@ -36,7 +36,8 @@ import { CronService } from './cron.service';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     TransactionModule,
     MailerModule,
+    ConfigurationModule,
   ],
-  // providers: [BalanceCheckService],
+  providers: [BalanceCheckService],
 })
 export class CronModule { }

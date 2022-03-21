@@ -3,7 +3,6 @@ import * as moment from 'moment-timezone';
 
 import { MailerService } from 'src/mailer/mailer.service';
 import { Configuration } from '../configuration/entities/configuration.schema';
-import { Meter } from '../meter/entities/meter.schema';
 import { MeterStatus } from '../meter/enum/meter.status.enum';
 import { UserDocument } from '../user/entities/user.schema';
 
@@ -14,7 +13,7 @@ export interface MeterStatusInfo {
 export interface MeterScreenerInfo {
   perRate: number;
   allowedFlow: number;
-  battery_level: number;
+  batteryLevel: number;
   siteName: string;
   meterName: string;
   status: MeterStatusInfo;
@@ -72,16 +71,18 @@ export class ScreenerService {
     //CHECK FOR BATTERY THRESHOLD
     this.logger.debug(
       `CHECK LOW BATTERY THRESHOLD ${
-        meter.battery_level
-      } < ${lowBattThreshold} = ${meter.battery_level < lowBattThreshold}`,
+        meter.batteryLevel
+      } < ${lowBattThreshold} = ${meter.batteryLevel < lowBattThreshold}`,
     );
-    if (meter.battery_level <= lowBattThreshold) {
-      messages.push(`Low Battery ${meter.battery_level}%`);
+    if (meter.batteryLevel <= lowBattThreshold) {
+      messages.push(`Low Battery ${meter.batteryLevel}%`);
     }
 
     if (messages.length != 0) {
       if (users !== undefined && users.length > 0) {
-        const triggerDate = moment().tz('Asia/Manila').format('MMMM Do YYYY, h:mm:ss a');
+        const triggerDate = moment()
+          .tz('Asia/Manila')
+          .format('MMMM Do YYYY, h:mm:ss a');
 
         users.forEach((user) => {
           this.mailerService.sendNotification(
@@ -109,15 +110,19 @@ export class ScreenerService {
         }
 
         let meterStatus = '';
+        let header = '';
         switch (status) {
           case MeterStatus.open:
             meterStatus = 'opened';
+            header = `Water Meter (${meterName}) Open`;
             break;
           case MeterStatus.close:
             meterStatus = 'closed';
+            header = `Water Meter (${meterName}) Closed`;
             break;
           default:
             meterStatus = '';
+            header = `Water Meter (${meterName})`;
             break;
         }
 
@@ -128,7 +133,7 @@ export class ScreenerService {
         users.forEach((user) => {
           this.mailerService.sendMeterStatusNotification(
             {
-              header: `Water Meter (${meterName}) Alert`,
+              header: header,
               firstName: `${user.first_name}`,
               dateTriggered: triggerDate,
               messages: [],
@@ -137,7 +142,7 @@ export class ScreenerService {
               meterStatus,
             },
             `${user.email}`,
-            `Water Meter (${meterName}) Alert`,
+            header,
           );
         });
       }
