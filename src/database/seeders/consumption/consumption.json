@@ -11,7 +11,8 @@
   "hall_fault": 0,
   "mag_fault": 0,
   "frame_id": 1,
-  "consumed_at": "2022-02-01T01:36:49.454Z"
+  "consumed_at": "2022-02-01T01:36:49.454Z",
+  "last_uplink": true
 },{
   "dev_eui": "340001-1234",
   "wireless_device_id": "577800001",
@@ -24,7 +25,8 @@
   "hall_fault": 0,
   "mag_fault": 0,
   "frame_id": 1,
-  "consumed_at": "2022-02-28T01:36:49.454Z"
+  "consumed_at": "2022-02-28T01:36:49.454Z",
+  "last_uplink": true
 },
 {
   "dev_eui": "440001-1234",
@@ -38,7 +40,8 @@
   "hall_fault": 0,
   "mag_fault": 0,
   "frame_id": 1,
-  "consumed_at": "2022-02-28T01:36:49.454Z"
+  "consumed_at": "2022-02-28T01:36:49.454Z",
+  "last_uplink": true
 },
 {
 "dev_eui": "540001-1234",
@@ -52,7 +55,8 @@
 "hall_fault": 0,
 "mag_fault": 0,
 "frame_id": 1,
-"consumed_at": "2022-02-01T01:36:49.454Z"
+"consumed_at": "2022-02-01T01:36:49.454Z",
+"last_uplink": true
 },{
 "dev_eui": "540001-1234",
 "wireless_device_id": "577800003",
@@ -65,13 +69,14 @@
 "hall_fault": 0,
 "mag_fault": 0,
 "frame_id": 1,
-"consumed_at": "2022-02-28T01:36:49.454Z"
+"consumed_at": "2022-02-28T01:36:49.454Z",
+"last_uplink": true
 },
 {
 "dev_eui": "640001-1234",
 "wireless_device_id": "577800003",
-"cumulative_flow": "0.1",
-"allowed_flow": "0.1",
+"cumulative_flow": "3500.1",
+"allowed_flow": "3500.1",
 "battery_level": 100,
 "battery_fault": 0,
 "valve_status": 1,
@@ -79,7 +84,8 @@
 "hall_fault": 0,
 "mag_fault": 0,
 "frame_id": 1,
-"consumed_at": "2022-02-01T01:36:49.454Z"
+"consumed_at": "2022-02-01T01:36:49.454Z",
+"last_uplink": true
 },{
 "dev_eui": "640001-1234",
 "wireless_device_id": "577800004",
@@ -92,7 +98,8 @@
 "hall_fault": 0,
 "mag_fault": 0,
 "frame_id": 1,
-"consumed_at": "2022-02-28T01:36:49.454Z"
+"consumed_at": "2022-02-28T01:36:49.454Z",
+"last_uplink": true
 },
 {
 "dev_eui": "840001-1234",
@@ -106,12 +113,13 @@
 "hall_fault": 0,
 "mag_fault": 0,
 "frame_id": 1,
-"consumed_at": "2022-02-01T01:36:49.454Z"
+"consumed_at": "2022-02-01T01:36:49.454Z",
+"last_uplink": true
 },{
 "dev_eui": "840001-1234",
 "wireless_device_id": "577800006",
-"cumulative_flow": "0.1",
-"allowed_flow": "0.1",
+"cumulative_flow": "3146.1",
+"allowed_flow": "3146.1",
 "battery_level": 100,
 "battery_fault": 0,
 "valve_status": 1,
@@ -119,6 +127,7 @@
 "hall_fault": 0,
 "mag_fault": 0,
 "frame_id": 1,
-"consumed_at": "2022-02-28T01:36:49.454Z"
+"consumed_at": "2022-02-28T01:36:49.454Z",
+"last_uplink": true
 }
 ]

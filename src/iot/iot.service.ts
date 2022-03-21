@@ -22,8 +22,6 @@ export class IotService {
     device_id: string,
     overdraw_limitation: number,
   ): Observable<AxiosResponse<unknown>> {
-    //TODO convert peso to liter
-    //TODO overdraw should be converted to its absolute value
     return this.send(
       device_id,
       'SOVERDRAW',
@@ -36,7 +34,6 @@ export class IotService {
     device_id: string,
     water_alarm_threshold: number,
   ): Observable<AxiosResponse<unknown>> {
-    //TODO convert peso to liter
     return this.send(
       device_id,
       'SLOWBAL',
@@ -50,7 +47,6 @@ export class IotService {
     isTopup: boolean,
     dto: BalanceUpdateDTO,
   ): Observable<AxiosResponse<unknown>> {
-    //TODO convert peso to liter
     return this.send(
       device_id,
       isTopup ? 'SBALADD' : 'SBALDEDUCT',

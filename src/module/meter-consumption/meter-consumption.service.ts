@@ -34,7 +34,7 @@ export class MeterConsumptionService {
         config,
         {
           perRate,
-          battery_level: meter.battery_level,
+          batteryLevel: meter.battery_level,
           siteName: meter.site_name,
           meterName: meter.meter_name,
           allowedFlow: meter.allowed_flow,
