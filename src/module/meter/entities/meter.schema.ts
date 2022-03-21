@@ -1,8 +1,9 @@
+import Double from '@mongoosejs/double';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Organization } from 'src/module/organization/entities/organization.schema';
 import { ConsumerType } from '../enum/consumer-type.enum';
 import { MeterStatus } from '../enum/meter.status.enum';
-import Double from '@mongoosejs/double';
 
 export type MeterDocument = Meter & Document;
 
@@ -67,8 +68,8 @@ export class Meter {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'users' })
   iot_user_id: string;
 
-  @Prop()
-  iot_organization_id: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'organization' })
+  iot_organization_id: Organization;
 
   @Prop({ default: 1 })
   frame_id: number;

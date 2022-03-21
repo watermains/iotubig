@@ -6,15 +6,15 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ResponseInterceptor } from 'src/response.interceptor';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { LoginUserDto } from '../dto/login-user.dto';
-import { ForgotPasswordDto } from '../dto/forgot-password.dto';
-import { ResetPasswordDto } from '../dto/reset-password.dto';
-import { UserService } from './user.service';
-import { JwtAuthGuard } from '../../../guard/auth/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { MailerService } from 'src/mailer/mailer.service';
+import { ResponseInterceptor } from 'src/response.interceptor';
+import { JwtAuthGuard } from '../../../guard/auth/jwt-auth.guard';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import { LoginUserDto } from '../dto/login-user.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { UserService } from './user.service';
 
 @ApiTags('User')
 @Controller('user')
@@ -29,11 +29,6 @@ export class UserController {
   async register(@Body() body: CreateUserDto) {
     return this.userService.create(body);
   }
-
-  // @Get(':id')
-  // findOne(@Param() params): any {
-  //   return this.userService.findOne(params.id);
-  // }
 
   @Post('auth/login')
   @UseInterceptors(ResponseInterceptor)

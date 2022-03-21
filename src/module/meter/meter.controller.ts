@@ -37,9 +37,10 @@ export class MeterController {
   constructor(private readonly meterService: MeterService) {}
 
   @Post()
+  @Roles(RoleTypes.superAdmin)
   @UseInterceptors(ResponseInterceptor)
-  create(@Body() dto: CreateMeterDto) {
-    return this.meterService.create(dto);
+  create(@Req() req, @Body() dto: CreateMeterDto) {
+    return this.meterService.create(dto, req.user.role, req.user.org_id);
   }
 
   @Post('/valve')
@@ -49,6 +50,7 @@ export class MeterController {
   }
 
   @Get()
+  @Roles(RoleTypes.superAdmin)
   @UseInterceptors(ResponseInterceptor)
   findAll(@Req() req, @Query() dto: GetMetersDto) {
     return this.meterService.findAll(
@@ -58,12 +60,14 @@ export class MeterController {
       dto.valve_status,
       dto.consumer_type,
       dto.search,
+      req.user.role,
+      req.user.org_id,
     );
   }
 
   @Get('/details')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleTypes.customer)
+  @Roles(RoleTypes.customer, RoleTypes.superAdmin)
   @UseInterceptors(ResponseInterceptor, MutableDocumentInterceptor)
   findOne(@Req() req, @Query() dto: FindMeterDto) {
     return this.meterService.findMeterDetails(
@@ -75,6 +79,7 @@ export class MeterController {
   }
 
   @Get('/stats')
+  @Roles(RoleTypes.superAdmin)
   @UseInterceptors(ResponseInterceptor)
   findStat() {
     return this.meterService.findStats();
@@ -87,9 +92,14 @@ export class MeterController {
   }
 
   @Patch(':devEUI')
+  @Roles(RoleTypes.superAdmin)
   @UseInterceptors(ResponseInterceptor)
-  update(@Param() devEuiDto: MeterDevEUIDto, @Body() dto: UpdateMeterDto) {
-    return this.meterService.updateMeter(devEuiDto.devEUI, dto);
+  update(
+    @Req() req,
+    @Param() devEuiDto: MeterDevEUIDto,
+    @Body() dto: UpdateMeterDto,
+  ) {
+    return this.meterService.updateMeter(devEuiDto.devEUI, dto, req.user.role);
   }
 
   @Delete(':devEUI')

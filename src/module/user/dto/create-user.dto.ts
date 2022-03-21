@@ -33,6 +33,7 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({ type: 'string' })
+  @IsOptional()
   @IsString()
   organization_id: string;
 }

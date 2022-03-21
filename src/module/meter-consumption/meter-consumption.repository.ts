@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import * as moment from 'moment';
+import { Model } from 'mongoose';
 import { CreateMeterDto } from '../meter/dto/create-meter.dto';
 import { OrganizationDocument } from '../organization/entities/organization.schema';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
@@ -6,9 +9,6 @@ import {
   MeterConsumption,
   MeterConsumptionDocument,
 } from './entities/meter-consumption.schema';
-import * as moment from 'moment';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 export interface IMeterConsumption {
   create(dto: CreateMeterConsumptionDto);
@@ -39,10 +39,13 @@ export class MeterConsumptionRepository implements IMeterConsumption {
       consumed_at.$lt = endDate;
     }
 
-    return this.meterConsumptionModel.find({
-      dev_eui: devEUI,
-      consumed_at,
-    });
+    return this.meterConsumptionModel
+      .find({
+        dev_eui: devEUI,
+        consumed_at,
+        last_uplink: true,
+      })
+      .sort({ consumed_at: 1 });
   }
 
   async generateReports(startDate: Date, endDate: Date) {

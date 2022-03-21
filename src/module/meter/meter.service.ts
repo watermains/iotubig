@@ -3,7 +3,9 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import * as Mongoose from 'mongoose';
 import { from, lastValueFrom, map, tap } from 'rxjs';
+import { RoleTypes } from 'src/decorators/roles.decorator';
 import { IotService } from 'src/iot/iot.service';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { Action, LogService } from '../log/log.service';
@@ -30,7 +32,11 @@ export class MeterService {
     private readonly logService: LogService,
   ) {}
 
-  async create(dto: CreateMeterDto) {
+  async create(dto: CreateMeterDto, role: RoleTypes, user_org_id: string) {
+    if (role == RoleTypes.admin) {
+      dto.iot_organization_id = user_org_id;
+    }
+
     await this.repo.createMeter(dto);
     return { message: 'Meter created successfully' };
   }
@@ -62,8 +68,11 @@ export class MeterService {
     return meter;
   }
 
-  async findOrgMeters(organization_id: string) {
-    return this.repo.findMetersWhere({ organization_id });
+  async findOrgMeters(organization_id: string, filter?: object) {
+    return this.repo.findMetersWhere({
+      iot_organization_id: new Mongoose.Types.ObjectId(organization_id),
+      ...filter,
+    });
   }
 
   async findAll(
@@ -73,53 +82,71 @@ export class MeterService {
     valve_status?: MeterStatus,
     consumer_type?: ConsumerType,
     search?: string,
+    role?: RoleTypes,
+    iot_organization_id?: string,
   ) {
     const configuration = await this.configRepo.findOne(organization_id);
 
-    const low_balance_threshold = configuration.water_alarm_threshold;
-    const battery_level_threshold = configuration.battery_level_threshold;
+    const low_balance_threshold = configuration?.water_alarm_threshold;
+    const battery_level_threshold = configuration?.battery_level_threshold;
 
-    const query: {
+    const $match: {
       deleted_at: null;
       valve_status?: MeterStatus;
       consumer_type?: ConsumerType;
       $or?: unknown[];
+      iot_organization_id?: Mongoose.Types.ObjectId;
     } = {
       deleted_at: null,
     };
 
     if (valve_status) {
-      query.valve_status = valve_status;
+      $match.valve_status = Number(valve_status);
     }
 
     if (consumer_type) {
-      query.consumer_type = consumer_type;
+      $match.consumer_type = consumer_type;
     }
 
     if (search) {
       const fields = ['meter_name', 'site_name', 'unit_name', 'dev_eui'];
-      query.$or = fields.map((field) => ({ [field]: new RegExp(search, 'i') }));
+
+      $match.$or = fields.map((field) => ({
+        [field]: new RegExp(search, 'i'),
+      }));
     }
 
-    const paginatedData = await this.repo.findAll(query, offset, pageSize);
+    if (role == RoleTypes.admin && iot_organization_id) {
+      $match.iot_organization_id = new Mongoose.Types.ObjectId(
+        iot_organization_id,
+      );
+    }
+
+    const { data, total_rows } = await this.repo.findAll(
+      $match,
+      offset,
+      pageSize,
+    );
 
     return {
       response: {
-        meters: paginatedData.data.map((meter) => {
-          const consumption_rate = configuration.getConsumptionRate(
+        meters: data.map((meter) => {
+          const consumption_rate = configuration?.getConsumptionRate(
             meter.consumer_type,
           );
 
-          const estimated_balance = meter.getEstimatedBalance(consumption_rate);
+          const model = this.repo.createModel(meter);
+          const estimated_balance = model.getEstimatedBalance(consumption_rate);
 
           return {
-            ...meter.toJSON(),
+            ...meter,
+            ...model.toJSON(),
             estimated_balance,
             low_balance_threshold,
             battery_level_threshold,
           };
         }),
-        total_rows: paginatedData.total_rows,
+        total_rows,
       },
     };
   }
@@ -148,7 +175,7 @@ export class MeterService {
 
     const configuration = await this.configRepo.findOne(organization_id);
 
-    const battery_level_threshold = configuration.battery_level_threshold;
+    const battery_level_threshold = configuration?.battery_level_threshold;
 
     const meter = await this.repo.findMeter(params);
 
@@ -156,7 +183,7 @@ export class MeterService {
       throw new NotFoundException('Meter does not exist');
     }
 
-    const consumption_rate = configuration.getConsumptionRate(
+    const consumption_rate = configuration?.getConsumptionRate(
       meter.consumer_type,
     );
 
@@ -178,7 +205,15 @@ export class MeterService {
     return { response, message: 'Meter valve status updated successfully' };
   }
 
-  async updateMeter(devEUI: string, dto: UpdateMeterDto): Promise<unknown> {
+  async updateMeter(
+    devEUI: string,
+    dto: UpdateMeterDto,
+    role: RoleTypes,
+  ): Promise<unknown> {
+    if (role == RoleTypes.admin) {
+      dto.iot_organization_id = undefined;
+    }
+
     const meter = await this.repo.findByDevEui(devEUI);
     const old_meter_name = meter.meter_name;
 
