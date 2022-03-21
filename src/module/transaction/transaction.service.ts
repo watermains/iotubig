@@ -155,11 +155,17 @@ export class TransactionService {
     }
 
     if (!meter.document.meter_name) {
-      throw new BadRequestException('No meter name found for this meter');
+      throw new BadRequestException('No meter name found for this meter.');
     }
 
     if (!meter.document.wireless_device_id) {
-      throw new BadRequestException('No wiress device id found for this meter');
+      throw new BadRequestException(
+        'No wiress device id found for this meter.',
+      );
+    }
+
+    if (!meter.document.iot_organization_id) {
+      throw new BadRequestException('No organization found for this meter.');
     }
 
     const rate = config.getConsumptionRate(meter.document.consumer_type);

@@ -6,12 +6,15 @@ import { UserRepository } from '../user.repository';
 export class AdminService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async login(loginUserDto: LoginUserDto): Promise<Object> {
+  async login(loginUserDto: LoginUserDto): Promise<unknown> {
     return this.userRepository.adminLogin(loginUserDto);
   }
 
-  async findOneByEmail(email: string): Promise<Object> {
-    const { first_name } = await this.userRepository.findOneByEmail(email);
-    return { response: { first_name } };
+  async findOneByEmail(email: string): Promise<unknown> {
+    const { first_name, role } = await this.userRepository.findOneByEmail(
+      email,
+    );
+
+    return { response: { first_name, role } };
   }
 }

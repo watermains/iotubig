@@ -47,17 +47,16 @@ export class ConfigurationService {
               const config = await this.configurationRepository.findOne(
                 organization_id,
               );
+
               const meters = await this.meterService.findOrgMeters(
                 organization_id,
+                { wireless_device_id: { $nin: [null, ''] } },
               );
 
               meters.forEach((meter) => {
                 const rate = config.getConsumptionRate(meter.consumer_type);
 
-                if (
-                  updateConfigurationDto.overdraw_limitation &&
-                  meter.wireless_device_id
-                ) {
+                if (updateConfigurationDto.overdraw_limitation) {
                   const overDrawVolume =
                     config.overdraw_limitation / meter.getWaterMeterRate(rate);
 
@@ -69,10 +68,7 @@ export class ConfigurationService {
                   );
                 }
 
-                if (
-                  updateConfigurationDto.water_alarm_threshold &&
-                  meter.wireless_device_id
-                ) {
+                if (updateConfigurationDto.water_alarm_threshold) {
                   const lowVolume =
                     config.water_alarm_threshold /
                     meter.getWaterMeterRate(rate);

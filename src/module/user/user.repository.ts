@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
+import { isIn } from 'class-validator';
 import { Model } from 'mongoose';
 import { RoleTypes } from 'src/decorators/roles.decorator';
 import { MailerService } from 'src/mailer/mailer.service';
@@ -103,7 +104,10 @@ export class UserRepository {
   async adminLogin(loginUserDto) {
     try {
       const user = await this.userModel
-        .findOne({ email: loginUserDto.email, role: 'admin' })
+        .findOne({
+          email: loginUserDto.email,
+          role: { $in: [RoleTypes.admin, RoleTypes.superAdmin] },
+        })
         .select('+password')
         .exec();
       const isMatch = await bcrypt.compare(
@@ -128,6 +132,15 @@ export class UserRepository {
 
   async seedAdmin(body) {
     body.password = await bcrypt.hash(body.password, 10);
+
+    if (!isIn(body.role, [RoleTypes.admin, RoleTypes.superAdmin])) {
+      throw new Error('Invalid role');
+    }
+
+    if (body.role == RoleTypes.superAdmin) {
+      body.organization_id = undefined;
+    }
+
     return this.userModel.findOneAndUpdate({ email: body.email }, body, {
       upsert: true,
       new: true,

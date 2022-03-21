@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { MeterCheck, MeterField } from 'src/validators/meter.validator';
 
 export class MeterDto {
@@ -22,6 +22,11 @@ export class MeterDto {
   @ApiProperty({ type: 'string' })
   @IsString()
   consumer_type: string;
+
+  @ApiProperty({ type: 'string' })
+  @IsOptional()
+  @IsString()
+  iot_organization_id?: string;
 }
 
 export class MeterDevEUIDto {

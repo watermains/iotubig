@@ -26,6 +26,7 @@ export interface IMeter {
   seed(organization: OrganizationDocument, meterData: CreateMeterDto[]);
   findStats(): Promise<Stats>;
   removeMeter(devEUI: string);
+  createModel(document: object);
 }
 @Injectable()
 export class MeterRepository implements IMeter {
@@ -145,13 +146,42 @@ export class MeterRepository implements IMeter {
     return stats;
   }
 
-  async findAll(query: object, offset: number, pageSize: number) {
-    const meters = await this.meterModel
-      .find(query)
-      .skip(offset)
-      .limit(pageSize);
+  async findAll($match: object, offset: number, pageSize: number) {
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'organizations',
+          localField: 'iot_organization_id',
+          foreignField: '_id',
+          as: 'org',
+        },
+      },
+      {
+        $addFields: {
+          org: {
+            $arrayElemAt: ['$org', 0],
+          },
+        },
+      },
+      { $match },
+    ];
 
-    const total_rows = await this.meterModel.find(query).count();
+    const meters = await this.meterModel.aggregate([
+      ...pipeline,
+      {
+        $skip: Number(offset),
+      },
+      {
+        $limit: Number(pageSize),
+      },
+    ]);
+
+    const [{ total_rows }] = await this.meterModel.aggregate([
+      ...pipeline,
+      {
+        $count: 'total_rows',
+      },
+    ]);
 
     return new PaginatedData(meters, total_rows);
   }
@@ -224,5 +254,9 @@ export class MeterRepository implements IMeter {
     ];
 
     return { data, fields };
+  }
+
+  createModel(document: object) {
+    return new this.meterModel(document);
   }
 }
