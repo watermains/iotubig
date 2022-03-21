@@ -44,6 +44,7 @@ export class TransactionService {
     }
 
     if (transaction !== undefined) {
+      //TODO should we update instantly or not?
       this.meterRepo.updateFlow(meter.dev_eui, transaction.volume);
 
       const data = {
@@ -55,7 +56,7 @@ export class TransactionService {
         this.logService.create({
           action: Action.reload,
           meter_name: meter.meter_name,
-          data: data.toString(),
+          data: JSON.stringify(data),
           created_by: user_id,
           organization_id,
         });
@@ -86,7 +87,7 @@ export class TransactionService {
         this.logService.create({
           action: Action.deduct,
           meter_name: meter.meter_name,
-          data: data.toString(),
+          data: JSON.stringify(data),
           created_by: user_id,
           organization_id,
         });

@@ -148,22 +148,23 @@ export class BalanceCheckService {
             `deltaFlow: ${deltaFlow}; with threshold: ${minimum}L`,
           );
           if (deltaFlow < minimum) {
-            const normalizedDeductionAmount = Math.round(
-              rate * (minimum - deltaFlow) * -1,
+            const normalizedDeductionAmount = rate * (minimum - deltaFlow) * -1;
+            const displayDeductionAmount = parseFloat(
+              normalizedDeductionAmount.toFixed(2),
             );
             //TODO replace ID;
             this.transactionService.create(
               '-1',
               orgID,
               {
-                amount: normalizedDeductionAmount,
+                amount: displayDeductionAmount,
                 iot_meter_id: val.meter_name,
                 dev_eui: val.dev_eui,
               },
               config,
             );
             this.logger.debug(
-              `FOR DEDUCTION: ${val.meter_name} with DEV EUI: ${val.dev_eui} with AMOUNT: ${normalizedDeductionAmount}`,
+              `FOR DEDUCTION: ${val.meter_name} with DEV EUI: ${val.dev_eui} with AMOUNT: ${displayDeductionAmount}`,
             );
           } else {
             this.logger.debug(
