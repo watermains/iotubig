@@ -98,10 +98,16 @@ export class TransactionService {
     }
   }
 
-  async findAll(offset: number, pageSize: number): Promise<unknown> {
+  async findAll(
+    offset: number,
+    pageSize: number,
+
+    organization_id: string,
+  ): Promise<unknown> {
     const { data: transactions, total_rows } = await this.repo.findWhere(
       offset,
       pageSize,
+      organization_id,
     );
 
     return { response: { transactions, total_rows } };
@@ -111,10 +117,12 @@ export class TransactionService {
     dev_eui: string,
     offset: number,
     pageSize: number,
+    organization_id: string,
   ): Promise<unknown> {
     const { data: transactions, total_rows } = await this.repo.findWhere(
       offset,
       pageSize,
+      organization_id,
       dev_eui,
     );
 
@@ -125,12 +133,20 @@ export class TransactionService {
     return this.repo.remove(id);
   }
 
-  async getTotalAmounts(startDate: Date, endDate?: Date): Promise<unknown> {
-    return this.repo.getTotalAmounts(startDate, endDate);
+  async getTotalAmounts(
+    organization_id: string,
+    startDate: Date,
+    endDate?: Date,
+  ): Promise<unknown> {
+    return this.repo.getTotalAmounts(organization_id, startDate, endDate);
   }
 
-  async generateReports(startDate: Date, endDate: Date) {
-    return this.repo.generateReports(startDate, endDate);
+  async generateReports(
+    startDate: Date,
+    endDate: Date,
+    organization_id: string,
+  ) {
+    return this.repo.generateReports(startDate, endDate, organization_id);
   }
 
   async sendBalanceUpdate(

@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { OrganizationService } from './organization.service';
-import { OrganizationController } from './organization.controller';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtAuthGuard, JwtStrategy, RolesGuard } from 'src/guard';
 import {
   Organization,
   OrganizationSchema,
 } from './entities/organization.schema';
+import { OrganizationController } from './organization.controller';
 import { OrganizationRepository } from './organization.repository';
-import { JwtStrategy, JwtAuthGuard, RolesGuard } from 'src/guard';
+import { OrganizationService } from './organization.service';
 
 @Module({
   imports: [
@@ -25,5 +25,6 @@ import { JwtStrategy, JwtAuthGuard, RolesGuard } from 'src/guard';
     JwtAuthGuard,
     RolesGuard,
   ],
+  exports: [OrganizationService],
 })
 export class OrganizationModule {}

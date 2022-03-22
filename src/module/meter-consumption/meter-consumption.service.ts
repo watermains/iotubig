@@ -14,7 +14,7 @@ export class MeterConsumptionService {
     private readonly meterConsRepo: MeterConsumptionRepository,
     private readonly userRepo: UserRepository,
     private readonly screenerService: ScreenerService,
-  ) { }
+  ) {}
 
   async create(organization_id: string, dto: CreateMeterConsumptionDto) {
     const config = await this.configRepo.findOne(organization_id);
@@ -53,7 +53,11 @@ export class MeterConsumptionService {
     return this.meterConsRepo.findMeterConsumption(devEUI, startDate, endDate);
   }
 
-  generateReports(startDate: Date, endDate: Date) {
-    return this.meterConsRepo.generateReports(startDate, endDate);
+  generateReports(startDate: Date, endDate: Date, organization_id: string) {
+    return this.meterConsRepo.generateReports(
+      startDate,
+      endDate,
+      organization_id,
+    );
   }
 }

@@ -44,30 +44,52 @@ export class TransactionController {
 
   @Get()
   @UseInterceptors(ResponseInterceptor)
-  findAll(@Query() dto: GetTransactionsDto) {
-    return this.transactionService.findAll(dto.offset, dto.pageSize);
+  findAll(@Req() req, @Query() dto: GetTransactionsDto) {
+    return this.transactionService.findAll(
+      dto.offset,
+      dto.pageSize,
+      req.user.org_id,
+    );
   }
 
   @Get('/reports')
   @UseInterceptors(ReportsInterceptor)
-  generateReports(@Query() dto: GenerateTransactionReportsDto) {
-    return this.transactionService.generateReports(dto.startDate, dto.endDate);
+  generateReports(@Req() req, @Query() dto: GenerateTransactionReportsDto) {
+    return this.transactionService.generateReports(
+      dto.startDate,
+      dto.endDate,
+      req.user.org_id,
+    );
   }
 
   @Post('amounts/total')
   @UseInterceptors(ResponseInterceptor, AggregatedDocumentsInterceptor)
   total(
+    @Req() req,
     @Body()
     dto: GetTransactionsTotalAmountsDto,
   ) {
-    return this.transactionService.getTotalAmounts(dto.startDate, dto.endDate);
+    return this.transactionService.getTotalAmounts(
+      req.user.org_id,
+      dto.startDate,
+      dto.endDate,
+    );
   }
 
   @Get(':devEUI')
   @Roles(RoleTypes.customer)
   @UseInterceptors(ResponseInterceptor)
-  findWhere(@Param('devEUI') devEUI: string, @Query() dto: GetTransactionsDto) {
-    return this.transactionService.findWhere(devEUI, dto.offset, dto.pageSize);
+  findWhere(
+    @Req() req,
+    @Param('devEUI') devEUI: string,
+    @Query() dto: GetTransactionsDto,
+  ) {
+    return this.transactionService.findWhere(
+      devEUI,
+      dto.offset,
+      dto.pageSize,
+      req.user.org_id,
+    );
   }
 
   @Delete(':id')

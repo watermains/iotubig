@@ -10,4 +10,8 @@ export class OrganizationService {
   findAll(offset: number, pageSize: number, search?: string) {
     return this.organizationRepository.findAll(offset, pageSize, search);
   }
+
+  findById(id: string) {
+    return this.organizationRepository.findById(id);
+  }
 }

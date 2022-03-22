@@ -12,6 +12,7 @@ import { APIKeyMiddleware } from 'src/middleware/apikey.middleware';
 import { MeterCheckConstraint } from 'src/validators/meter.validator';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { LogModule } from '../log/log.module';
+import { OrganizationModule } from '../organization/organization.module';
 import { ScreenerModule } from '../screener/screener.module';
 import { TransactionModule } from '../transaction/transaction.module';
 import { UserModule } from '../user/user.module';
@@ -38,6 +39,7 @@ import { MeterService } from './meter.service';
     HttpModule,
     ScreenerModule,
     LogModule,
+    OrganizationModule,
   ],
   controllers: [MeterController, ExternalMeterController],
   providers: [MeterService, MeterRepository, IotService, MeterCheckConstraint],

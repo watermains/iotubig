@@ -35,10 +35,14 @@ export class MeterConsumptionController {
 
   @Get('/reports')
   @UseInterceptors(ReportsInterceptor)
-  generateReports(@Query() dto: GenerateMeterConsumptionReportsDto) {
+  generateReports(
+    @Req() req,
+    @Query() dto: GenerateMeterConsumptionReportsDto,
+  ) {
     return this.meterConsumptionService.generateReports(
       dto.startDate,
       dto.endDate,
+      req.user.org_id,
     );
   }
 

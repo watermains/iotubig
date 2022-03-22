@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as Mongoose from 'mongoose';
 import { Model } from 'mongoose';
+import { RoleTypes } from 'src/decorators/roles.decorator';
 import { ConfigurationDocument } from '../configuration/entities/configuration.schema';
 import { CreateMeterConsumptionDto } from '../meter-consumption/dto/create-meter-consumption.dto';
 import { OrganizationDocument } from '../organization/entities/organization.schema';
@@ -24,7 +26,7 @@ export interface IMeter {
   findMeter(whereClause: object);
   findMetersWhere(whereClause: object);
   seed(organization: OrganizationDocument, meterData: CreateMeterDto[]);
-  findStats(): Promise<Stats>;
+  findStats(role: RoleTypes, organization_id: string): Promise<Stats>;
   removeMeter(devEUI: string);
   createModel(document: object);
 }
@@ -123,26 +125,48 @@ export class MeterRepository implements IMeter {
     });
   }
 
-  async findStats(): Promise<Stats> {
-    const stats = new Stats();
-    stats.idle = await this.meterModel.count({
-      valve_status: MeterStatus.idle,
+  async findStats(role: RoleTypes, organization_id?: string): Promise<Stats> {
+    const pipeline =
+      role == RoleTypes.admin && organization_id
+        ? [
+            {
+              $match: {
+                iot_organization_id: new Mongoose.Types.ObjectId(
+                  organization_id,
+                ),
+              },
+            },
+          ]
+        : [];
+
+    const counts = await this.meterModel.aggregate([
+      ...pipeline,
+      {
+        $group: {
+          _id: '$valve_status',
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+
+    const count: { [key: string]: number } = counts.reduce(
+      (accumulator, currentValue) => {
+        return { ...accumulator, [currentValue._id]: currentValue.count };
+      },
+      {},
+    );
+
+    const stats = new Stats({
+      idle: count[`${MeterStatus.idle}`],
+      open: count[`${MeterStatus.open}`],
+      close: count[`${MeterStatus.close}`],
+      fault: count[`${MeterStatus.fault}`],
+      pending_open: count[`${MeterStatus.pendingOpen}`],
+      pending_close: count[`${MeterStatus.pendingClose}`],
     });
-    stats.open = await this.meterModel.count({
-      valve_status: MeterStatus.open,
-    });
-    stats.close = await this.meterModel.count({
-      valve_status: MeterStatus.close,
-    });
-    stats.fault = await this.meterModel.count({
-      valve_status: MeterStatus.fault,
-    });
-    stats.pending_open = await this.meterModel.count({
-      valve_status: MeterStatus.pendingOpen,
-    });
-    stats.pending_close = await this.meterModel.count({
-      valve_status: MeterStatus.pendingClose,
-    });
+
     return stats;
   }
 
@@ -176,12 +200,14 @@ export class MeterRepository implements IMeter {
       },
     ]);
 
-    const [{ total_rows }] = await this.meterModel.aggregate([
+    const count = await this.meterModel.aggregate([
       ...pipeline,
       {
         $count: 'total_rows',
       },
     ]);
+
+    const total_rows = count?.[0]?.total_rows;
 
     return new PaginatedData(meters, total_rows);
   }
@@ -190,8 +216,13 @@ export class MeterRepository implements IMeter {
     return await this.meterModel.find(query);
   }
 
-  async generateReports(configuration: ConfigurationDocument) {
-    const meters = await this.meterModel.find({});
+  async generateReports(
+    configuration: ConfigurationDocument,
+    organization_id: string,
+  ) {
+    const meters = await this.meterModel.find({
+      iot_organization_id: new Mongoose.Types.ObjectId(organization_id),
+    });
 
     const data = meters.map((meter) => {
       const consumption_rate = configuration.getConsumptionRate(

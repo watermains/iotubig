@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Query,
   Req,
   UseGuards,
   UseInterceptors,
@@ -8,7 +9,11 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
-import { DocumentsInterceptor } from 'src/response.interceptor';
+import {
+  DocumentsInterceptor,
+  ReportsInterceptor,
+} from 'src/response.interceptor';
+import { GenerateLogReportsDto } from './dto/generate-log-reports.dto';
 import { LogService } from './log.service';
 
 @ApiTags('Log')
@@ -23,5 +28,15 @@ export class LogController {
   @UseInterceptors(DocumentsInterceptor)
   findAll(@Req() req) {
     return this.logService.findAll(req.user.org_id);
+  }
+
+  @Get('/reports')
+  @UseInterceptors(ReportsInterceptor)
+  generateReports(@Req() req, @Query() dto: GenerateLogReportsDto) {
+    return this.logService.generateReports(
+      dto.startDate,
+      dto.endDate,
+      req.user.org_id,
+    );
   }
 }
