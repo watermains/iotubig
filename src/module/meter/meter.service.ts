@@ -86,6 +86,7 @@ export class MeterService {
     search?: string,
     role?: RoleTypes,
     iot_organization_id?: string,
+    transactable?: boolean,
   ) {
     const configuration = await this.configRepo.findOne(organization_id);
 
@@ -98,6 +99,7 @@ export class MeterService {
       consumer_type?: ConsumerType;
       $or?: unknown[];
       iot_organization_id?: Mongoose.Types.ObjectId;
+      wireless_device_id?: { $nin: unknown[] };
     } = {
       deleted_at: null,
     };
@@ -108,6 +110,10 @@ export class MeterService {
 
     if (consumer_type) {
       $match.consumer_type = consumer_type;
+    }
+
+    if (Boolean(transactable)) {
+      $match.wireless_device_id = { $nin: [null, ''] };
     }
 
     if (search) {

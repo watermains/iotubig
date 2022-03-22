@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ConsumerType } from '../enum/consumer-type.enum';
 import { MeterStatus } from '../enum/meter.status.enum';
 
@@ -32,4 +38,10 @@ export class GetMetersDto {
   @IsOptional()
   @IsEnum(ConsumerType)
   consumer_type?: ConsumerType;
+
+  @ApiProperty({ type: 'boolean', required: false })
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  transactable?: boolean;
 }

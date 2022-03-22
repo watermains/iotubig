@@ -62,6 +62,7 @@ export class MeterController {
       dto.search,
       req.user.role,
       req.user.org_id,
+      dto.transactable,
     );
   }
 
