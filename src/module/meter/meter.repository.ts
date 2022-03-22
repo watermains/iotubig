@@ -61,7 +61,7 @@ export class MeterRepository implements IMeter {
       if (open) {
         return MeterStatus.open;
       } else {
-        return MeterStatus.close;
+        return MeterStatus.closed;
       }
     } else {
       if (open) {
@@ -161,7 +161,7 @@ export class MeterRepository implements IMeter {
     const stats = new Stats({
       idle: count[`${MeterStatus.idle}`],
       open: count[`${MeterStatus.open}`],
-      close: count[`${MeterStatus.close}`],
+      close: count[`${MeterStatus.closed}`],
       fault: count[`${MeterStatus.fault}`],
       pending_open: count[`${MeterStatus.pendingOpen}`],
       pending_close: count[`${MeterStatus.pendingClose}`],
