@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -294,6 +295,7 @@ export class MeterService {
     user_id: string,
     organization_id: string,
     dto: UpdateMeterValveDto,
+    role: RoleTypes,
   ) {
     const meter = await this.findMeterDetails(
       user_id,
@@ -301,6 +303,16 @@ export class MeterService {
       undefined,
       dto.dev_eui,
     );
+
+    if (!meter.document.wireless_device_id) {
+      throw new BadRequestException(
+        'No wiress device id found for this meter.',
+      );
+    }
+
+    if (role == RoleTypes.superAdmin && !organization_id) {
+      organization_id = meter.document.iot_organization_id.toString();
+    }
 
     const data = {};
 

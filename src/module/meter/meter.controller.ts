@@ -44,9 +44,15 @@ export class MeterController {
   }
 
   @Post('/valve')
+  @Roles(RoleTypes.superAdmin)
   @UseInterceptors(ResponseInterceptor)
   async changeValve(@Req() req, @Body() dto: UpdateMeterValveDto) {
-    return this.meterService.changeValve(req.user.id, req.user.org_id, dto);
+    return this.meterService.changeValve(
+      req.user.id,
+      req.user.org_id,
+      dto,
+      req.user.role,
+    );
   }
 
   @Get()
