@@ -49,6 +49,7 @@ export class TransactionService {
 
       const data = {
         volume: transaction.volume,
+        amount: transaction.amount,
       };
 
       if (transaction.volume > 0) {
