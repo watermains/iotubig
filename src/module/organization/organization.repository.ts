@@ -29,4 +29,8 @@ export class OrganizationRepository {
 
     return this.organizationModel.find(query).skip(offset).limit(pageSize);
   }
+
+  findById(id: string) {
+    return this.organizationModel.findById(id);
+  }
 }

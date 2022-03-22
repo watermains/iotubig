@@ -9,6 +9,7 @@ import { RoleTypes } from 'src/decorators/roles.decorator';
 import { IotService } from 'src/iot/iot.service';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { Action, LogService } from '../log/log.service';
+import { OrganizationService } from '../organization/organization.service';
 import { ScreenerService } from '../screener/screener.service';
 import { TransactionRepository } from '../transaction/transaction.repository';
 import { UserRepository } from '../user/user.repository';
@@ -30,6 +31,7 @@ export class MeterService {
     private readonly transactionRepo: TransactionRepository,
     private readonly iotService: IotService,
     private readonly logService: LogService,
+    private readonly orgService: OrganizationService,
   ) {}
 
   async create(dto: CreateMeterDto, role: RoleTypes, user_org_id: string) {
@@ -84,6 +86,7 @@ export class MeterService {
     search?: string,
     role?: RoleTypes,
     iot_organization_id?: string,
+    transactable?: boolean,
   ) {
     const configuration = await this.configRepo.findOne(organization_id);
 
@@ -96,6 +99,7 @@ export class MeterService {
       consumer_type?: ConsumerType;
       $or?: unknown[];
       iot_organization_id?: Mongoose.Types.ObjectId;
+      wireless_device_id?: { $nin: unknown[] };
     } = {
       deleted_at: null,
     };
@@ -108,8 +112,18 @@ export class MeterService {
       $match.consumer_type = consumer_type;
     }
 
+    if (Boolean(transactable)) {
+      $match.wireless_device_id = { $nin: [null, ''] };
+    }
+
     if (search) {
-      const fields = ['meter_name', 'site_name', 'unit_name', 'dev_eui'];
+      const fields = [
+        'meter_name',
+        'site_name',
+        'unit_name',
+        'dev_eui',
+        ...(role == RoleTypes.superAdmin ? ['org.name'] : []),
+      ];
 
       $match.$or = fields.map((field) => ({
         [field]: new RegExp(search, 'i'),
@@ -156,6 +170,7 @@ export class MeterService {
     organization_id: string,
     meter_name?: string,
     dev_eui?: string,
+    role?: RoleTypes,
   ) {
     if (!meter_name && !dev_eui) {
       const { water_meter_id } = await this.userRepo.findOneByID(user_id);
@@ -163,11 +178,20 @@ export class MeterService {
       meter_name = water_meter_id;
     }
 
-    const params = {
+    const params: {
+      meter_name?: string;
+      dev_eui?: string;
+      deleted_at?: null;
+      iot_organization_id?: Mongoose.Types.ObjectId;
+    } = {
       meter_name,
       dev_eui,
       deleted_at: null,
     };
+
+    if (role == RoleTypes.admin) {
+      params.iot_organization_id = new Mongoose.Types.ObjectId(organization_id);
+    }
 
     Object.keys(params).forEach((key) =>
       params[key] === undefined ? delete params[key] : {},
@@ -190,12 +214,21 @@ export class MeterService {
     const water_meter_rate = meter.getWaterMeterRate(consumption_rate);
     const estimated_balance = meter.getEstimatedBalance(consumption_rate);
 
+    let org;
+
+    if (role == RoleTypes.superAdmin && meter.iot_organization_id) {
+      org = await this.orgService.findById(
+        meter.iot_organization_id.toString(),
+      );
+    }
+
     return {
       document: meter,
       custom_fields: {
         water_meter_rate,
         estimated_balance,
         battery_level_threshold,
+        org,
       },
     };
   }
@@ -247,14 +280,14 @@ export class MeterService {
     return { message: 'Meter deleted successfully' };
   }
 
-  async findStats() {
-    const res = await this.repo.findStats();
+  async findStats(role: RoleTypes, organization_id?: string) {
+    const res = await this.repo.findStats(role, organization_id);
     return { response: res };
   }
 
   async generateReports(organization_id: string) {
     const configuration = await this.configRepo.findOne(organization_id);
-    return this.repo.generateReports(configuration);
+    return this.repo.generateReports(configuration, organization_id);
   }
 
   async changeValve(

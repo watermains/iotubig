@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
+import * as Mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { CreateMeterDto } from '../meter/dto/create-meter.dto';
 import { OrganizationDocument } from '../organization/entities/organization.schema';
@@ -13,7 +14,7 @@ import {
 export interface IMeterConsumption {
   create(dto: CreateMeterConsumptionDto);
   findMeterConsumption(devEUI: string, startDate: Date, endDate?: Date);
-  generateReports(startDate: Date, endDate: Date);
+  generateReports(startDate: Date, endDate: Date, organization_id: string);
   seed(
     organization: OrganizationDocument,
     data: CreateMeterConsumptionDto[],
@@ -48,7 +49,11 @@ export class MeterConsumptionRepository implements IMeterConsumption {
       .sort({ consumed_at: 1 });
   }
 
-  async generateReports(startDate: Date, endDate: Date) {
+  async generateReports(
+    startDate: Date,
+    endDate: Date,
+    organization_id: string,
+  ) {
     let previousDate: moment.Moment | string = moment(startDate).subtract(
       1,
       'days',
@@ -83,6 +88,9 @@ export class MeterConsumptionRepository implements IMeterConsumption {
             $gte: previousDate,
             $lte: endDate,
           },
+          'meter.iot_organization_id': new Mongoose.Types.ObjectId(
+            organization_id,
+          ),
         },
       },
     ]);

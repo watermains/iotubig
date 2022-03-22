@@ -62,6 +62,7 @@ export class MeterController {
       dto.search,
       req.user.role,
       req.user.org_id,
+      dto.transactable,
     );
   }
 
@@ -75,14 +76,15 @@ export class MeterController {
       req.user.org_id,
       dto.meterName,
       dto.devEUI,
+      req.user.role,
     );
   }
 
   @Get('/stats')
   @Roles(RoleTypes.superAdmin)
   @UseInterceptors(ResponseInterceptor)
-  findStat() {
-    return this.meterService.findStats();
+  findStat(@Req() req) {
+    return this.meterService.findStats(req.user.role, req.user.org_id);
   }
 
   @Get('/reports')

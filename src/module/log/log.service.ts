@@ -28,4 +28,8 @@ export class LogService {
   async create(data: LogData) {
     return await this.repo.createLog(data);
   }
+
+  generateReports(startDate: Date, endDate: Date, organization_id: string) {
+    return this.repo.generateReports(startDate, endDate, organization_id);
+  }
 }

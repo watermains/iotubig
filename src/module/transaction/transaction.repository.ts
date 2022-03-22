@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as Mongoose from 'mongoose';
 import { Model, PipelineStage } from 'mongoose';
 import { Configuration } from '../configuration/entities/configuration.schema';
 import { Meter } from '../meter/entities/meter.schema';
@@ -21,11 +22,16 @@ export interface ITransaction {
   findWhere(
     offset: number,
     pageSize: number,
+    organization_id: string,
     dev_eui?: string,
   ): Promise<PaginatedData>;
   remove(id: number);
-  getTotalAmounts(startDate: Date, endDate?: Date): Promise<unknown>;
-  generateReports(startDate: Date, endDate: Date);
+  getTotalAmounts(
+    organization_id: string,
+    startDate: Date,
+    endDate?: Date,
+  ): Promise<unknown>;
+  generateReports(startDate: Date, endDate: Date, organization_id: string);
 }
 
 @Injectable()
@@ -66,8 +72,17 @@ export class TransactionRepository implements ITransaction {
   async findWhere(
     offset: number,
     pageSize: number,
+    organization_id: string,
     dev_eui?: string,
   ): Promise<PaginatedData> {
+    const $match = {
+      'meter.iot_organization_id': new Mongoose.Types.ObjectId(organization_id),
+    };
+
+    if (dev_eui) {
+      $match['meter.dev_eui'] = dev_eui;
+    }
+
     const transactionsPipeline: PipelineStage[] = [
       {
         $lookup: {
@@ -82,15 +97,7 @@ export class TransactionRepository implements ITransaction {
           meter: { $arrayElemAt: ['$meter', 0] },
         },
       },
-      ...(dev_eui
-        ? [
-            {
-              $match: {
-                'meter.dev_eui': dev_eui,
-              },
-            },
-          ]
-        : []),
+      { $match },
       {
         $sort: {
           createdAt: -1,
@@ -108,12 +115,14 @@ export class TransactionRepository implements ITransaction {
       },
     ]);
 
-    const [{ total_rows }] = await this.transactionModel.aggregate([
+    const count = await this.transactionModel.aggregate([
       ...transactionsPipeline,
       {
         $count: 'total_rows',
       },
     ]);
+
+    const total_rows = count?.[0]?.total_rows;
 
     return new PaginatedData(transactions, total_rows);
   }
@@ -125,7 +134,11 @@ export class TransactionRepository implements ITransaction {
     return { message: 'Transaction successfully deleted.' };
   }
 
-  async getTotalAmounts(startDate: Date, endDate?: Date): Promise<unknown> {
+  async getTotalAmounts(
+    organization_id: string,
+    startDate: Date,
+    endDate?: Date,
+  ): Promise<unknown> {
     const date: { $gte: Date; $lte?: Date } = { $gte: startDate };
 
     if (endDate) {
@@ -134,6 +147,14 @@ export class TransactionRepository implements ITransaction {
 
     return await this.transactionModel.aggregate([
       {
+        $lookup: {
+          from: 'meters',
+          localField: 'iot_meter_id',
+          foreignField: 'meter_name',
+          as: 'meter',
+        },
+      },
+      {
         $addFields: {
           date: {
             $dateToString: {
@@ -141,11 +162,15 @@ export class TransactionRepository implements ITransaction {
               date: '$createdAt',
             },
           },
+          meter: { $arrayElemAt: ['$meter', 0] },
         },
       },
       {
         $match: {
           date,
+          'meter.iot_organization_id': new Mongoose.Types.ObjectId(
+            organization_id,
+          ),
         },
       },
       {
@@ -164,7 +189,11 @@ export class TransactionRepository implements ITransaction {
     ]);
   }
 
-  async generateReports(startDate: Date, endDate: Date) {
+  async generateReports(
+    startDate: Date,
+    endDate: Date,
+    organization_id: string,
+  ) {
     const transactions = await this.transactionModel.aggregate([
       {
         $lookup: {
@@ -194,6 +223,9 @@ export class TransactionRepository implements ITransaction {
             $gte: startDate,
             $lte: endDate,
           },
+          'meter.iot_organization_id': new Mongoose.Types.ObjectId(
+            organization_id,
+          ),
         },
       },
       {
