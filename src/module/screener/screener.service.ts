@@ -116,7 +116,7 @@ export class ScreenerService {
             meterStatus = 'opened';
             header = `Water Meter (${meterName}) Opened`;
             break;
-          case MeterStatus.close:
+          case MeterStatus.closed:
             meterStatus = 'closed';
             header = `Water Meter (${meterName}) Closed`;
             break;

@@ -91,8 +91,8 @@ MeterSchema.virtual('valve_status_name').get(function () {
       return 'Idle';
     case MeterStatus.open:
       return 'Open';
-    case MeterStatus.close:
-      return 'Close';
+    case MeterStatus.closed:
+      return 'Closed';
     case MeterStatus.fault:
       return 'Fault';
     case MeterStatus.pendingOpen:
