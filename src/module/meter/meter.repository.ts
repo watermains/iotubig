@@ -125,7 +125,6 @@ export class MeterRepository implements IMeter {
     });
   }
 
-<<<<<<< Updated upstream
   async findStats(role: RoleTypes, organization_id?: string): Promise<Stats> {
     const pipeline =
       role == RoleTypes.admin && organization_id
@@ -162,31 +161,10 @@ export class MeterRepository implements IMeter {
     const stats = new Stats({
       idle: count[`${MeterStatus.idle}`],
       open: count[`${MeterStatus.open}`],
-      close: count[`${MeterStatus.close}`],
+      close: count[`${MeterStatus.closed}`],
       fault: count[`${MeterStatus.fault}`],
       pending_open: count[`${MeterStatus.pendingOpen}`],
       pending_close: count[`${MeterStatus.pendingClose}`],
-=======
-  async findStats(): Promise<Stats> {
-    const stats = new Stats();
-    stats.idle = await this.meterModel.count({
-      valve_status: MeterStatus.idle,
-    });
-    stats.open = await this.meterModel.count({
-      valve_status: MeterStatus.open,
-    });
-    stats.close = await this.meterModel.count({
-      valve_status: MeterStatus.closed,
-    });
-    stats.fault = await this.meterModel.count({
-      valve_status: MeterStatus.fault,
-    });
-    stats.pending_open = await this.meterModel.count({
-      valve_status: MeterStatus.pendingOpen,
-    });
-    stats.pending_close = await this.meterModel.count({
-      valve_status: MeterStatus.pendingClose,
->>>>>>> Stashed changes
     });
 
     return stats;
