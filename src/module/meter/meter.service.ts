@@ -94,6 +94,8 @@ export class MeterService {
     const low_balance_threshold = configuration?.water_alarm_threshold;
     const battery_level_threshold = configuration?.battery_level_threshold;
 
+    const $sort = { createdAt: 1 };
+
     const $match: {
       deleted_at: null;
       valve_status?: MeterStatus;
@@ -101,6 +103,7 @@ export class MeterService {
       $or?: unknown[];
       iot_organization_id?: Mongoose.Types.ObjectId;
       wireless_device_id?: { $nin: unknown[] };
+      meter_name?: { $nin: unknown[] };
     } = {
       deleted_at: null,
     };
@@ -115,6 +118,7 @@ export class MeterService {
 
     if (Boolean(transactable)) {
       $match.wireless_device_id = { $nin: [null, ''] };
+      $match.meter_name = { $nin: [null, ''] };
     }
 
     if (search) {
@@ -139,6 +143,7 @@ export class MeterService {
 
     const { data, total_rows } = await this.repo.findAll(
       $match,
+      $sort,
       offset,
       pageSize,
     );
@@ -246,6 +251,12 @@ export class MeterService {
   ): Promise<unknown> {
     if (role == RoleTypes.admin) {
       dto.iot_organization_id = undefined;
+    } else if (role == RoleTypes.superAdmin) {
+      Object.keys(dto).forEach((key) => {
+        if (key != 'iot_organization_id') {
+          dto[key] = undefined;
+        }
+      });
     }
 
     const meter = await this.repo.findByDevEui(devEUI);
