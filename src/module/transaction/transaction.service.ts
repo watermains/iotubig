@@ -185,6 +185,10 @@ export class TransactionService {
       throw new BadRequestException('No organization found for this meter.');
     }
 
+    if (meter.document.iot_organization_id.toString() != organization_id) {
+      throw new BadRequestException();
+    }
+
     const rate = config.getConsumptionRate(meter.document.consumer_type);
     const volume = dto.amount / meter.document.getWaterMeterRate(rate);
 
