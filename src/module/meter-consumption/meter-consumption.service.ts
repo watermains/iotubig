@@ -25,6 +25,9 @@ export class MeterConsumptionService {
     const oldMeter = await this.meterRepo.findByDevEui(dto.dev_eui);
     const meter = await this.meterRepo.upsertMeterViaConsumption(dto);
 
+    const isChanged =
+      oldMeter !== null ? meter.valve_status !== oldMeter.valve_status : false;
+
     const users = await this.userRepo.isOwned(meter.meter_name);
 
     const rate = config.getConsumptionRate(meter.consumer_type);
@@ -39,7 +42,7 @@ export class MeterConsumptionService {
           meterName: meter.meter_name,
           allowedFlow: meter.allowed_flow,
           status: {
-            isChanged: meter.valve_status !== oldMeter.valve_status,
+            isChanged,
             current: meter.valve_status,
           },
         },
