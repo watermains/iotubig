@@ -170,8 +170,13 @@ export class MeterRepository implements IMeter {
     return stats;
   }
 
-  async findAll($match: object, offset: number, pageSize: number) {
-    const pipeline = [
+  async findAll(
+    $match: object,
+    $sort: object,
+    offset: number,
+    pageSize: number,
+  ) {
+    const pipeline: Mongoose.PipelineStage[] = [
       {
         $lookup: {
           from: 'organizations',
@@ -188,6 +193,7 @@ export class MeterRepository implements IMeter {
         },
       },
       { $match },
+      { $sort: { ...$sort } },
     ];
 
     const meters = await this.meterModel.aggregate([

@@ -52,6 +52,10 @@ export class LogRepository implements ILog {
 
     const fields = [
       {
+        label: 'date',
+        value: 'date',
+      },
+      {
         label: 'meter_name',
         value: 'meter_name',
       },
@@ -60,8 +64,8 @@ export class LogRepository implements ILog {
         value: 'action',
       },
       {
-        label: 'date',
-        value: 'date',
+        label: 'data',
+        value: 'data',
       },
     ];
 
