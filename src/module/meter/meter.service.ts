@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as Mongoose from 'mongoose';
 import { from, lastValueFrom, map, tap } from 'rxjs';
@@ -249,18 +250,22 @@ export class MeterService {
     dto: UpdateMeterDto,
     role: RoleTypes,
   ): Promise<unknown> {
+    const meter = await this.repo.findByDevEui(devEUI);
+    const old_meter_name = meter.meter_name;
+
     if (role == RoleTypes.admin) {
       dto.iot_organization_id = undefined;
     } else if (role == RoleTypes.superAdmin) {
+      if (meter.iot_organization_id) {
+        throw new UnauthorizedException();
+      }
+
       Object.keys(dto).forEach((key) => {
         if (key != 'iot_organization_id') {
           dto[key] = undefined;
         }
       });
     }
-
-    const meter = await this.repo.findByDevEui(devEUI);
-    const old_meter_name = meter.meter_name;
 
     return lastValueFrom(
       from(
