@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as moment from 'moment';
 import { lastValueFrom, map } from 'rxjs';
@@ -186,7 +187,7 @@ export class TransactionService {
     }
 
     if (meter.document.iot_organization_id.toString() != organization_id) {
-      throw new BadRequestException();
+      throw new UnauthorizedException();
     }
 
     const rate = config.getConsumptionRate(meter.document.consumer_type);
