@@ -168,7 +168,8 @@ export class MailerService {
         this.logger.debug(val);
       })
       .catch((err) => {
-        this.logger.error(err);
+        this.logger.error(`CODE: ${err.Error.Code} TYPE: ${err.Error.Type}`);
+        this.logger.error(`MESSAGE: ${err.Error.Message}`);
       });
     // const send = new Promise((resolve, reject) => {
     //   this.ses.sendEmail(a, (err, data, res) => {
