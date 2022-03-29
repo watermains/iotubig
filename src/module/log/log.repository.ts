@@ -7,7 +7,12 @@ import { LogData } from './log.service';
 export interface ILog {
   findLogs(organization_id: string);
   createLog(data: LogData);
-  generateReports(startDate: Date, endDate: Date, organization_id: string);
+  generateReports(
+    startDate: Date,
+    endDate: Date,
+    organization_id: string,
+    utcOffset: number,
+  );
 }
 
 @Injectable()
@@ -27,6 +32,7 @@ export class LogRepository implements ILog {
     startDate: Date,
     endDate: Date,
     organization_id: string,
+    utcOffset: number,
   ) {
     const data = await this.log.aggregate([
       {
@@ -34,7 +40,7 @@ export class LogRepository implements ILog {
           date: {
             $dateToString: {
               format: '%Y-%m-%d',
-              date: '$createdAt',
+              date: { $add: ['$createdAt', utcOffset * 60 * 60 * 1000] },
             },
           },
         },

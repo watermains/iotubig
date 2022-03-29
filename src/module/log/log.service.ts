@@ -29,7 +29,17 @@ export class LogService {
     return await this.repo.createLog(data);
   }
 
-  generateReports(startDate: Date, endDate: Date, organization_id: string) {
-    return this.repo.generateReports(startDate, endDate, organization_id);
+  generateReports(
+    startDate: Date,
+    endDate: Date,
+    organization_id: string,
+    utcOffset: number,
+  ) {
+    return this.repo.generateReports(
+      startDate,
+      endDate,
+      organization_id,
+      utcOffset,
+    );
   }
 }

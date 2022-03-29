@@ -31,7 +31,12 @@ export interface ITransaction {
     startDate: Date,
     endDate?: Date,
   ): Promise<unknown>;
-  generateReports(startDate: Date, endDate: Date, organization_id: string);
+  generateReports(
+    startDate: Date,
+    endDate: Date,
+    organization_id: string,
+    utcOffset: number,
+  );
 }
 
 @Injectable()
@@ -193,6 +198,7 @@ export class TransactionRepository implements ITransaction {
     startDate: Date,
     endDate: Date,
     organization_id: string,
+    utcOffset: number,
   ) {
     const transactions = await this.transactionModel.aggregate([
       {
@@ -208,7 +214,7 @@ export class TransactionRepository implements ITransaction {
           date: {
             $dateToString: {
               format: '%Y-%m-%d',
-              date: '$createdAt',
+              date: { $add: ['$createdAt', utcOffset * 60 * 60 * 1000] },
             },
           },
           volume_cubic_meter: {

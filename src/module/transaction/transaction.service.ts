@@ -147,8 +147,14 @@ export class TransactionService {
     startDate: Date,
     endDate: Date,
     organization_id: string,
+    utcOffset: number,
   ) {
-    return this.repo.generateReports(startDate, endDate, organization_id);
+    return this.repo.generateReports(
+      startDate,
+      endDate,
+      organization_id,
+      utcOffset,
+    );
   }
 
   async sendBalanceUpdate(

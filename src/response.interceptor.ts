@@ -118,7 +118,7 @@ export class ReportsInterceptor implements NestInterceptor {
         const res = context.switchToHttp().getResponse();
         res.setHeader('Content-Type', 'text/csv');
         const csv = await json2csv.parseAsync(data, { fields });
-        return res.send(csv);
+        return csv;
       }),
     );
   }
