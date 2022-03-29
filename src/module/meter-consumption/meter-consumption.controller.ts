@@ -43,6 +43,7 @@ export class MeterConsumptionController {
       dto.startDate,
       dto.endDate,
       req.user.org_id,
+      dto.utcOffset,
     );
   }
 

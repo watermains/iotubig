@@ -59,6 +59,7 @@ export class TransactionController {
       dto.startDate,
       dto.endDate,
       req.user.org_id,
+      dto.utcOffset,
     );
   }
 

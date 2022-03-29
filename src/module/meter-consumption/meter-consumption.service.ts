@@ -56,11 +56,17 @@ export class MeterConsumptionService {
     return this.meterConsRepo.findMeterConsumption(devEUI, startDate, endDate);
   }
 
-  generateReports(startDate: Date, endDate: Date, organization_id: string) {
+  generateReports(
+    startDate: Date,
+    endDate: Date,
+    organization_id: string,
+    utcOffset: number,
+  ) {
     return this.meterConsRepo.generateReports(
       startDate,
       endDate,
       organization_id,
+      utcOffset,
     );
   }
 }

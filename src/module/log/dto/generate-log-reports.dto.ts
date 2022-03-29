@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDateString, IsNumber } from 'class-validator';
 
 export class GenerateLogReportsDto {
   @ApiProperty({
@@ -15,4 +16,11 @@ export class GenerateLogReportsDto {
   })
   @IsDateString()
   endDate: Date;
+
+  @ApiProperty({
+    type: 'number',
+  })
+  @IsNumber()
+  @Type(() => Number)
+  utcOffset: number;
 }

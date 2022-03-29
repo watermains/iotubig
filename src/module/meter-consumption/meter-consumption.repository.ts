@@ -14,7 +14,12 @@ import {
 export interface IMeterConsumption {
   create(dto: CreateMeterConsumptionDto);
   findMeterConsumption(devEUI: string, startDate: Date, endDate?: Date);
-  generateReports(startDate: Date, endDate: Date, organization_id: string);
+  generateReports(
+    startDate: Date,
+    endDate: Date,
+    organization_id: string,
+    utcOffset: number,
+  );
   seed(
     organization: OrganizationDocument,
     data: CreateMeterConsumptionDto[],
@@ -44,15 +49,25 @@ export class MeterConsumptionRepository implements IMeterConsumption {
       .find({
         dev_eui: devEUI,
         consumed_at,
-        last_uplink: true,
       })
       .sort({ consumed_at: 1 });
+  }
+
+  private groupBy(items: object[], key: string): object {
+    return items.reduce(
+      (result, item) => ({
+        ...result,
+        [item[key]]: [...(result[item[key]] || []), item],
+      }),
+      {},
+    );
   }
 
   async generateReports(
     startDate: Date,
     endDate: Date,
     organization_id: string,
+    utcOffset: number,
   ) {
     let previousDate: moment.Moment | string = moment(startDate).subtract(
       1,
@@ -76,7 +91,7 @@ export class MeterConsumptionRepository implements IMeterConsumption {
           date: {
             $dateToString: {
               format: '%Y-%m-%d',
-              date: '$consumed_at',
+              date: { $add: ['$consumed_at', utcOffset * 60 * 60 * 1000] },
             },
           },
           meter: { $arrayElemAt: ['$meter', 0] },
@@ -95,32 +110,59 @@ export class MeterConsumptionRepository implements IMeterConsumption {
       },
     ]);
 
-    const data = consumptions
-      .map((consumption, index) => {
-        if (consumption.date === previousDate) {
-          return null;
-        }
+    let groups = this.groupBy(consumptions, 'dev_eui');
 
-        let volume_cubic_meter = (() => {
-          if (index > 0) {
-            const previousCumulativeFlow =
-              consumptions[index - 1]?.cumulative_flow || 0;
-
-            return consumption.cumulative_flow - previousCumulativeFlow;
+    groups = Object.keys(groups).reduce((accumulator, currentValue) => {
+      const value = groups[currentValue]
+        .map((consumption: any, index: number) => {
+          if (consumption.date === previousDate) {
+            return null;
           }
 
-          return 0;
-        })();
+          let volume_cubic_meter = (() => {
+            if (index > 0) {
+              const previousCumulativeFlow =
+                consumptions[index - 1]?.cumulative_flow || 0;
 
-        volume_cubic_meter /= 1000;
-        return { ...consumption, volume_cubic_meter };
-      })
-      .filter(Boolean); // Remove null items
+              return consumption.cumulative_flow - previousCumulativeFlow;
+            }
+
+            return 0;
+          })();
+
+          volume_cubic_meter /= 1000;
+          return { ...consumption, volume_cubic_meter };
+        })
+        .filter(Boolean); // Remove null items;
+
+      return { ...accumulator, [currentValue]: value };
+    }, {});
+
+    const data = Object.values(groups).map((consumption) => {
+      const first = consumption[0];
+      const last = consumption[consumption.length - 1];
+
+      const meter = first.meter;
+      const start_date = first.date;
+      const end_date = last.date;
+
+      const volume_cubic_meter = consumption.reduce(
+        (accumulator: any, currentValue: any) =>
+          accumulator + currentValue.volume_cubic_meter,
+        0,
+      );
+
+      return { meter, start_date, end_date, volume_cubic_meter };
+    });
 
     const fields = [
       {
-        label: 'date',
-        value: 'date',
+        label: 'start_date',
+        value: 'start_date',
+      },
+      {
+        label: 'end_date',
+        value: 'end_date',
       },
       {
         label: 'meter_name',
