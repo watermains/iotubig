@@ -34,8 +34,9 @@ export class BalanceCheckService {
 
   @Cron(
     process.env.NODE_ENV === 'development'
-      ? '*/10 * * * * *'
-      : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
+      ? '*/15 * * * * *'
+      : '* 30 10 * * *',
+      // : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
     {
       timeZone: 'Asia/Manila',
     },
@@ -47,8 +48,8 @@ export class BalanceCheckService {
     //get first day of last month
     const now = moment();
     const previousMonth = now.month() - 1;
-    const startDate = this.getFirstDateOfMonth(previousMonth);
-    const startDatePlus = this.getFirstDateOfMonth(previousMonth).add(1, 'days');
+    const startDate = this.getFirstDateOfMonth(previousMonth).subtract(1, 'days');
+    const startDatePlus = this.getFirstDateOfMonth(previousMonth);
     const endDate = this.getLastDateOfMonth(previousMonth);
     const endDatePlus = this.getLastDateOfMonth(previousMonth).add(1, 'days');
     this.logger.debug(`*************`);
