@@ -10,7 +10,7 @@ export class ConfigurationService {
     private readonly configurationRepository: ConfigurationRepository,
     private readonly meterService: MeterService,
     private readonly iotService: IotService,
-  ) {}
+  ) { }
 
   async findOne(organization_id: string): Promise<unknown> {
     const configuration = await this.configurationRepository.findOne(
@@ -63,6 +63,8 @@ export class ConfigurationService {
                   lastValueFrom(
                     this.iotService.sendOverdrawUpdate(
                       meter.wireless_device_id,
+                      meter.meter_name,
+                      meter.site_name,
                       overDrawVolume,
                     ),
                   );
@@ -76,6 +78,8 @@ export class ConfigurationService {
                   lastValueFrom(
                     this.iotService.sendLowBalanceUpdate(
                       meter.wireless_device_id,
+                      meter.meter_name,
+                      meter.site_name,
                       lowVolume,
                     ),
                   );

@@ -34,7 +34,7 @@ export class MeterService {
     private readonly iotService: IotService,
     private readonly logService: LogService,
     private readonly orgService: OrganizationService,
-  ) {}
+  ) { }
 
   async create(dto: CreateMeterDto, role: RoleTypes, user_org_id: string) {
     if (role == RoleTypes.admin) {
@@ -337,7 +337,7 @@ export class MeterService {
 
     return lastValueFrom(
       this.iotService
-        .sendOpenValveUpdate(meter.document.wireless_device_id, dto)
+        .sendOpenValveUpdate(meter.document.wireless_device_id, meter.document.meter_name, meter.document.site_name, dto)
         .pipe(
           map(async (obs) => {
             const response = await this.repo.updateValve(dto);

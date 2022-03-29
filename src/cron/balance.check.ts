@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { ConfigurationRepository } from 'src/module/configuration/configuration.repository';
@@ -34,9 +34,9 @@ export class BalanceCheckService {
 
   @Cron(
     process.env.NODE_ENV === 'development'
-      ? '*/15 * * * * *'
-      : '* 30 10 * * *',
-      // : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
+      ? '*/10 * * * * *'
+      : '00 15 11 * * *',
+    // : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
     {
       timeZone: 'Asia/Manila',
     },
@@ -48,7 +48,10 @@ export class BalanceCheckService {
     //get first day of last month
     const now = moment();
     const previousMonth = now.month() - 1;
-    const startDate = this.getFirstDateOfMonth(previousMonth).subtract(1, 'days');
+    const startDate = this.getFirstDateOfMonth(previousMonth).subtract(
+      1,
+      'days',
+    );
     const startDatePlus = this.getFirstDateOfMonth(previousMonth);
     const endDate = this.getLastDateOfMonth(previousMonth);
     const endDatePlus = this.getLastDateOfMonth(previousMonth).add(1, 'days');
@@ -113,7 +116,6 @@ export class BalanceCheckService {
 
         const startConsume = await this.consumptionModel.findOne({
           dev_eui: val.dev_eui,
-          last_uplink: true,
           consumed_at: {
             $gte: startDate,
             $lt: startDatePlus,
@@ -121,7 +123,6 @@ export class BalanceCheckService {
         });
         const endConsume = await this.consumptionModel.findOne({
           dev_eui: val.dev_eui,
-          last_uplink: true,
           consumed_at: {
             $gte: endDate,
             $lt: endDatePlus,
@@ -154,16 +155,17 @@ export class BalanceCheckService {
               normalizedDeductionAmount.toFixed(2),
             );
             //TODO replace ID;
-            this.transactionService.create(
-              '-1',
-              orgID,
-              {
+            try {
+              this.transactionService.sendBalanceUpdate('-1', orgID, {
                 amount: displayDeductionAmount,
                 iot_meter_id: val.meter_name,
                 dev_eui: val.dev_eui,
-              },
-              config,
-            );
+              });
+            } catch (ex) {
+              this.logger.debug(
+                `Failed to deduct balance in IoT with error ${ex}`,
+              );
+            }
             this.logger.debug(
               `FOR DEDUCTION: ${val.meter_name} with DEV EUI: ${val.dev_eui} with AMOUNT: ${displayDeductionAmount}`,
             );
