@@ -23,6 +23,19 @@ export interface NotificationOptions {
   meterName: string;
   dateTriggered: string;
 }
+
+export interface ErrorAlertNotificationOptions {
+  header: string;
+  siteName: string;
+  meterName: string;
+  dateTriggered: string;
+  deviceId: string;
+  command: string;
+  errorCode: string;
+  errorType: string;
+  errorDesc: string;
+}
+
 export interface MeterStatusNotificationOptions extends NotificationOptions {
   meterStatus: string;
 }
@@ -91,6 +104,18 @@ export class MailerService {
       email,
       subject,
       'balance_alert.hbs',
+      options,
+    );
+  }
+
+  async sendErrorAlertNotification(
+    options: ErrorAlertNotificationOptions,
+    subject: string,
+  ) {
+    this.sendEmailWithTemplateOptions(
+      'dev@umpisa.co',
+      subject,
+      'error_alert.hbs',
       options,
     );
   }

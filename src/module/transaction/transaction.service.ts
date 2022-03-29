@@ -28,7 +28,7 @@ export class TransactionService {
     private readonly iotService: IotService,
     private readonly meterService: MeterService,
     private readonly logService: LogService,
-  ) {}
+  ) { }
 
   async create(
     user_id: string,
@@ -203,6 +203,8 @@ export class TransactionService {
       this.iotService
         .sendBalanceUpdate(
           meter.document.wireless_device_id,
+          meter.document.meter_name,
+          meter.document.site_name,
           dto.amount > 0 ? true : false,
           { balance: volume.toString() },
         )
