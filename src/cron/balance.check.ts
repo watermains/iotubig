@@ -162,7 +162,9 @@ export class BalanceCheckService {
                 dev_eui: val.dev_eui,
               });
             } catch (ex) {
-              console.log(ex);
+              this.logger.debug(
+                `Failed to deduct balance in IoT with error ${ex}`,
+              );
             }
             this.logger.debug(
               `FOR DEDUCTION: ${val.meter_name} with DEV EUI: ${val.dev_eui} with AMOUNT: ${displayDeductionAmount}`,
