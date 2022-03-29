@@ -206,7 +206,7 @@ export class TransactionService {
           meter.document.meter_name,
           meter.document.site_name,
           dto.amount > 0 ? true : false,
-          { balance: volume.toString() },
+          { balance: Math.abs(volume).toString() },
         )
         .pipe(
           map((obs) => {

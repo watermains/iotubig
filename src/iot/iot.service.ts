@@ -85,6 +85,8 @@ export class IotService {
     data: any = {},
     frame_id: number,
   ) {
+    console.log(`${command}`);
+    console.log(`${JSON.stringify(data)}`);
     const res = this.httpService
       .post(process.env.IOT_URL, {
         device_id,
