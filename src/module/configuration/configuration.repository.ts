@@ -14,12 +14,15 @@ export class ConfigurationRepository {
     private configurationModel: Model<ConfigurationDocument>,
   ) {}
 
-  seedConfiguration(body) {
-    return this.configurationModel.findOneAndUpdate(
-      { organization_id: body.organization_id },
-      body,
-      { upsert: true, new: true, setDefaultsOnInsert: true },
-    );
+  async seedConfiguration(body) {
+    const config = await this.configurationModel.findOne({
+      organization_id: body.organization_id,
+    });
+    if (config) {
+      return;
+    }
+
+    return this.configurationModel.create({ ...body });
   }
 
   async findOne(organization_id: string) {
