@@ -10,7 +10,7 @@ export class ConfigurationService {
     private readonly configurationRepository: ConfigurationRepository,
     private readonly meterService: MeterService,
     private readonly iotService: IotService,
-  ) { }
+  ) {}
 
   async findOne(organization_id: string): Promise<unknown> {
     const configuration = await this.configurationRepository.findOne(
@@ -32,8 +32,13 @@ export class ConfigurationService {
             updateConfigurationDto,
           );
 
+          const reminder =
+            updateConfigurationDto.minimum_monthly_consumer_deduction
+              ? 'Changes on *Minimum Monthly Consumer Deduction* will take effect on the next scheduled run.'
+              : undefined;
+
           return {
-            response: configuration,
+            response: { configuration, reminder },
             message: 'Settings saved successfully',
           };
         })(),
