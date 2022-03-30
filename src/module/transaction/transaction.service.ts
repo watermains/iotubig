@@ -28,7 +28,7 @@ export class TransactionService {
     private readonly iotService: IotService,
     private readonly meterService: MeterService,
     private readonly logService: LogService,
-  ) { }
+  ) {}
 
   async create(
     user_id: string,
@@ -66,7 +66,9 @@ export class TransactionService {
         const users = await this.userRepo.isOwned(meter.meter_name);
         if (users.length != 0) {
           const header = `Water Meter (${meter.meter_name}) Reload`;
-          const triggerDate = moment().format('MMMM Do YYYY, h:mm:ss a');
+          const triggerDate = moment()
+            .tz('Asia/Manila')
+            .format('MMMM Do YYYY, h:mm:ss a');
 
           users.forEach((user) => {
             this.mailerService.sendCreditNotification(
