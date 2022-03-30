@@ -32,10 +32,25 @@ export class MeterConsumptionRepository implements IMeterConsumption {
   constructor(
     @InjectModel(MeterConsumption.name)
     private meterConsumptionModel: Model<MeterConsumptionDocument>,
-  ) {}
+  ) { }
 
   async create(dto: CreateMeterConsumptionDto) {
     return await this.meterConsumptionModel.create(dto);
+  }
+
+  async upsertMeterConsumption(dto: CreateMeterConsumptionDto) {
+    const startTime = moment.utc(dto.consumed_at).hours(0).minutes(0).seconds(0);
+    const endTime = moment.utc(dto.consumed_at).hours(23).minutes(59).seconds(59);
+    return await this.meterConsumptionModel.findOneAndUpdate(
+      {
+        dev_eui: dto.dev_eui, consumed_at: {
+          "$gte": startTime,
+          "$lte": endTime
+        }
+      },
+      { ...dto },
+      { upsert: true, new: true, sort: { consumed_at: -1 } },
+    );
   }
 
   findMeterConsumption(devEUI: string, startDate: Date, endDate?: Date) {
