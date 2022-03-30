@@ -14,11 +14,11 @@ export class MeterConsumptionService {
     private readonly meterConsRepo: MeterConsumptionRepository,
     private readonly userRepo: UserRepository,
     private readonly screenerService: ScreenerService,
-  ) {}
+  ) { }
 
   async create(organization_id: string, dto: CreateMeterConsumptionDto) {
     const config = await this.configRepo.findOne(organization_id);
-    const consumption = await this.meterConsRepo.create(dto);
+    const consumption = await this.meterConsRepo.upsertMeterConsumption(dto);
 
     delete dto.last_uplink;
     delete dto.consumed_at;
