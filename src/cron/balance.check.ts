@@ -34,7 +34,7 @@ export class BalanceCheckService {
 
   @Cron(
     process.env.NODE_ENV === 'development'
-      ? '*/10 * * * * *'
+      ? '00 27 18 * * *'
       : '00 27 18 * * *',
     // : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
     {

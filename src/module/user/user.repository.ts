@@ -142,21 +142,22 @@ export class UserRepository {
     }
   }
 
-  async seedAdmin(body) {
-    body.password = await bcrypt.hash(body.password, 10);
+  seedAdmin(data: any[]): Promise<UserDocument>[] {
+    return data.map(async (body) => {
+      body.password = await bcrypt.hash(body.password, 10);
+      if (!isIn(body.role, [RoleTypes.admin, RoleTypes.superAdmin])) {
+        throw new Error('Invalid role');
+      }
 
-    if (!isIn(body.role, [RoleTypes.admin, RoleTypes.superAdmin])) {
-      throw new Error('Invalid role');
-    }
+      if (body.role == RoleTypes.superAdmin) {
+        body.organization_id = undefined;
+      }
 
-    if (body.role == RoleTypes.superAdmin) {
-      body.organization_id = undefined;
-    }
-
-    return this.userModel.findOneAndUpdate({ email: body.email }, body, {
-      upsert: true,
-      new: true,
-      setDefaultsOnInsert: true,
+      return this.userModel.findOneAndUpdate({ email: body.email }, body, {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
+      });
     });
   }
 

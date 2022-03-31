@@ -82,11 +82,10 @@ export class Seeder {
   }
 
   async admin(organization) {
-    return await this.adminSeederService
-      .create(organization)
-      .then((createdAdmin) => {
-        this.logger.debug(`Created Admin User: ${createdAdmin}`);
-        return [true, createdAdmin];
+    return Promise.all(await this.adminSeederService.create(organization))
+      .then((result) => {
+        this.logger.debug(`Created Admin Users: ${result}`);
+        return true;
       })
       .catch((error) => error);
   }
