@@ -27,7 +27,7 @@ export interface IMeter {
   findMetersWhere(whereClause: object);
   seed(organization: OrganizationDocument, meterData: CreateMeterDto[]);
   findStats(role: RoleTypes, organization_id: string): Promise<Stats>;
-  removeMeter(devEUI: string);
+  unlinkMeter(meter: MeterDocument);
   createModel(document: object);
 }
 @Injectable()
@@ -106,10 +106,10 @@ export class MeterRepository implements IMeter {
     return await this.meterModel.findOne(whereClause);
   }
 
-  async removeMeter(devEUI: string) {
-    const forRemove = await this.meterModel.findOne({ dev_eui: devEUI });
-    forRemove.deleted_at = new Date();
-    await forRemove.save();
+  async unlinkMeter(meter: MeterDocument) {
+    meter.site_name = null;
+    meter.unit_name = null;
+    await meter.save();
   }
 
   seed(
