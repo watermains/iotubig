@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import { lastValueFrom, map } from 'rxjs';
 import { IotService } from 'src/iot/iot.service';
 import { MailerService } from 'src/mailer/mailer.service';
+import { OrganizationService } from '../organization/organization.service';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { Configuration } from '../configuration/entities/configuration.schema';
 import { Action, LogService } from '../log/log.service';
@@ -28,7 +29,8 @@ export class TransactionService {
     private readonly iotService: IotService,
     private readonly meterService: MeterService,
     private readonly logService: LogService,
-  ) {}
+    private readonly orgService: OrganizationService,
+  ) { }
 
   async create(
     user_id: string,
@@ -70,7 +72,11 @@ export class TransactionService {
             .tz('Asia/Manila')
             .format('MMMM Do YYYY, h:mm:ss a');
 
-          users.forEach((user) => {
+          users.forEach(async (user) => {
+            const org = await this.orgService.findById(
+              user.organization_id.toString(),
+            );
+
             this.mailerService.sendCreditNotification(
               {
                 header,
@@ -78,6 +84,7 @@ export class TransactionService {
                 messages: [],
                 siteName: transaction.site_name,
                 meterName: meter.meter_name,
+                orgName: org.name,
                 dateTriggered: triggerDate,
                 amount: `Php ${transaction.amount}`,
                 balanceStatus: 'credited',

@@ -21,6 +21,7 @@ export interface NotificationOptions {
   messages: string[];
   siteName: string;
   meterName: string;
+  orgName: string;
   dateTriggered: string;
 }
 
@@ -59,16 +60,16 @@ export class MailerService {
   private readonly logger = new Logger(MailerService.name);
   private readonly sender = 'noreply@watermains.net';
 
-  async sendWelcome(firstName: string, email: string) {
+  async sendWelcome(firstName: string, email: string, orgName: string) {
     this.sendEmailWithTemplateOptions(
       email,
       'Welcome to IoTubig',
       'welcome.hbs',
-      { firstName },
+      { firstName, orgName },
     );
   }
 
-  async sendForgotPassword(firstName: string, email: string, token: string) {
+  async sendForgotPassword(firstName: string, email: string, orgName: string, token: string) {
     // Safely join URLs
     const url = new URL(
       path.join(
@@ -83,7 +84,7 @@ export class MailerService {
       email,
       'Reset your password',
       'reset_password.hbs',
-      { firstName, link },
+      { firstName, orgName, link },
     );
   }
 

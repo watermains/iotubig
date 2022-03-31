@@ -7,6 +7,7 @@ import { MailerModule } from 'src/mailer/mailer.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { LogModule } from '../log/log.module';
 import { MeterModule } from '../meter/meter.module';
+import { OrganizationModule } from '../organization/organization.module';
 import { UserModule } from '../user/user.module';
 import { Transaction, TransactionSchema } from './entities/transaction.schema';
 import { TransactionController } from './transaction.controller';
@@ -38,6 +39,7 @@ import { TransactionService } from './transaction.service';
     ]),
     HttpModule,
     MailerModule,
+    OrganizationModule,
     LogModule,
   ],
   controllers: [TransactionController],
@@ -65,4 +67,4 @@ import { TransactionService } from './transaction.service';
   ],
   providers: [TransactionService, IotService, TransactionRepository],
 })
-export class TransactionModule {}
+export class TransactionModule { }
