@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
+import * as pjson from '../package.json';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -17,7 +18,7 @@ async function bootstrap() {
     .addBearerAuth()
     .setTitle('IoTubig')
     .setDescription('Coolness overload')
-    .setDescription('1.0')
+    .setDescription(`${pjson.version}`)
     .addTag('UMPISA')
     .build();
 
