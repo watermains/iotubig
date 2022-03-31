@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as moment from 'moment-timezone';
 
 import { MailerService } from 'src/mailer/mailer.service';
+import { OrganizationService } from '../organization/organization.service';
 import { Configuration } from '../configuration/entities/configuration.schema';
 import { MeterStatus } from '../meter/enum/meter.status.enum';
 import { UserDocument } from '../user/entities/user.schema';
@@ -21,7 +22,7 @@ export interface MeterScreenerInfo {
 
 @Injectable()
 export class ScreenerService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailerService: MailerService, private readonly orgService: OrganizationService) { }
 
   private readonly logger = new Logger(ScreenerService.name);
 
@@ -40,24 +41,21 @@ export class ScreenerService {
     let message = '';
     this.logger.debug(`EVALUATING: ${meter.meterName}`);
     this.logger.debug(
-      `CHECK OVERDRAW: ${meter.allowedFlow} < ${overdrawThreshold} = ${
-        meter.allowedFlow < overdrawThreshold
+      `CHECK OVERDRAW: ${meter.allowedFlow} < ${overdrawThreshold} = ${meter.allowedFlow < overdrawThreshold
       }`,
     );
     if (meter.allowedFlow <= overdrawThreshold && message == '') {
       message = `Overdrawn Water Limit <meter will be closed>`;
     }
     this.logger.debug(
-      `CHECK BELOW ZERO: ${meter.allowedFlow} < ${belowZeroThreshold} = ${
-        meter.allowedFlow < belowZeroThreshold
+      `CHECK BELOW ZERO: ${meter.allowedFlow} < ${belowZeroThreshold} = ${meter.allowedFlow < belowZeroThreshold
       }`,
     );
     if (meter.allowedFlow <= belowZeroThreshold && message == '') {
       message = `Below Zero Balance`;
     }
     this.logger.debug(
-      `CHECK LOW THRESHOLD ${meter.allowedFlow} < ${lowThreshold} = ${
-        meter.allowedFlow < lowThreshold
+      `CHECK LOW THRESHOLD ${meter.allowedFlow} < ${lowThreshold} = ${meter.allowedFlow < lowThreshold
       }`,
     );
     if (meter.allowedFlow <= lowThreshold && message == '') {
@@ -70,8 +68,7 @@ export class ScreenerService {
 
     //CHECK FOR BATTERY THRESHOLD
     this.logger.debug(
-      `CHECK LOW BATTERY THRESHOLD ${
-        meter.batteryLevel
+      `CHECK LOW BATTERY THRESHOLD ${meter.batteryLevel
       } < ${lowBattThreshold} = ${meter.batteryLevel < lowBattThreshold}`,
     );
     if (meter.batteryLevel <= lowBattThreshold) {
@@ -84,7 +81,11 @@ export class ScreenerService {
           .tz('Asia/Manila')
           .format('MMMM Do YYYY, h:mm:ss a');
 
-        users.forEach((user) => {
+        users.forEach(async (user) => {
+          const org = await this.orgService.findById(
+            user.organization_id.toString(),
+          );
+
           this.mailerService.sendNotification(
             {
               header: `Water Meter (${meterName}) Alert`,
@@ -93,6 +94,7 @@ export class ScreenerService {
               messages: messages,
               siteName: meter.siteName,
               meterName: meterName,
+              orgName: org.name,
             },
             `${user.email}`,
             `Water Meter (${meterName}) Alert`,
@@ -130,7 +132,11 @@ export class ScreenerService {
           return;
         }
 
-        users.forEach((user) => {
+        users.forEach(async (user) => {
+          const org = await this.orgService.findById(
+            user.organization_id.toString(),
+          );
+
           this.mailerService.sendMeterStatusNotification(
             {
               header: header,
@@ -140,6 +146,7 @@ export class ScreenerService {
               siteName: meter.siteName,
               meterName: meterName,
               meterStatus,
+              orgName: org.name,
             },
             `${user.email}`,
             header,

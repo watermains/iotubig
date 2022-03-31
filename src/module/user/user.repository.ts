@@ -10,6 +10,7 @@ import { isIn } from 'class-validator';
 import { Model } from 'mongoose';
 import { RoleTypes } from 'src/decorators/roles.decorator';
 import { MailerService } from 'src/mailer/mailer.service';
+import { OrganizationService } from '../organization/organization.service';
 import { Organization } from '../organization/entities/organization.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -23,7 +24,8 @@ export class UserRepository {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
     private mailerService: MailerService,
-  ) {}
+    private readonly orgService: OrganizationService,
+  ) { }
 
   async findOneByEmail(email: string) {
     return this.userModel.findOne({ email });
@@ -44,7 +46,11 @@ export class UserRepository {
     const createdUser = new this.userModel(dto);
     createdUser.role = RoleTypes.customer;
     createdUser.save();
-    this.mailerService.sendWelcome(dto.first_name, dto.email);
+    const org = await this.orgService.findById(
+      createdUser.organization_id.toString(),
+    );
+
+    this.mailerService.sendWelcome(dto.first_name, dto.email, org.name);
     return { message: 'Registration Success' };
   }
 
@@ -78,7 +84,10 @@ export class UserRepository {
     const user = await this.findOneByEmail(dto.email);
     const payload = { email: user.email, id: user._id, role: user.role };
     const token = this.jwtService.sign(payload);
-    this.mailerService.sendForgotPassword(user.first_name, user.email, token);
+    const org = await this.orgService.findById(
+      user.organization_id.toString(),
+    );
+    this.mailerService.sendForgotPassword(user.first_name, user.email, org.name, token);
     return {
       message: 'Reset password link sent on your email address',
     };

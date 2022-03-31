@@ -14,6 +14,8 @@ import { IsEmailExistConstraint } from 'src/decorators/exist-email.decorator';
 import { MeterCheckConstraint } from 'src/validators/meter.validator';
 import { MailerModule } from 'src/mailer/mailer.module';
 import { MeterModule } from '../meter/meter.module';
+import { OrganizationModule } from '../organization/organization.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -24,6 +26,7 @@ import { MeterModule } from '../meter/meter.module';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },
     }),
+    OrganizationModule,
   ],
   controllers: [UserController, AdminController],
   providers: [
@@ -37,4 +40,4 @@ import { MeterModule } from '../meter/meter.module';
   ],
   exports: [UserService, AdminService, UserRepository],
 })
-export class UserModule {}
+export class UserModule { }
