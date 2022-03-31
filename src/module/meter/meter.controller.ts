@@ -112,8 +112,8 @@ export class MeterController {
 
   @Delete(':devEUI')
   @UseInterceptors(ResponseInterceptor)
-  remove(@Param() devEuiDto: MeterDevEUIDto) {
-    return this.meterService.removeMeter(devEuiDto.devEUI);
+  unlink(@Param() devEuiDto: MeterDevEUIDto) {
+    return this.meterService.unlinkMeter(devEuiDto.devEUI);
   }
 }
 

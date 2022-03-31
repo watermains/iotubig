@@ -10,8 +10,8 @@ import { isIn } from 'class-validator';
 import { Model } from 'mongoose';
 import { RoleTypes } from 'src/decorators/roles.decorator';
 import { MailerService } from 'src/mailer/mailer.service';
-import { OrganizationService } from '../organization/organization.service';
 import { Organization } from '../organization/entities/organization.schema';
+import { OrganizationService } from '../organization/organization.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -25,7 +25,7 @@ export class UserRepository {
     private jwtService: JwtService,
     private mailerService: MailerService,
     private readonly orgService: OrganizationService,
-  ) { }
+  ) {}
 
   async findOneByEmail(email: string) {
     return this.userModel.findOne({ email });
@@ -84,10 +84,13 @@ export class UserRepository {
     const user = await this.findOneByEmail(dto.email);
     const payload = { email: user.email, id: user._id, role: user.role };
     const token = this.jwtService.sign(payload);
-    const org = await this.orgService.findById(
-      user.organization_id.toString(),
+    const org = await this.orgService.findById(user.organization_id.toString());
+    this.mailerService.sendForgotPassword(
+      user.first_name,
+      user.email,
+      org.name,
+      token,
     );
-    this.mailerService.sendForgotPassword(user.first_name, user.email, org.name, token);
     return {
       message: 'Reset password link sent on your email address',
     };
@@ -184,5 +187,9 @@ export class UserRepository {
 
   updateMany(filter: object, update: object): any {
     return this.userModel.updateMany(filter, update);
+  }
+
+  deleteMany(filter: object): any {
+    return this.userModel.deleteMany(filter);
   }
 }
