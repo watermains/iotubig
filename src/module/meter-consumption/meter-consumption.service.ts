@@ -18,7 +18,7 @@ export class MeterConsumptionService {
 
   async create(organization_id: string, dto: CreateMeterConsumptionDto) {
     const config = await this.configRepo.findOne(organization_id);
-    const consumption = await this.meterConsRepo.upsertMeterConsumption(dto);
+    const consumption = await this.meterConsRepo.create(dto);
 
     delete dto.last_uplink;
     delete dto.consumed_at;
