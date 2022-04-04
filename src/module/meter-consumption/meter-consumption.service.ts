@@ -14,11 +14,14 @@ export class MeterConsumptionService {
     private readonly meterConsRepo: MeterConsumptionRepository,
     private readonly userRepo: UserRepository,
     private readonly screenerService: ScreenerService,
-  ) { }
+  ) {}
 
   async create(organization_id: string, dto: CreateMeterConsumptionDto) {
     const config = await this.configRepo.findOne(organization_id);
-    const consumption = await this.meterConsRepo.create(dto);
+
+    if (dto.last_uplink) {
+      await this.meterConsRepo.create(dto);
+    }
 
     delete dto.last_uplink;
     delete dto.consumed_at;
@@ -32,7 +35,7 @@ export class MeterConsumptionService {
 
     const rate = config.getConsumptionRate(meter.consumer_type);
     const perRate = meter.getWaterMeterRate(rate);
-    if (consumption) {
+    if (meter) {
       this.screenerService.checkMeters(
         config,
         {
