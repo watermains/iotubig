@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { ConfigurationRepository } from 'src/module/configuration/configuration.repository';
@@ -35,8 +35,8 @@ export class BalanceCheckService {
   @Cron(
     process.env.NODE_ENV === 'development'
       ? '00 27 18 * * *'
-      : '00 00 00 1 * *',
-    //: CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
+      /: '00 00 00 1 * *',
+    : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
     {
       timeZone: 'Asia/Manila',
     },
