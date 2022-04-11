@@ -53,7 +53,7 @@ Populate the ff. seeder files for:
 
 ### Admin
 
-(includes super admin role)
+(includes superadmin role)
 
 - [admin.json](./src/database/seeders/admin/admin.json)
 
