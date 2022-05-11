@@ -131,4 +131,3 @@ $ npm run migrate:down
 # Create Migration Script
 $ npm run migrate:create
 ```
- 
