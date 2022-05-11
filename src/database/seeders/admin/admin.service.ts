@@ -8,7 +8,10 @@ export class AdminSeederService {
     const admins = require('./admin.json');
     const data = [];
     admins.forEach((admin) => {
-      if (admin.role == 'super_admin') {
+      if (
+        admin.role == 'super_admin' ||
+        (process.env.NODE_ENV === 'development' && admin.role == 'admin')
+      ) {
         admin.organization_id = organization._id;
       }
       data.push(admin);
