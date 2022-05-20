@@ -152,24 +152,21 @@ export class MeterService {
       pageSize,
     );
 
+    const meters = data.map((meter) => {
+      const model = this.repo.createModel(meter);
+      const estimated_balance = meter.allowed_flow;
+      return {
+        ...meter,
+        ...model.toJSON(),
+        estimated_balance,
+        low_balance_threshold,
+        battery_level_threshold,
+      };;
+    });
+    
     return {
       response: {
-        meters: data.map((meter) => {
-          const consumption_rate = configuration?.getConsumptionRate(
-            meter.consumer_type,
-          );
-
-          const model = this.repo.createModel(meter);
-          const estimated_balance = model.getEstimatedBalance(consumption_rate);
-
-          return {
-            ...meter,
-            ...model.toJSON(),
-            estimated_balance,
-            low_balance_threshold,
-            battery_level_threshold,
-          };
-        }),
+        meters,
         total_rows,
       },
     };
@@ -222,7 +219,8 @@ export class MeterService {
     );
 
     const water_meter_rate = meter.getWaterMeterRate(consumption_rate);
-    const estimated_balance = meter.getEstimatedBalance(consumption_rate);
+    // const estimated_balance = meter.getEstimatedBalance(consumption_rate);
+    const estimated_balance = Number(meter.allowed_flow);
 
     let org;
 

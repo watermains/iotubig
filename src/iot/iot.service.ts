@@ -77,6 +77,12 @@ export class IotService {
       siteName, 'SVALVE', { data: dto.is_open ? 1 : 0 }, 1);
   }
 
+  sendConsumptionRateUpdate(device_id: string, meterName: string,
+    siteName: string, consumption_rate: number) {
+    return this.send(device_id, meterName,
+      siteName, 'SRATE', { data: consumption_rate ?? 20 }, 1);
+  }
+
   private send(
     device_id: string,
     meterName: string,

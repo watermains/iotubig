@@ -4,11 +4,12 @@ import { CreateUserDto } from 'src/module/user/dto/create-user.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as faker from '@faker-js/faker';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserSeederService {
   constructor(private readonly userRepository: UserRepository) {}
-  create(organization) {
+  async create(organization) {
     const meters = Array<any>();
     meters.push(
       ...JSON.parse(
@@ -19,6 +20,7 @@ export class UserSeederService {
           .toString(),
       ),
     );
+    const password = await bcrypt.hash(`Ump1sa@123`, 10);
     const data = Array<CreateUserDto>();
     meters.forEach((meter) => {
       if (meter.meter_name.includes('NO USER')) {
@@ -30,12 +32,12 @@ export class UserSeederService {
         first_name,
         last_name,
         email: faker.faker.internet.email(first_name, last_name, 'umpisa.co'),
-        password: `ump1sa`,
+        password,
         organization_id: organization._id,
-        water_meter_id: meter.meter_name,
+        water_meter_id: meter.meter_name
       });
     });
 
-    return this.userRepository.seedUser(data);
+    return await this.userRepository.seedUser(data);
   }
 }

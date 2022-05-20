@@ -47,7 +47,9 @@ export class ConfigurationService {
           complete: async () => {
             if (
               updateConfigurationDto.overdraw_limitation ||
-              updateConfigurationDto.water_alarm_threshold
+              updateConfigurationDto.water_alarm_threshold ||
+              updateConfigurationDto.commercial_consumption_rates ||
+              updateConfigurationDto.residential_consumption_rates
             ) {
               const config = await this.configurationRepository.findOne(
                 organization_id,
@@ -60,6 +62,22 @@ export class ConfigurationService {
 
               meters.forEach((meter) => {
                 const rate = config.getConsumptionRate(meter.consumer_type);
+                
+                if (
+                  (updateConfigurationDto.commercial_consumption_rates &&
+                    meter.consumer_type === 'Commercial') ||
+                  (updateConfigurationDto.residential_consumption_rates &&
+                    meter.consumer_type === 'Residential')
+                ) {
+                  lastValueFrom(
+                    this.iotService.sendConsumptionRateUpdate(
+                      meter.wireless_device_id,
+                      meter.meter_name,
+                      meter.site_name,
+                      rate,
+                    ),
+                  );
+                }
 
                 if (updateConfigurationDto.overdraw_limitation) {
                   const overDrawVolume =
