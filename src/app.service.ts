@@ -4,6 +4,6 @@ import * as pjson from '../package.json';
 @Injectable()
 export class AppService {
   alive(): string {
-    return `I Am Alive ${pjson.version} 11052022@1737`;
+    return `I Am Alive ${pjson.version} 08062022@1547`;
   }
 }
