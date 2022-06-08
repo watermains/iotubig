@@ -80,30 +80,30 @@ export class ConfigurationService {
                 }
 
                 if (updateConfigurationDto.overdraw_limitation) {
-                  const overDrawVolume =
-                    config.overdraw_limitation / meter.getWaterMeterRate(rate);
+                  // const overDrawVolume =
+                  //   config.overdraw_limitation / meter.getWaterMeterRate(rate);
 
                   lastValueFrom(
                     this.iotService.sendOverdrawUpdate(
                       meter.wireless_device_id,
                       meter.meter_name,
                       meter.site_name,
-                      overDrawVolume,
+                      config.overdraw_limitation,
                     ),
                   );
                 }
 
                 if (updateConfigurationDto.water_alarm_threshold) {
-                  const lowVolume =
-                    config.water_alarm_threshold /
-                    meter.getWaterMeterRate(rate);
+                  // const lowVolume =
+                  //   config.water_alarm_threshold /
+                  //   meter.getWaterMeterRate(rate);
 
                   lastValueFrom(
                     this.iotService.sendLowBalanceUpdate(
                       meter.wireless_device_id,
                       meter.meter_name,
                       meter.site_name,
-                      lowVolume,
+                      config.water_alarm_threshold,
                     ),
                   );
                 }

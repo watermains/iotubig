@@ -206,7 +206,7 @@ export class TransactionService {
     }
 
     const rate = config.getConsumptionRate(meter.document.consumer_type);
-    const volume = dto.amount / meter.document.getWaterMeterRate(rate);
+    // const volume = dto.amount / meter.document.getWaterMeterRate(rate);
 
     return lastValueFrom(
       this.iotService
@@ -215,7 +215,7 @@ export class TransactionService {
           meter.document.meter_name,
           meter.document.site_name,
           dto.amount > 0 ? true : false,
-          { balance: Math.abs(volume).toString() },
+          { balance: Math.abs(dto.amount).toString() },
         )
         .pipe(
           map((obs) => {
