@@ -62,7 +62,7 @@ export class ScreenerService {
       message = `Low Balance`;
     }
     if (message != '') {
-      message += ` (${meter.allowedFlow}L)`;
+      message += ` (${meter.allowedFlow} Php)`;
       messages.push(message);
     }
 
