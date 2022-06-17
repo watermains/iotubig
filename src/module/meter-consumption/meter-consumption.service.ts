@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
 import { MeterRepository } from '../meter/meter.repository';
-import { TransactionRepository } from '../transaction/transaction.repository';
+// import { TransactionRepository } from '../transaction/transaction.repository';
 import { ScreenerService } from '../screener/screener.service';
 import { UserRepository } from '../user/user.repository';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
@@ -11,7 +11,7 @@ import { MeterConsumptionRepository } from './meter-consumption.repository';
 export class MeterConsumptionService {
   constructor(
     private readonly meterRepo: MeterRepository,
-    private readonly transactionRepo: TransactionRepository,
+    // private readonly transactionRepo: TransactionRepository,
     private readonly configRepo: ConfigurationRepository,
     private readonly meterConsRepo: MeterConsumptionRepository,
     private readonly userRepo: UserRepository,
@@ -30,13 +30,13 @@ export class MeterConsumptionService {
     const oldMeter = await this.meterRepo.findByDevEui(dto.dev_eui);
     const meter = await this.meterRepo.upsertMeterViaConsumption(dto);
 
-    const transaction = await this.transactionRepo.findByDevEui(dto.dev_eui);
+    // const transaction = await this.transactionRepo.findByDevEui(dto.dev_eui);
 
-    const isReloaded = oldMeter && transaction.status === "Pending" ? oldMeter.allowed_flow + transaction.amount === meter.allowed_flow : false
+    // const isReloaded = oldMeter && transaction.status === "Pending" ? oldMeter.allowed_flow + transaction.amount === meter.allowed_flow : false
 
-    if (isReloaded) {
-      await this.transactionRepo.updateStatus(transaction.reference_no, "Successful");
-    }
+    // if (isReloaded) {
+    //   await this.transactionRepo.updateStatus(transaction.reference_no, "Successful");
+    // }
 
     const isChanged =
       oldMeter !== null ? meter.valve_status !== oldMeter.valve_status : false;

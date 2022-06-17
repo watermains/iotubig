@@ -57,7 +57,7 @@ export class TransactionRepository implements ITransaction {
 
     const transaction = await this.transactionModel.create({
       ...dto,
-      status: 'Pending',
+      // status: 'Pending',
       reference_no: 0,
       iot_meter_id: meter.meter_name,
       volume,
@@ -281,17 +281,17 @@ export class TransactionRepository implements ITransaction {
     return { data, fields };
   }
 
-  async findByDevEui(dev_eui: string) {
-    return await this.transactionModel.findOne({ dev_eui });
-  }
+  // async findByDevEui(dev_eui: string) {
+  //   return await this.transactionModel.findOne({ dev_eui });
+  // }
 
-  async updateStatus(reference_no: number, status: string) {
-    return await this.transactionModel.findOneAndUpdate(
-      { reference_no },
-      { status },
-      { new: true },
-    );
-  }
+  // async updateStatus(reference_no: number, status: string) {
+  //   return await this.transactionModel.findOneAndUpdate(
+  //     { reference_no },
+  //     { status },
+  //     { new: true },
+  //   );
+  // }
 
   updateMany(filter: object, update: object): any {
     return this.transactionModel.updateMany(filter, update);

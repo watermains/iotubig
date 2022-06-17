@@ -43,8 +43,8 @@ export class Transaction {
   @Prop({ default: '' })
   unit_name: string;
 
-  @Prop({ required: true })
-  status: string;
+  // @Prop({ required: true })
+  // status: string;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);
