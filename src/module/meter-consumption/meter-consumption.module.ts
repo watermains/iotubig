@@ -17,6 +17,7 @@ import { UserModule } from '../user/user.module';
 import { MeterConsumptionRepository } from './meter-consumption.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { TransactionModule } from '../transaction/transaction.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ConfigModule } from '@nestjs/config';
     MeterModule,
     UserModule,
     ConfigurationModule,
+    TransactionModule,
   ],
   controllers: [MeterConsumptionController, ExternalMeterConsumptionController],
   providers: [MeterConsumptionService, MeterConsumptionRepository],
