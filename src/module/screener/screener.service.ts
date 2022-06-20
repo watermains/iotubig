@@ -32,9 +32,9 @@ export class ScreenerService {
     users: UserDocument[],
   ) {
     const meterName = meter.meterName ?? 'Unspecified';
-    const lowThreshold = config.water_alarm_threshold / meter.perRate;
+    const lowThreshold = config.water_alarm_threshold;
     const belowZeroThreshold = 0;
-    const overdrawThreshold = config.overdraw_limitation / meter.perRate;
+    const overdrawThreshold = config.overdraw_limitation ;
     const lowBattThreshold = config.battery_level_threshold;
 
     const messages = [];
