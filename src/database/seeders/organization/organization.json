@@ -1,4 +1,12 @@
-{
+[{
   "name": "UP",
   "property": "UP Property"
-}
+},
+{
+  "name": "GPC",
+  "property": "GPC"
+},
+{
+  "name": "SSL",
+  "property": "Sonsoles"
+}]
