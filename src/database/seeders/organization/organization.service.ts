@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { OrganizationRepository } from 'src/module/organization/organization.repository';
-import { string } from 'yargs';
 
 @Injectable()
 export class OrganizationSeederService {
@@ -9,8 +8,6 @@ export class OrganizationSeederService {
   ) {}
   create() {
     const data = require('./organization.json');
-    data.forEach((obj: { name: string; property: string }) => {
-      this.organizationRepository.seedOrganization(obj);
-    });
+    return this.organizationRepository.seedOrganization(data);
   }
 }
