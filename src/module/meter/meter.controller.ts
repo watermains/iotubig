@@ -99,7 +99,7 @@ export class MeterController {
     return this.meterService.generateReports(req.user.org_id);
   }
 
-  @Patch(':devEUI')
+  @Patch('/:devEUI')
   @Roles(RoleTypes.superAdmin)
   @UseInterceptors(ResponseInterceptor)
   update(
@@ -110,7 +110,8 @@ export class MeterController {
     return this.meterService.updateMeter(devEuiDto.devEUI, dto, req.user.role);
   }
 
-  @Delete(':devEUI')
+  @Delete('/:devEUI')
+  @Roles(RoleTypes.superAdmin)
   @UseInterceptors(ResponseInterceptor)
   unlink(@Param() devEuiDto: MeterDevEUIDto) {
     return this.meterService.unlinkMeter(devEuiDto.devEUI);

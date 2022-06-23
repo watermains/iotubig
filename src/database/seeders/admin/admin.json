@@ -13,5 +13,13 @@
   "password": "ump1sa",
   "role": "super_admin",
   "organization_id": ""
+},
+{
+  "first_name": "Admin2",
+  "last_name": "IoTubig",
+  "email": "dev2@admin.co",
+  "password": "ump1sa",
+  "role": "admin",
+  "organization_id": ""
 }
 ]
