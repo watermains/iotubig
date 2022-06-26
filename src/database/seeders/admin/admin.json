@@ -1,23 +1,8 @@
-[{
-  "first_name": "Admin",
-  "last_name": "IoTubig",
-  "email": "dev@umpisa.co",
-  "password": "ump1sa",
-  "role": "admin",
-  "organization_id": ""
-},
+[
 {
-  "first_name": "Super Admin",
-  "last_name": "IoTubig",
-  "email": "super@admin.co",
-  "password": "ump1sa",
-  "role": "super_admin",
-  "organization_id": ""
-},
-{
-  "first_name": "dev",
+  "first_name": "gcp",
   "last_name": "tester",
-  "email": "devtester@admin.co",
+  "email": "gcptester@iotubig.com",
   "password": "ump1sa",
   "role": "admin",
   "organization_id": ""
