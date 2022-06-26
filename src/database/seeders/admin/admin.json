@@ -1,8 +1,7 @@
-[
-{
-  "first_name": "gcp",
-  "last_name": "tester",
-  "email": "gcptester@iotubig.com",
+[{
+  "first_name": "Admin",
+  "last_name": "IoTubig",
+  "email": "dev@umpisa.co",
   "password": "ump1sa",
   "role": "admin",
   "organization_id": ""
