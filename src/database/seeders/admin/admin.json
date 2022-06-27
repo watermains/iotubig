@@ -1,9 +1,50 @@
-[{
-  "first_name": "Admin",
-  "last_name": "IoTubig",
-  "email": "dev@umpisa.co",
-  "password": "ump1sa",
-  "role": "admin",
-  "organization_id": ""
-}
+[
+  {
+    "first_name": "Admin-0011",
+    "last_name": "Sonsoles",
+    "email": "sonsoles0011@gmail.com",
+    "password": "SonsolesSuites",
+    "role": "admin",
+    "organization_id": ""
+  },
+  {
+    "first_name": "Admin-0012",
+    "last_name": "Sonsoles",
+    "email": "sonsoles0012@gmail.com",
+    "password": "SonsolesSuites",
+    "role": "admin",
+    "organization_id": ""
+  },
+  {
+    "first_name": "Admin-0014",
+    "last_name": "Sonsoles",
+    "email": "sonsoles0014@gmail.com",
+    "password": "SonsolesSuites",
+    "role": "admin",
+    "organization_id": ""
+  },
+  {
+    "first_name": "Admin-0015",
+    "last_name": "Sonsoles",
+    "email": "sonsoles0015@gmail.com",
+    "password": "SonsolesSuites",
+    "role": "admin",
+    "organization_id": ""
+  },
+  {
+    "first_name": "Admin-0017",
+    "last_name": "Sonsoles",
+    "email": "sonsoles0017@gmail.com",
+    "password": "SonsolesSuites",
+    "role": "admin",
+    "organization_id": ""
+  },
+  {
+    "first_name": "Admin",
+    "last_name": "Sonsoles",
+    "email": "sonsolessuites@gmail.com",
+    "password": "SonsolesSuites",
+    "role": "admin",
+    "organization_id": ""
+  }
 ]
