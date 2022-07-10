@@ -35,8 +35,8 @@ export class BalanceCheckService {
   @Cron(
     process.env.NODE_ENV === 'development'
       ? '00 27 18 * * *'
-      //: '00 00 00 1 * *',
-    : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
+      : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
+      // : '00 00 00 1 * *',
     {
       timeZone: 'Asia/Manila',
     },
@@ -82,7 +82,8 @@ export class BalanceCheckService {
       const commercialRate = config.getConsumptionRate(ConsumerType.Commercial);
       const perCommercialRate = commercialRate / 1000;
       const commercialMinimum =
-        config.minimum_monthly_consumer_deduction / perCommercialRate;
+        // config.minimum_monthly_consumer_deduction / perCommercialRate;
+        config.minimum_monthly_consumer_deduction;
 
       this.logger.debug(`*************`);
       this.logger.debug(`commercialRate: ${commercialRate}`);
@@ -93,7 +94,8 @@ export class BalanceCheckService {
       );
       const perResidentialRate = residentialRate / 1000;
       const residentialMinimum =
-        config.minimum_monthly_consumer_deduction / perResidentialRate;
+        // config.minimum_monthly_consumer_deduction / perResidentialRate;
+        config.minimum_monthly_consumer_deduction;
 
       this.logger.debug(`*************`);
       this.logger.debug(`residentialRate: ${residentialRate}`);
@@ -150,7 +152,8 @@ export class BalanceCheckService {
             `deltaFlow: ${deltaFlow}; with threshold: ${minimum}L`,
           );
           if (deltaFlow < minimum) {
-            const normalizedDeductionAmount = rate * (minimum - deltaFlow) * -1;
+            // const normalizedDeductionAmount = rate * (minimum - deltaFlow) * -1;
+            const normalizedDeductionAmount = (minimum - deltaFlow) * -1;
             const displayDeductionAmount = parseFloat(
               normalizedDeductionAmount.toFixed(2),
             );
