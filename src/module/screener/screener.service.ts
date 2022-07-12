@@ -32,9 +32,9 @@ export class ScreenerService {
     users: UserDocument[],
   ) {
     const meterName = meter.meterName ?? 'Unspecified';
-    const lowThreshold = config.water_alarm_threshold;
+    const lowThreshold = Number(config.water_alarm_threshold);
     const belowZeroThreshold = 0;
-    const overdrawThreshold = config.overdraw_limitation ;
+    const overdrawThreshold = Number(config.overdraw_limitation);
     const lowBattThreshold = config.battery_level_threshold;
 
     const messages = [];
@@ -44,21 +44,21 @@ export class ScreenerService {
       `CHECK OVERDRAW: ${meter.allowedFlow} < ${overdrawThreshold} = ${meter.allowedFlow < overdrawThreshold
       }`,
     );
-    if (meter.allowedFlow <= overdrawThreshold && message == '') {
+    if (Number(meter.allowedFlow) <= overdrawThreshold && message == '') {
       message = `Overdrawn Water Limit <meter will be closed>`;
     }
     this.logger.debug(
       `CHECK BELOW ZERO: ${meter.allowedFlow} < ${belowZeroThreshold} = ${meter.allowedFlow < belowZeroThreshold
       }`,
     );
-    if (meter.allowedFlow <= belowZeroThreshold && message == '') {
+    if (Number(meter.allowedFlow) <= belowZeroThreshold && message == '') {
       message = `Below Zero Balance`;
     }
     this.logger.debug(
       `CHECK LOW THRESHOLD ${meter.allowedFlow} < ${lowThreshold} = ${meter.allowedFlow < lowThreshold
       }`,
     );
-    if (meter.allowedFlow <= lowThreshold && message == '') {
+    if (Number(meter.allowedFlow) <= lowThreshold && message == '') {
       message = `Low Balance`;
     }
     if (message != '') {
