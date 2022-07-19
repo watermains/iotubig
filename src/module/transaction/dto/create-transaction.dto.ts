@@ -4,8 +4,8 @@ import { MeterCheck, MeterField } from 'src/validators/meter.validator';
 
 export class CreateTransactionDto {
   @ApiProperty({ type: 'number' })
-  @IsPositive()
-  @Min(300)
+  // @IsPositive()
+  @Min(0)
   amount: number;
 
   @ApiProperty({ type: 'string' })
