@@ -177,9 +177,7 @@ export class ReportsInterceptor implements NestInterceptor {
         const printer = new PdfPrinter(fonts);
         const res = context.switchToHttp().getResponse();
         res.setHeader('Content-Type', 'application/pdf');
-        let file_name = 'PDF' + '.pdf';
         const pdfDoc = printer.createPdfKitDocument(dd, {});
-        pdfDoc.pipe(fs.createWriteStream(file_name));
         pdfDoc.end();
         return new StreamableFile(pdfDoc);
       }),
