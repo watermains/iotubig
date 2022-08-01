@@ -3,11 +3,15 @@ import {
   ExecutionContext,
   Injectable,
   NestInterceptor,
+  StreamableFile,
 } from '@nestjs/common';
 import * as json2csv from 'json2csv';
 import { Document } from 'mongoose';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import * as fs from 'fs';
+import * as PdfPrinter from 'pdfmake';
+import * as moment from 'moment';
 
 export interface Response<T> {
   statusCode: number;
@@ -115,10 +119,69 @@ export class ReportsInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map(async ({ data, fields }) => {
+        const fonts = {
+          Helvetica: {
+            normal: 'Helvetica',
+            bold: 'Helvetica-Bold',
+            italics: 'Helvetica-Oblique',
+            bolditalics: 'Helvetica-BoldOblique',
+          },
+        };
+        const timeStamp = moment().format('MMMM Do YYYY, h:mm:ss a');
+        const ddFields = fields.map((item: Object) => item['value']);
+        const ddFields1 = ddFields.splice(0, 6);
+        const ddFields2 = [ddFields1[0], ...ddFields];
+        const ddData1 = data.map((item: Object) => [
+          ...ddFields1.map((field: string) => item[field] ?? 'N/A'),
+        ]);
+        const ddData2 = data.map((item: Object) => [
+          ...ddFields2.map((field: string) => item[field] ?? 'N/A'),
+        ]);
+
+        const documentData1 = [ddFields1, ...ddData1];
+        const documentData2 = [ddFields2, ...ddData2];
+        const widths1 = [...Array(ddFields1.length).keys()].map((key, index) =>
+          index === ddFields1.length - 1 ? '*' : 'auto',
+        );
+        const widths2 = [...Array(ddFields2.length).keys()].map((key, index) =>
+          index === ddFields2.length - 1 ? '*' : 'auto',
+        );
+        var dd = {
+          pageOrientation: 'landscape',
+          defaultStyle: {
+            fontSize: 10,
+            font: 'Helvetica',
+          },
+          content: [
+            { text: "IoTubig", fontSize: 14, margin: [0, 0, 0, 16] },
+            { text: timeStamp, fontSize: 11 },
+            {
+              layout: 'lightHorizontalLines',
+              table: {
+                headerRows: 1,
+                widths: widths1,
+                body: documentData1,
+              },
+              margin: [0, 16],
+            },
+            {
+              layout: 'lightHorizontalLines',
+              table: {
+                headerRows: 1,
+                widths: widths2,
+                body: documentData2,
+              },
+            },
+          ],
+        };
+        const printer = new PdfPrinter(fonts);
         const res = context.switchToHttp().getResponse();
-        res.setHeader('Content-Type', 'text/csv');
-        const csv = await json2csv.parseAsync(data, { fields });
-        return csv;
+        res.setHeader('Content-Type', 'application/pdf');
+        let file_name = 'PDF' + '.pdf';
+        const pdfDoc = printer.createPdfKitDocument(dd, {});
+        pdfDoc.pipe(fs.createWriteStream(file_name));
+        pdfDoc.end();
+        return new StreamableFile(pdfDoc);
       }),
     );
   }
