@@ -127,7 +127,7 @@ export class ReportsInterceptor implements NestInterceptor {
             bolditalics: 'Helvetica-BoldOblique',
           },
         };
-        const timeStamp = moment().utc().local().format('MMMM Do YYYY, h:mm:ss a');
+        const timeStamp = moment().tz('Asia/Manila').format('MMMM Do YYYY, h:mm:ss a');
         const ddFields = fields.map((item: Object) => item['value']);
         const ddFields1 = ddFields.splice(0, 6);
         const ddFields2 = [ddFields1[0], ...ddFields];
