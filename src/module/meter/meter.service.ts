@@ -92,6 +92,7 @@ export class MeterService {
     role?: RoleTypes,
     iot_organization_id?: string,
     transactable?: boolean,
+    allowed_flow?: number,
   ) {
     const configuration = await this.configRepo.findOne(organization_id);
 
@@ -108,9 +109,14 @@ export class MeterService {
       iot_organization_id?: Mongoose.Types.ObjectId;
       wireless_device_id?: { $nin: unknown[] };
       meter_name?: { $nin: unknown[] };
+      allowed_flow?: number;
     } = {
       deleted_at: null,
     };
+
+    if (allowed_flow) {
+      $match.allowed_flow = Number(allowed_flow);
+    }
 
     if (valve_status) {
       $match.valve_status = Number(valve_status);

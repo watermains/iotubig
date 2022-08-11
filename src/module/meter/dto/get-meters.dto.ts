@@ -44,4 +44,9 @@ export class GetMetersDto {
   @IsBoolean()
   @Type(() => Boolean)
   transactable?: boolean;
+
+  @ApiProperty({ type: 'number', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  allowed_flow?: number;
 }

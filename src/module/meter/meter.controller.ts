@@ -69,6 +69,7 @@ export class MeterController {
       req.user.role,
       req.user.org_id,
       dto.transactable,
+      dto.allowed_flow,
     );
   }
 
