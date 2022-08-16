@@ -23,6 +23,17 @@ export class GetMetersDto {
   @Type(() => Number)
   pageSize = 10;
 
+  @ApiProperty({ type: 'number', required: false, default: 10 })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  sortIndex?: number;
+
+  @ApiProperty({ type: 'string', required: false })
+  @IsOptional()
+  @IsString()
+  ascending?: string;
+
   @ApiProperty({ type: 'string', required: false })
   @IsOptional()
   @IsString()

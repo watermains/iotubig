@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import * as Mongoose from 'mongoose';
 import { from, lastValueFrom, map, tap } from 'rxjs';
+import { meterTableIndex } from 'src/common/helper';
 import { RoleTypes } from 'src/decorators/roles.decorator';
 import { IotService } from 'src/iot/iot.service';
 import { ConfigurationRepository } from '../configuration/configuration.repository';
@@ -93,13 +94,15 @@ export class MeterService {
     iot_organization_id?: string,
     transactable?: boolean,
     allowed_flow?: number,
+    sortIndex?: number,
+    ascending?: string,
   ) {
     const configuration = await this.configRepo.findOne(organization_id);
 
     const low_balance_threshold = configuration?.water_alarm_threshold;
     const battery_level_threshold = configuration?.battery_level_threshold;
-
-    const $sort = { createdAt: 1 };
+    const sort_by = meterTableIndex(sortIndex);
+    const $sort = { [sort_by] : ascending === 'true' ? 1 : -1 };
 
     const $match: {
       deleted_at: null;
@@ -167,9 +170,9 @@ export class MeterService {
         estimated_balance,
         low_balance_threshold,
         battery_level_threshold,
-      };;
+      };
     });
-    
+
     return {
       response: {
         meters,

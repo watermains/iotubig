@@ -70,6 +70,8 @@ export class MeterController {
       req.user.org_id,
       dto.transactable,
       dto.allowed_flow,
+      dto.sortIndex,
+      dto.ascending,
     );
   }
 
