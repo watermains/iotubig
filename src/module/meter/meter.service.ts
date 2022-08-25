@@ -23,6 +23,7 @@ import { UpdateMeterDto } from './dto/update-meter.dto';
 import { ConsumerType } from './enum/consumer-type.enum';
 import { MeterStatus } from './enum/meter.status.enum';
 import { MeterRepository } from './meter.repository';
+import * as moment from 'moment';
 
 @Injectable()
 export class MeterService {
@@ -164,12 +165,14 @@ export class MeterService {
     const meters = data.map((meter) => {
       const model = this.repo.createModel(meter);
       const estimated_balance = meter.allowed_flow;
+      const last_uplink = moment(meter.updatedAt).format('LLL');
       return {
         ...meter,
         ...model.toJSON(),
         estimated_balance,
         low_balance_threshold,
         battery_level_threshold,
+        last_uplink,
       };
     });
 
@@ -323,6 +326,11 @@ export class MeterService {
 
   async findStats(role: RoleTypes, organization_id?: string) {
     const res = await this.repo.findStats(role, organization_id);
+    return { response: res };
+  }
+
+  async findLatestUplink(organization_id?: string) {
+    const res = await this.repo.findLatestUplink(organization_id);
     return { response: res };
   }
 

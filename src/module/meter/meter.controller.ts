@@ -96,6 +96,13 @@ export class MeterController {
     return this.meterService.findStats(req.user.role, req.user.org_id);
   }
 
+  @Get('/uplink')
+  @Roles(RoleTypes.superAdmin)
+  @UseInterceptors(ResponseInterceptor)
+  findUplink(@Req() req) {
+    return this.meterService.findLatestUplink(req.user.org_id);
+  }
+
   @Get('/reports')
   @UseInterceptors(ReportsInterceptor)
   generateReports(@Req() req) {

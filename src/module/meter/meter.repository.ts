@@ -125,6 +125,11 @@ export class MeterRepository implements IMeter {
     });
   }
 
+  async findLatestUplink(organization_id?: string) {
+    const response = await this.meterModel.findOne({ iot_organization_id: organization_id}, {}, { sort: { 'updatedAt' : -1 }});
+    return response;
+  }
+
   async findStats(role: RoleTypes, organization_id?: string): Promise<Stats> {
     const pipeline =
       role == RoleTypes.admin && organization_id
