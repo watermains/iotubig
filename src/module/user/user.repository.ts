@@ -16,6 +16,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './entities/user.schema';
 
 @Injectable()
@@ -109,6 +110,18 @@ export class UserRepository {
     }
 
     throw new NotAcceptableException(['Same as old password']);
+  }
+
+  async changeEmail(request, dto: UpdateUserDto) {
+    const user = await this.userModel.findOne({ water_meter_id: request.body.meter }).select('+email');
+    const match = await bcrypt.compare(dto.email, user.email);
+    if (!match) {
+      user.email = dto.email;
+      user.save();
+      return { message: 'Email Changed Successfully!' };
+    }
+
+    throw new NotAcceptableException(['You are entering the same Email address.']);
   }
 
   // ADMIN

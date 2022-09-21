@@ -5,6 +5,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserRepository } from '../user.repository';
 
 @Injectable()
@@ -41,5 +42,12 @@ export class UserService {
     resetPasswordDto: ResetPasswordDto,
   ): Promise<unknown> {
     return this.userRepository.resetPassword(request, resetPasswordDto);
+  }
+
+  async changeEmail(
+    request,
+    updateUserDto: UpdateUserDto,
+  ): Promise<unknown> {
+    return this.userRepository.changeEmail(request, updateUserDto);
   }
 }

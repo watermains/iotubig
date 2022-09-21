@@ -14,6 +14,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserService } from './user.service';
 
 @ApiTags('User')
@@ -47,5 +48,11 @@ export class UserController {
   @UseInterceptors(ResponseInterceptor)
   resetPassword(@Req() req, @Body() body: ResetPasswordDto) {
     return this.userService.resetPassword(req, body);
+  }
+
+  @Post('auth/change-email')
+  @UseInterceptors(ResponseInterceptor)
+  changeEmail(@Req() req, @Body() body: UpdateUserDto) {
+    return this.userService.changeEmail(req, body);
   }
 }
