@@ -44,10 +44,7 @@ export class UserService {
     return this.userRepository.resetPassword(request, resetPasswordDto);
   }
 
-  async changeEmail(
-    request,
-    updateUserDto: UpdateUserDto,
-  ): Promise<unknown> {
+  async changeEmail(request, updateUserDto: UpdateUserDto): Promise<unknown> {
     return this.userRepository.changeEmail(request, updateUserDto);
   }
 }

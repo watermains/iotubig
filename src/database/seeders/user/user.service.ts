@@ -34,7 +34,9 @@ export class UserSeederService {
         email: faker.faker.internet.email(first_name, last_name, 'umpisa.co'),
         password,
         organization_id: organization._id,
-        water_meter_id: meter.meter_name
+        water_meter_id: meter.meter_name,
+        isActive: true,
+        isDeactivated: false,
       });
     });
 

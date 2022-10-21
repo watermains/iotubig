@@ -37,6 +37,16 @@ export interface ErrorAlertNotificationOptions {
   errorDesc: string;
 }
 
+export interface EmailVerificationOptions {
+  header: string;
+  userId: string;
+  adminName: string;
+  newUserAccount: string;
+  meterName: string;
+  orgName: string;
+  redirectUrl: string; 
+}
+
 export interface MeterStatusNotificationOptions extends NotificationOptions {
   meterStatus: string;
 }
@@ -86,6 +96,14 @@ export class MailerService {
       'reset_password.hbs',
       { firstName, orgName, link },
     );
+  }
+
+  async sendEmailVerification(
+    options: EmailVerificationOptions,
+    email: string,
+    subject: string,
+  ) {
+    this.sendEmailWithTemplateOptions(email, subject, 'verify_account.hbs', options);
   }
 
   async sendCreditNotification(

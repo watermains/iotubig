@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
 import { IsEmailAlreadyExist } from 'src/decorators/unique-email.decorator';
 import { MeterCheck, MeterField } from 'src/validators/meter.validator';
 
@@ -36,4 +36,14 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   organization_id: string;
+
+  @ApiProperty({ type: 'boolean', required: false, default: false })
+  @IsOptional()
+  @IsBoolean()
+  isActive: boolean;
+
+  @ApiProperty({ type: 'boolean', required: false, default: false })
+  @IsOptional()
+  @IsBoolean()
+  isDeactivated: boolean;
 }

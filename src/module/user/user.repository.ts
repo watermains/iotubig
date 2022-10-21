@@ -18,6 +18,9 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './entities/user.schema';
+import * as path from 'path';
+import { ObjectId } from 'mongodb';
+import { VerifyUserDto } from '../verify-users/dto/verify-user-dto';
 
 @Injectable()
 export class UserRepository {
@@ -42,14 +45,115 @@ export class UserRepository {
     });
   }
 
+  async findEmailByMeter(water_meter_id: string) {
+    return this.userModel.find({
+      water_meter_id,
+      isActive: true,
+      isDeactivated: false
+    });
+  }
+
+  async findUnverifiedUsers(iot_organization_id: ObjectId) {
+    return this.userModel.find(
+      {
+        organization_id: iot_organization_id,
+        role: RoleTypes.customer,
+        isActive: false,
+        isDeactivated: false,
+      },
+      [],
+      { sort: { createdAt: -1 } },
+    );
+  }
+
+  async verifyUser(organizationId: ObjectId, dto: VerifyUserDto) {
+    await this.userModel.updateMany(
+      {
+        organization_id: organizationId,
+        water_meter_id: dto.water_meter_id,
+        $and: [
+          { $or: [{ isActive: true }, { isActive: undefined }] },
+          { $or: [{ isDeactivated: false }, { isDeactivated: undefined }] },
+        ],
+      },
+      { isActive: false, isDeactivated: true },
+    );
+
+    await this.userModel.findOneAndUpdate(
+      {
+        organization_id: organizationId,
+        water_meter_id: dto.water_meter_id,
+        email: dto.email,
+        isActive: false,
+        isDeactivated: false,
+      },
+      { isActive: true },
+    );
+    return {
+      message: 'Account verified successfully!',
+    };
+  }
+
+  async deactivateUser(organizationId: ObjectId, dto: VerifyUserDto) {
+    await this.userModel.findOneAndUpdate(
+      {
+        organization_id: organizationId,
+        water_meter_id: dto.water_meter_id,
+        email: dto.email,
+
+        $or: [{ isDeactivated: false }, { isDeactivated: undefined }],
+      },
+      { isActive: false, isDeactivated: true },
+    );
+    return {
+      message: 'Account deactivated!',
+    };
+  }
+
   async create(dto: CreateUserDto) {
-    console.log(dto);
     const createdUser = new this.userModel(dto);
-    createdUser.role = RoleTypes.customer;
-    createdUser.save();
     const org = await this.orgService.findById(
       createdUser.organization_id.toString(),
     );
+    const users = await this.isOwned(dto.water_meter_id);
+    const adminDetails = await this.userModel.findOne({
+      organization_id: createdUser.organization_id.toString(),
+      role: 'admin',
+    });
+
+    await this.userModel.updateMany(
+      {
+        role: RoleTypes.customer,
+        water_meter_id: createdUser.water_meter_id,
+        isDeactivated: false,
+        isActive: false,
+      },
+      { isDeactivated: true },
+    );
+
+    if (users.length > 1) {
+      const header = `A new account was created for ${org.name} and it needs your confirmation!`;
+      const link = `/verifyUsers`;
+      const redirectUrl = new URL(
+        path.join(process.env.ADMIN_FRONT_END_URL, link),
+      ).toString();
+      const options = {
+        header,
+        userId: createdUser.id,
+        adminName: adminDetails.first_name,
+        newUserAccount: createdUser.email,
+        meterName: createdUser.water_meter_id,
+        orgName: org.name,
+        redirectUrl,
+      };
+      this.mailerService.sendEmailVerification(
+        options,
+        adminDetails.email,
+        header,
+      );
+    }
+    createdUser.role = RoleTypes.customer;
+    createdUser.save();
 
     this.mailerService.sendWelcome(dto.first_name, dto.email, org.name);
     return { message: 'Registration Success' };
@@ -58,7 +162,12 @@ export class UserRepository {
   async login(dto: LoginUserDto) {
     try {
       const user = await this.userModel
-        .findOne({ email: dto.email, role: RoleTypes.customer })
+        .findOne({
+          email: dto.email,
+          role: RoleTypes.customer,
+          isActive: true,
+          isDeactivated: false,
+        })
         .select('+password')
         .exec();
       const isMatch = await bcrypt.compare(dto.password, user.password);
@@ -113,7 +222,9 @@ export class UserRepository {
   }
 
   async changeEmail(request, dto: UpdateUserDto) {
-    const user = await this.userModel.findOne({ water_meter_id: request.body.meter }).select('+email');
+    const user = await this.userModel
+      .findOne({ water_meter_id: request.body.meter })
+      .select('+email');
     const match = await bcrypt.compare(dto.email, user.email);
     if (!match) {
       user.email = dto.email;
@@ -121,7 +232,9 @@ export class UserRepository {
       return { message: 'Email Changed Successfully!' };
     }
 
-    throw new NotAcceptableException(['You are entering the same Email address.']);
+    throw new NotAcceptableException([
+      'You are entering the same Email address.',
+    ]);
   }
 
   // ADMIN

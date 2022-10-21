@@ -20,6 +20,7 @@ import {
   ScreenerModule,
   AuthModule,
   LogModule,
+  VerifyUsersModule,
 } from './module';
 import { MailerModule } from './mailer/mailer.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -44,6 +45,7 @@ import { CronModule } from './cron/cron.module';
     CronModule,
     AuthModule,
     LogModule,
+    VerifyUsersModule
   ],
   controllers: [AppController],
   providers: [AppService],

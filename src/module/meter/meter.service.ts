@@ -103,7 +103,7 @@ export class MeterService {
     const low_balance_threshold = configuration?.water_alarm_threshold;
     const battery_level_threshold = configuration?.battery_level_threshold;
     const sort_by = meterTableIndex(sortIndex);
-    const $sort = { [sort_by] : ascending === 'true' ? 1 : -1 };
+    const $sort = { [sort_by]: ascending === 'true' ? 1 : -1 };
 
     const $match: {
       deleted_at: null;
@@ -162,19 +162,24 @@ export class MeterService {
       pageSize,
     );
 
-    const meters = data.map((meter) => {
-      const model = this.repo.createModel(meter);
-      const estimated_balance = meter.allowed_flow;
-      const last_uplink = moment(meter.updatedAt).format('LLL');
-      return {
-        ...meter,
-        ...model.toJSON(),
-        estimated_balance,
-        low_balance_threshold,
-        battery_level_threshold,
-        last_uplink,
-      };
-    });
+
+    const meters = await Promise.all(
+      data.map(async (meter) => {
+        const response = await this.userRepo.findEmailByMeter(meter.meter_name);
+        const model = this.repo.createModel(meter);
+        const estimated_balance = meter.allowed_flow;
+        const last_uplink = moment(meter.updatedAt).format('LLL');
+        return {
+          ...meter,
+          ...model.toJSON(),
+          estimated_balance,
+          low_balance_threshold,
+          battery_level_threshold,
+          last_uplink,
+          email: response[0]?.email ?? '',
+        };
+      }),
+    );
 
     return {
       response: {

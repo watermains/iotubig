@@ -26,6 +26,12 @@ export class User {
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'organization' })
   organization_id: Organization;
+
+  @Prop()
+  isActive: boolean;
+
+  @Prop()
+  isDeactivated: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
