@@ -32,10 +32,16 @@ export class MeterConsumptionService {
 
     const transaction = await this.transactionRepo.findByDevEui(dto.dev_eui);
 
-    const isReloaded = oldMeter && transaction.status === "Pending" ? oldMeter.allowed_flow + transaction.amount === meter.allowed_flow : false
+    const isReloaded =
+      oldMeter && transaction.status === 'Pending'
+        ? oldMeter.allowed_flow + transaction.amount === meter.allowed_flow
+        : false;
 
     if (isReloaded) {
-      await this.transactionRepo.updateStatus(transaction.reference_no, "Successful");
+      await this.transactionRepo.updateStatus(
+        transaction.reference_no,
+        'Successful',
+      );
     }
 
     const isChanged =
@@ -65,8 +71,39 @@ export class MeterConsumptionService {
     return { message: 'Meter Consumption successfully recorded' };
   }
 
-  findMeterConsumption(devEUI: string, startDate: Date, endDate?: Date) {
-    return this.meterConsRepo.findMeterConsumption(devEUI, startDate, endDate);
+  async findMeterConsumption(
+    devEUI: string,
+    created_by_id: string,
+    organization_id: string,
+    startDate: Date,
+    endDate?: Date,
+  ) {
+    const { meter_name } = await this.meterRepo.findByDevEui(devEUI);
+    const user = await this.userRepo.findActiveUserByMeter(meter_name);
+    const { data: transactions, total_rows } =
+      await this.transactionRepo.findWhere(0, 10, organization_id, devEUI);
+
+    const response = await this.meterConsRepo.findMeterConsumption(
+      devEUI,
+      startDate,
+      endDate,
+    );
+
+    const meterConsumption = response.map((res) => {
+      return {
+        _id: res?._id,
+        userId: user[0]._id,
+        dev_eui: res.dev_eui,
+        iot_meter_id: meter_name,
+        created_by: created_by_id,
+        current_meter_volume: res.allowed_flow,
+        amount: 0,
+        createdAt: res.consumed_at,
+      };
+    });
+    const allTransactions = [ ...meterConsumption, ...transactions];
+    allTransactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return { response: [...allTransactions.slice(0,10)] };
   }
 
   generateReports(
