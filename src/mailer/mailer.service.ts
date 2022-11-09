@@ -178,7 +178,7 @@ export class MailerService {
     this.sendEmail(emailOptions);
   }
 
-  private async sendEmail(options: EmailOptions) {
+  private sendEmail(options: EmailOptions) {
     const email = {
       ...options,
       message: options.html,
@@ -206,7 +206,7 @@ export class MailerService {
       },
     };
 
-    await this.ses
+    this.ses
       .sendEmail(input)
       .then((val) => {
         this.logger.debug(val);
