@@ -48,16 +48,13 @@ export class MeterConsumptionController {
   }
 
   @Get(':devEUI')
-  @UseInterceptors(ResponseInterceptor)
+  @UseInterceptors(ResponseInterceptor, DocumentsInterceptor)
   findMeterConsumption(
-    @Req() req,
     @Param('devEUI') devEUI: string,
     @Query(new ValidationPipe({ transform: true })) dto: FilterDateDto,
   ) {
     return this.meterConsumptionService.findMeterConsumption(
       devEUI,
-      req.user.id,
-      req.user.org_id,
       dto.startDate,
       dto.endDate,
     );

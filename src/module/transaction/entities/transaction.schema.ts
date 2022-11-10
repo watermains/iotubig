@@ -37,9 +37,6 @@ export class Transaction {
   @Prop({ required: true })
   dev_eui: string;
 
-  @Prop({ required: true })
-  userId: string;
-
   @Prop({ default: '' })
   site_name: string;
 

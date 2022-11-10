@@ -165,7 +165,7 @@ export class MeterService {
 
     const meters = await Promise.all(
       data.map(async (meter) => {
-        const response = await this.userRepo.findActiveUserByMeter(meter.meter_name);
+        const response = await this.userRepo.findEmailByMeter(meter.meter_name);
         const model = this.repo.createModel(meter);
         const estimated_balance = meter.allowed_flow;
         const last_uplink = moment(meter.updatedAt).format('LLL');

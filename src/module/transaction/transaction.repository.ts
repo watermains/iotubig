@@ -13,8 +13,7 @@ import {
 
 export interface ITransaction {
   create(
-    created_by: string,
-    userId: string,
+    user_id: string,
     dto: CreateTransactionDto,
     meter: Meter,
     config: Configuration,
@@ -49,8 +48,7 @@ export class TransactionRepository implements ITransaction {
     private transactionModel: Model<TransactionDocument>,
   ) {}
   async create(
-    created_by: string,
-    userId: string,
+    user_id: string,
     dto: CreateTransactionDto,
     meter: Meter,
     config: Configuration,
@@ -61,7 +59,6 @@ export class TransactionRepository implements ITransaction {
 
     const transaction = await this.transactionModel.create({
       ...dto,
-      userId,
       status: 'Pending',
       reference_no: 0,
       iot_meter_id: meter.meter_name,
@@ -70,7 +67,7 @@ export class TransactionRepository implements ITransaction {
       site_name: meter.site_name,
       unit_name: meter.unit_name,
       current_meter_volume: meter.allowed_flow,
-      created_by,
+      created_by: user_id,
     });
 
     return transaction;

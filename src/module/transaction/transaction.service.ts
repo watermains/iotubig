@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -41,8 +39,7 @@ export class TransactionService {
     config: Configuration,
   ) {
     const meter = await this.meterRepo.findByDevEui(dto.dev_eui);
-    const user = await this.userRepo.findActiveUserByMeter(meter?.meter_name);
-    const transaction = await this.repo.create(user_id, user[0]._id, dto, meter, config);
+    const transaction = await this.repo.create(user_id, dto, meter, config);
     if (transaction === undefined) {
       throw new InternalServerErrorException(
         'Transaction not recorded on the application. Contact your administrator.',
@@ -68,7 +65,7 @@ export class TransactionService {
           organization_id,
         });
 
-        const users = await this.userRepo.findActiveUserByMeter(meter.meter_name);
+        const users = await this.userRepo.isOwned(meter.meter_name);
         if (users.length != 0) {
           const header = `Water Meter (${meter.meter_name}) Reload`;
           const triggerDate = moment()
@@ -113,21 +110,6 @@ export class TransactionService {
   }
 
   async findAll(
-    offset: number,
-    pageSize: number,
-
-    organization_id: string,
-  ): Promise<unknown> {
-    const { data: transactions, total_rows } = await this.repo.findWhere(
-      offset,
-      pageSize,
-      organization_id,
-    );
-
-    return { response: { transactions, total_rows } };
-  }
-
-  async findUser(
     offset: number,
     pageSize: number,
 
