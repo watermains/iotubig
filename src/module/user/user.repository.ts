@@ -45,7 +45,7 @@ export class UserRepository {
     });
   }
 
-  async findEmailByMeter(water_meter_id: string) {
+  async findActiveUserByMeter(water_meter_id: string) {
     return this.userModel.find({
       water_meter_id,
       isActive: true,

@@ -22,7 +22,7 @@ export class MeterConsumption {
   @Prop({
     default: 0.0,
     type: Double,
-    get: (val) => val.toString(),
+    // get: (val) => val.toString(),
   })
   allowed_flow: number;
 
