@@ -5,13 +5,12 @@ import {
   NestInterceptor,
   StreamableFile,
 } from '@nestjs/common';
-import * as json2csv from 'json2csv';
 import { Document } from 'mongoose';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import * as fs from 'fs';
 import * as PdfPrinter from 'pdfmake';
 import * as moment from 'moment';
+import { Workbook } from 'exceljs';
 
 export interface Response<T> {
   statusCode: number;
@@ -127,7 +126,9 @@ export class ReportsInterceptor implements NestInterceptor {
             bolditalics: 'Helvetica-BoldOblique',
           },
         };
-        const timeStamp = moment().tz('Asia/Manila').format('MMMM Do YYYY, h:mm:ss a');
+        const timeStamp = moment()
+          .tz('Asia/Manila')
+          .format('MMMM Do YYYY, h:mm:ss a');
         const ddFields = fields.map((item: Object) => item['value']);
         const ddFields1 = ddFields.splice(0, 6);
         const ddFields2 = [ddFields1[0], ...ddFields];
@@ -153,7 +154,7 @@ export class ReportsInterceptor implements NestInterceptor {
             font: 'Helvetica',
           },
           content: [
-            { text: "IoTubig", fontSize: 14, margin: [0, 0, 0, 16] },
+            { text: 'IoTubig', fontSize: 14, margin: [0, 0, 0, 16] },
             { text: timeStamp, fontSize: 11 },
             {
               layout: 'lightHorizontalLines',
@@ -180,6 +181,88 @@ export class ReportsInterceptor implements NestInterceptor {
         const pdfDoc = printer.createPdfKitDocument(dd, {});
         pdfDoc.end();
         return new StreamableFile(pdfDoc);
+      }),
+    );
+  }
+}
+
+@Injectable()
+export class CsvReportsInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map(async ({ data, fields, startDate, endDate }) => {
+        const _data = data.map((item) => {
+          return {
+            ...item,
+            time: moment(item.createdAt).format('LT'),
+          };
+        });
+        const workbook = new Workbook();
+        workbook.creator = 'IoTubig Admin';
+        workbook.created = new Date();
+        workbook.modified = new Date();
+        workbook.lastPrinted = new Date();
+
+        const worksheet = workbook.addWorksheet('Remittance Report', {
+          views: [{ state: 'frozen', ySplit: 5 }],
+          headerFooter: { oddFooter: 'Page &P of &N', oddHeader: 'Odd Page' },
+        });
+        worksheet.mergeCells('A1', 'B1');
+        worksheet.getCell('A1').value = 'General Detailed Report';
+        worksheet.getCell('A2').value = 'From';
+        worksheet.getCell('B2').value = moment(startDate).format('LL');
+        worksheet.getCell('C2').value = 'To';
+        worksheet.getCell('D2').value = moment(endDate).format('LL');
+
+        worksheet.getRow(5).values = fields.map(
+          (field: { label: string }) => field.label,
+        );
+        worksheet.columns = fields.map(
+          (field: { label: string; value: string }) => {
+            return {
+              key: field.value,
+              width: 20,
+            };
+          },
+        );
+        const rows = _data.map((item: { [x: string]: any; }) => {
+          return fields.map((field: { value: string | number; }) => item[field.value]);
+        });
+
+        worksheet.addRows(rows);
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber >= 5) {
+            row.eachCell((cell, colNumber) => {
+              cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' },
+              };
+              cell.alignment = {
+                vertical: 'middle',
+                horizontal: 'center',
+                wrapText: true,
+              };
+            });
+          }
+        });
+
+        const response = context.switchToHttp().getResponse();
+
+        response.setHeader(
+          'Content-Type',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        );
+
+        response.setHeader(
+          'Content-Disposition',
+          'attachment; filename=IoTubig',
+        );
+
+        await workbook.xlsx.write(response);
+
+        response.end();
       }),
     );
   }

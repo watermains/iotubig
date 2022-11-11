@@ -254,36 +254,28 @@ export class TransactionRepository implements ITransaction {
 
     const fields = [
       {
-        label: 'date',
+        label: 'Date',
         value: 'date',
       },
       {
-        label: 'meter_name',
-        value: 'meter.meter_name',
+        label: 'Time',
+        value: 'time',
       },
       {
-        label: 'dev_eui',
-        value: 'meter.dev_eui',
+        label: 'Meter Name',
+        value: 'iot_meter_id',
       },
       {
-        label: 'unit_name',
-        value: 'meter.unit_name',
+        label: 'Meter Number',
+        value: 'dev_eui',
       },
       {
-        label: 'amount',
+        label: 'Load Amount',
         value: 'amount',
-      },
-      {
-        label: 'volume(cu.m)',
-        value: 'volume_cubic_meter',
-      },
-      {
-        label: 'rate',
-        value: 'rate',
       },
     ];
 
-    return { data, fields };
+    return { data, fields, startDate, endDate };
   }
 
   async findByDevEui(dev_eui: string) {

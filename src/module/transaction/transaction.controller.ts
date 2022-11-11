@@ -15,6 +15,7 @@ import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import {
   AggregatedDocumentsInterceptor,
+  CsvReportsInterceptor,
   ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
@@ -53,7 +54,7 @@ export class TransactionController {
   }
 
   @Get('/reports')
-  @UseInterceptors(ReportsInterceptor)
+  @UseInterceptors(CsvReportsInterceptor)
   generateReports(@Req() req, @Query() dto: GenerateTransactionReportsDto) {
     return this.transactionService.generateReports(
       dto.startDate,

@@ -10,6 +10,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import {
+  CsvReportsInterceptor,
   DocumentsInterceptor,
   ReportsInterceptor,
 } from 'src/response.interceptor';
@@ -31,7 +32,7 @@ export class LogController {
   }
 
   @Get('/reports')
-  @UseInterceptors(ReportsInterceptor)
+  @UseInterceptors(CsvReportsInterceptor)
   generateReports(@Req() req, @Query() dto: GenerateLogReportsDto) {
     return this.logService.generateReports(
       dto.startDate,
