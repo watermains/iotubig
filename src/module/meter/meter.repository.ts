@@ -246,56 +246,59 @@ export class MeterRepository implements IMeter {
 
     const fields = [
       {
-        label: 'meter_name',
+        label: 'Meter Name',
         value: 'meter_name',
       },
       {
-        label: 'site_name',
+        label: 'Site Name',
         value: 'site_name',
       },
       {
-        label: 'unit_name',
+        label: 'Unit Name',
         value: 'unit_name',
       },
       {
-        label: 'consumer_type',
+        label: 'Consumer Type',
         value: 'consumer_type',
       },
       {
-        label: 'balance(cu.m)',
+        label: 'Balance(cu.m)',
         value: 'balance',
       },
       {
-        label: 'battery_level',
+        label: 'Battery Level',
         value: 'battery_level',
       },
       {
-        label: 'valve_status',
+        label: 'Valve Status',
         value: 'valve_status',
       },
       {
-        label: 'battery_fault',
+        label: 'Battery Fault',
         value: 'battery_fault',
       },
       {
-        label: 'valve_fault',
+        label: 'Valve Fault',
         value: 'valve_fault',
       },
       {
-        label: 'hall_fault',
+        label: 'Hall Fault',
         value: 'hall_fault',
       },
       {
-        label: 'mag_fault',
+        label: 'Mag Fault',
         value: 'mag_fault',
       },
       {
-        label: 'wireless_device_id',
+        label: 'Meter Number',
         value: 'wireless_device_id',
       },
     ];
 
-    return { data, fields };
+    const workSheetName = 'Meter Status';
+    const sheetHeaderTitle = 'Meter Status Report';
+
+    return { data, fields, workSheetName, sheetHeaderTitle };
   }
 
   createModel(document: object) {
