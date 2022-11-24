@@ -32,7 +32,7 @@ export class TransactionService {
     private readonly meterService: MeterService,
     private readonly logService: LogService,
     private readonly orgService: OrganizationService,
-  ) { }
+  ) {}
 
   async create(
     user_id: string,
@@ -42,7 +42,13 @@ export class TransactionService {
   ) {
     const meter = await this.meterRepo.findByDevEui(dto.dev_eui);
     const user = await this.userRepo.findActiveUserByMeter(meter?.meter_name);
-    const transaction = await this.repo.create(user_id, user[0]._id, dto, meter, config);
+    const transaction = await this.repo.create(
+      user_id,
+      user[0]._id,
+      dto,
+      meter,
+      config,
+    );
     if (transaction === undefined) {
       throw new InternalServerErrorException(
         'Transaction not recorded on the application. Contact your administrator.',
@@ -68,7 +74,9 @@ export class TransactionService {
           organization_id,
         });
 
-        const users = await this.userRepo.findActiveUserByMeter(meter.meter_name);
+        const users = await this.userRepo.findActiveUserByMeter(
+          meter.meter_name,
+        );
         if (users.length != 0) {
           const header = `Water Meter (${meter.meter_name}) Reload`;
           const triggerDate = moment()
@@ -179,6 +187,26 @@ export class TransactionService {
     return this.repo.generateReports(
       startDate,
       endDate,
+      organization_id,
+      utcOffset,
+    );
+  }
+
+  async getAllAvailableStatements(userId: string) {
+    return this.repo.getAllAvailableStatements(
+      userId,
+    );
+  }
+
+  async generateStatements(
+    userId: string,
+    reportDate: string,
+    organization_id: string,
+    utcOffset: number,
+  ) {
+    return this.repo.generateStatements(
+      userId,
+      reportDate,
       organization_id,
       utcOffset,
     );

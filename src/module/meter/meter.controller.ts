@@ -15,9 +15,9 @@ import { ApiBearerAuth, ApiBody, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import {
+  CsvReportsInterceptor,
   DocumentInterceptor,
   MutableDocumentInterceptor,
-  ReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateMeterIOTDto } from './dto/create-meter-iot.dto';
@@ -104,7 +104,7 @@ export class MeterController {
   }
 
   @Get('/reports')
-  @UseInterceptors(ReportsInterceptor)
+  @UseInterceptors(CsvReportsInterceptor)
   generateReports(@Req() req) {
     return this.meterService.generateReports(req.user.org_id);
   }

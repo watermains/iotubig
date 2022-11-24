@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as moment from 'moment';
 import * as Mongoose from 'mongoose';
 import { Model, PipelineStage } from 'mongoose';
 import { Configuration } from '../configuration/entities/configuration.schema';
@@ -35,6 +36,12 @@ export interface ITransaction {
   generateReports(
     startDate: Date,
     endDate: Date,
+    organization_id: string,
+    utcOffset: number,
+  );
+  generateStatements(
+    userId: string,
+    reportDate: string,
     organization_id: string,
     utcOffset: number,
   );
@@ -275,11 +282,142 @@ export class TransactionRepository implements ITransaction {
       },
     ];
 
+    const workSheetName = "Remittance Report";
+    const sheetHeaderTitle = "General Detailed Report";
+
+    return { data, fields, startDate, endDate, workSheetName, sheetHeaderTitle };
+  }
+
+  async getAllAvailableStatements(userId: string) {
+    const dateValues = [];
+    const allTransactions = await this.transactionModel.find({ userId }, [], {
+      sort: { createdAt: -1 },
+    });
+
+    allTransactions.map((transaction) => {
+      const _date = moment(new Date(transaction.createdAt)).format('MMMM YYYY');
+      if (!dateValues.includes(_date)) {
+        dateValues.push(_date);
+      }
+    });
+
+    return { response: { all_statements: dateValues } };
+  }
+
+  async generateStatements(
+    userId: string,
+    reportDate: string,
+    organization_id: string,
+    utcOffset: number,
+  ) {
+    const startDate = moment(new Date(reportDate))
+      .startOf('month')
+      .format('YYYY-MM-DD');
+    const endDate = moment(new Date(reportDate))
+      .endOf('month')
+      .format('YYYY-MM-DD');
+
+    const transactions = await this.transactionModel.aggregate([
+      {
+        $lookup: {
+          from: 'meters',
+          localField: 'iot_meter_id',
+          foreignField: 'meter_name',
+          as: 'meter',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          let: { meter_name: '$iot_meter_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$isActive', true] },
+                    { $eq: ['$$meter_name', '$water_meter_id'] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'users',
+        },
+      },
+      {
+        $addFields: {
+          date: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: { $add: ['$createdAt', utcOffset * 60 * 60 * 1000] },
+            },
+          },
+          volume_cubic_meter: {
+            $divide: ['$volume', 1000],
+          },
+          meter: { $arrayElemAt: ['$meter', 0] },
+          email: { $arrayElemAt: ['$users.email', 0] },
+        },
+      },
+      {
+        $match: {
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+          'meter.iot_organization_id': new Mongoose.Types.ObjectId(
+            organization_id,
+          ),
+          'users.isActive': true,
+        },
+      },
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
+    ]);
+
+    const data = transactions.map((transaction) => {
+      const model = new this.transactionModel(transaction);
+      return { ...transaction, ...model.toJSON() };
+    });
+
+    const fields = [
+      {
+        label: 'Date',
+        value: 'date',
+      },
+      {
+        label: 'Time',
+        value: 'time',
+      },
+      {
+        label: 'Meter Name',
+        value: 'iot_meter_id',
+      },
+      {
+        label: 'Load Amount',
+        value: 'amount',
+      },
+      {
+        label: 'Load Balance',
+        value: 'current_meter_volume',
+      },
+      {
+        label: 'Water Consumed',
+        value: 'cumulative_flow',
+      },
+    ];
+
     return { data, fields, startDate, endDate };
   }
 
   async findByDevEui(dev_eui: string) {
-    return await this.transactionModel.findOne({ dev_eui }).sort({reference_no: -1});
+    return await this.transactionModel
+      .findOne({ dev_eui })
+      .sort({ reference_no: -1 });
   }
 
   async updateStatus(reference_no: number, status: string) {

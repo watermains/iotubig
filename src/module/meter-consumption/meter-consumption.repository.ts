@@ -32,21 +32,30 @@ export class MeterConsumptionRepository implements IMeterConsumption {
   constructor(
     @InjectModel(MeterConsumption.name)
     private meterConsumptionModel: Model<MeterConsumptionDocument>,
-  ) { }
+  ) {}
 
   async create(dto: CreateMeterConsumptionDto) {
     return await this.meterConsumptionModel.create(dto);
   }
 
   async upsertMeterConsumption(dto: CreateMeterConsumptionDto) {
-    const startTime = moment.utc(dto.consumed_at).hours(0).minutes(0).seconds(0);
-    const endTime = moment.utc(dto.consumed_at).hours(23).minutes(59).seconds(59);
+    const startTime = moment
+      .utc(dto.consumed_at)
+      .hours(0)
+      .minutes(0)
+      .seconds(0);
+    const endTime = moment
+      .utc(dto.consumed_at)
+      .hours(23)
+      .minutes(59)
+      .seconds(59);
     return await this.meterConsumptionModel.findOneAndUpdate(
       {
-        dev_eui: dto.dev_eui, consumed_at: {
-          "$gte": startTime,
-          "$lte": endTime
-        }
+        dev_eui: dto.dev_eui,
+        consumed_at: {
+          $gte: startTime,
+          $lte: endTime,
+        },
       },
       { ...dto },
       { upsert: true, new: true, sort: { consumed_at: -1 } },
@@ -110,6 +119,9 @@ export class MeterConsumptionRepository implements IMeterConsumption {
             },
           },
           meter: { $arrayElemAt: ['$meter', 0] },
+          meter_name: { $arrayElemAt: ['$meter.meter_name', 0] },
+          dev_eui: { $arrayElemAt: ['$meter.dev_eui', 0] },
+          unit_name: { $arrayElemAt: ['$meter.unit_name', 0] },
         },
       },
       {
@@ -161,35 +173,47 @@ export class MeterConsumptionRepository implements IMeterConsumption {
       const start_date = first.date;
       const end_date = last.date;
 
+      const meter_name = first.meter_name;
+      const dev_eui = first.dev_eui;
+      const unit_name = first.unit_name;
+
       const volume_cubic_meter = consumption.reduce(
         (accumulator: any, currentValue: any) =>
           accumulator + currentValue.volume_cubic_meter,
         0,
       );
 
-      return { meter, start_date, end_date, volume_cubic_meter };
+      return {
+        meter,
+        start_date,
+        end_date,
+        volume_cubic_meter,
+        meter_name,
+        dev_eui,
+        unit_name,
+      };
     });
 
     const fields = [
       {
-        label: 'start_date',
+        label: 'Start Date',
         value: 'start_date',
       },
       {
-        label: 'end_date',
+        label: 'End Date',
         value: 'end_date',
       },
       {
-        label: 'meter_name',
-        value: 'meter.meter_name',
+        label: 'Meter Name',
+        value: 'meter_name',
       },
       {
-        label: 'dev_eui',
-        value: 'meter.dev_eui',
+        label: 'Meter Number',
+        value: 'dev_eui',
       },
       {
-        label: 'unit_name',
-        value: 'meter.unit_name',
+        label: 'Unit Name',
+        value: 'unit_name',
       },
       {
         label: 'volume(cu.m)',
@@ -197,7 +221,17 @@ export class MeterConsumptionRepository implements IMeterConsumption {
       },
     ];
 
-    return { data, fields };
+    const workSheetName = 'Meter Consumption';
+    const sheetHeaderTitle = 'Meter Consumption Report';
+
+    return {
+      data,
+      fields,
+      startDate,
+      endDate,
+      workSheetName,
+      sheetHeaderTitle,
+    };
   }
 
   seed(organization: OrganizationDocument, data: CreateMeterConsumptionDto[]) {

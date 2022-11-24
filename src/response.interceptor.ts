@@ -117,7 +117,7 @@ export class MutableDocumentsInterceptor<T extends Document[], U extends JSON>
 export class ReportsInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      map(async ({ data, fields }) => {
+      map(async ({ data, fields, startDate, endDate }) => {
         const fonts = {
           Helvetica: {
             normal: 'Helvetica',
@@ -126,52 +126,80 @@ export class ReportsInterceptor implements NestInterceptor {
             bolditalics: 'Helvetica-BoldOblique',
           },
         };
-        const timeStamp = moment()
-          .tz('Asia/Manila')
-          .format('MMMM Do YYYY, h:mm:ss a');
-        const ddFields = fields.map((item: Object) => item['value']);
-        const ddFields1 = ddFields.splice(0, 6);
-        const ddFields2 = [ddFields1[0], ...ddFields];
-        const ddData1 = data.map((item: Object) => [
-          ...ddFields1.map((field: string) => item[field] ?? 'N/A'),
-        ]);
-        const ddData2 = data.map((item: Object) => [
-          ...ddFields2.map((field: string) => item[field] ?? 'N/A'),
+        const filteredFields = fields.filter(
+          (item: { label: string }) => item.label !== 'Meter Name',
+        );
+        const ddFields = filteredFields.map(
+          (item: { label: string }) => item.label,
+        );
+        const ddData = data.map((item: Object) => [
+          ...filteredFields.map((field: { value: string }) => {
+            switch (field.value) {
+              case 'date':
+                return moment(item['createdAt']).format('DD-MMM-YYYY');
+              case 'time':
+                return moment(item['createdAt']).format('h:mm');
+              case 'cumulative_flow':
+                return {
+                  text: item['meter']['cumulative_flow'],
+                  alignment: 'center',
+                };
+              default:
+                return {
+                  text: item[field.value] ?? 'N/A',
+                  alignment: 'center',
+                };
+            }
+          }),
         ]);
 
-        const documentData1 = [ddFields1, ...ddData1];
-        const documentData2 = [ddFields2, ...ddData2];
-        const widths1 = [...Array(ddFields1.length).keys()].map((key, index) =>
-          index === ddFields1.length - 1 ? '*' : 'auto',
-        );
-        const widths2 = [...Array(ddFields2.length).keys()].map((key, index) =>
-          index === ddFields2.length - 1 ? '*' : 'auto',
-        );
+        const documentData = [ddFields, ...ddData];
+        const widths = [...Array(ddFields.length).keys()].map(() => 'auto');
+
         var dd = {
           pageOrientation: 'landscape',
           defaultStyle: {
             fontSize: 10,
             font: 'Helvetica',
           },
+          watermark: {
+            text: 'IoTubig',
+            color: 'gray',
+            opacity: 0.2,
+            bold: false,
+            italics: false,
+          },
           content: [
-            { text: 'IoTubig', fontSize: 14, margin: [0, 0, 0, 16] },
-            { text: timeStamp, fontSize: 11 },
             {
-              layout: 'lightHorizontalLines',
-              table: {
-                headerRows: 1,
-                widths: widths1,
-                body: documentData1,
-              },
-              margin: [0, 16],
+              text: 'Detailed Individual Report',
+              fontSize: 14,
+              margin: [0, 0, 0, 8],
             },
             {
-              layout: 'lightHorizontalLines',
+              text: `User Account Email: ${data[0].email}`,
+              fontSize: 12,
+              margin: [0, 0, 0, 8],
+            },
+            {
+              text: `Meter Name: ${data[0].iot_meter_id}`,
+              fontSize: 12,
+              margin: [0, 0, 0, 8],
+            },
+            {
+              text: `Date Covered: ${moment(startDate).format(
+                'MMM DD, YYYY',
+              )} - ${moment(endDate).format('MMM DD, YYYY')}`,
+              fontSize: 12,
+              margin: [0, 0, 0, 8],
+            },
+            {
+              layout: 'headerLineOnly',
               table: {
                 headerRows: 1,
-                widths: widths2,
-                body: documentData2,
+                widths: widths,
+                body: documentData,
               },
+              margin: [0, 16],
             },
           ],
         };
@@ -190,80 +218,109 @@ export class ReportsInterceptor implements NestInterceptor {
 export class CsvReportsInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      map(async ({ data, fields, startDate, endDate }) => {
-        const _data = data.map((item) => {
-          return {
-            ...item,
-            time: moment(item.createdAt).format('LT'),
-          };
-        });
-        const workbook = new Workbook();
-        workbook.creator = 'IoTubig Admin';
-        workbook.created = new Date();
-        workbook.modified = new Date();
-        workbook.lastPrinted = new Date();
-
-        const worksheet = workbook.addWorksheet('Remittance Report', {
-          views: [{ state: 'frozen', ySplit: 5 }],
-          headerFooter: { oddFooter: 'Page &P of &N', oddHeader: 'Odd Page' },
-        });
-        worksheet.mergeCells('A1', 'B1');
-        worksheet.getCell('A1').value = 'General Detailed Report';
-        worksheet.getCell('A2').value = 'From';
-        worksheet.getCell('B2').value = moment(startDate).format('LL');
-        worksheet.getCell('C2').value = 'To';
-        worksheet.getCell('D2').value = moment(endDate).format('LL');
-
-        worksheet.getRow(5).values = fields.map(
-          (field: { label: string }) => field.label,
-        );
-        worksheet.columns = fields.map(
-          (field: { label: string; value: string }) => {
+      map(
+        async ({
+          data,
+          fields,
+          startDate,
+          endDate,
+          workSheetName,
+          sheetHeaderTitle,
+        }) => {
+          const _data = data.map((item) => {
             return {
-              key: field.value,
-              width: 20,
+              ...item,
+              time: moment(item.createdAt).format('LT'),
             };
-          },
-        );
-        const rows = _data.map((item: { [x: string]: any; }) => {
-          return fields.map((field: { value: string | number; }) => item[field.value]);
-        });
+          });
 
-        worksheet.addRows(rows);
-        worksheet.eachRow((row, rowNumber) => {
-          if (rowNumber >= 5) {
-            row.eachCell((cell, colNumber) => {
-              cell.border = {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' },
-              };
-              cell.alignment = {
-                vertical: 'middle',
-                horizontal: 'center',
-                wrapText: true,
-              };
-            });
+          const workbook = new Workbook();
+          workbook.creator = 'IoTubig Admin';
+          workbook.created = new Date();
+          workbook.modified = new Date();
+          workbook.lastPrinted = new Date();
+
+          const worksheet = workbook.addWorksheet(workSheetName, {
+            views: [{ state: 'frozen', ySplit: 5 }],
+            headerFooter: { oddFooter: 'Page &P of &N', oddHeader: 'Odd Page' },
+          });
+          worksheet.mergeCells('A1', 'B1');
+
+          worksheet.getCell('A1').value = sheetHeaderTitle;
+          worksheet.getCell('A2').value = 'From';
+
+          worksheet.getCell('B2').value = moment(startDate).format('LL');
+
+          worksheet.getCell('C2').value = 'To';
+
+          worksheet.getCell('D2').value = moment(endDate).format('LL');
+
+          if (workSheetName === 'Remittance Report') {
+            const totalBalance = _data.reduce(
+              (accumulated: number, current: { amount: number }) => {
+                return (accumulated += current.amount);
+              },
+              0,
+            );
+            worksheet.getCell('A3').value = 'Total Amount';
+            
+            worksheet.getCell('B3').value = totalBalance;
+            worksheet.getCell('B3').alignment = { horizontal: 'left' };
           }
-        });
 
-        const response = context.switchToHttp().getResponse();
+          worksheet.getRow(5).values = fields.map(
+            (field: { label: string }) => field.label,
+          );
+          worksheet.columns = fields.map(
+            (field: { label: string; value: string }) => {
+              return {
+                key: field.value,
+                width: 20,
+              };
+            },
+          );
+          const rows = _data.map((item: { [x: string]: any }) => {
+            return fields.map(
+              (field: { value: string | number }) => item[field.value],
+            );
+          });
 
-        response.setHeader(
-          'Content-Type',
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        );
+          worksheet.addRows(rows);
+          worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber >= 5) {
+              row.eachCell((cell, colNumber) => {
+                cell.border = {
+                  top: { style: 'thin' },
+                  left: { style: 'thin' },
+                  bottom: { style: 'thin' },
+                  right: { style: 'thin' },
+                };
+                cell.alignment = {
+                  vertical: 'middle',
+                  horizontal: 'center',
+                  wrapText: true,
+                };
+              });
+            }
+          });
 
-        response.setHeader(
-          'Content-Disposition',
-          'attachment; filename=IoTubig',
-        );
+          const response = context.switchToHttp().getResponse();
 
-        await workbook.xlsx.write(response);
+          response.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          );
 
-        response.end();
-      }),
+          response.setHeader(
+            'Content-Disposition',
+            'attachment; filename=IoTubig',
+          );
+
+          await workbook.xlsx.write(response);
+
+          response.end();
+        },
+      ),
     );
   }
 }

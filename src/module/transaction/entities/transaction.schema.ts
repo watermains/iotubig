@@ -31,6 +31,9 @@ export class Transaction {
   @Prop()
   deleted_at: Date;
 
+  @Prop()
+  createdAt: Date;
+
   @Prop({ required: true })
   iot_meter_id: string;
 

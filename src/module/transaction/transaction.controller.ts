@@ -20,6 +20,7 @@ import {
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { GenerateStatementReportsDto } from './dto/generate-statement.report';
 import { GenerateTransactionReportsDto } from './dto/generate-transaction-reports.dto';
 import { GetTransactionsTotalAmountsDto } from './dto/get-transactions-total-amounts.dto';
 import { GetTransactionsDto } from './dto/get-transactions.dto';
@@ -59,6 +60,27 @@ export class TransactionController {
     return this.transactionService.generateReports(
       dto.startDate,
       dto.endDate,
+      req.user.org_id,
+      dto.utcOffset,
+    );
+  }
+
+  @Get('/allstatements')
+  @UseInterceptors(ResponseInterceptor)
+  @Roles(RoleTypes.customer)
+  getAllAvailableStatements(@Req() req) {
+    return this.transactionService.getAllAvailableStatements(
+      req.user.id,
+    );
+  }
+
+  @Get('/statements')
+  @UseInterceptors(ReportsInterceptor)
+  @Roles(RoleTypes.customer)
+  generateStatements(@Req() req, @Query() dto: GenerateStatementReportsDto) {
+    return this.transactionService.generateStatements(
+      req.user.id,
+      dto.reportDate,
       req.user.org_id,
       dto.utcOffset,
     );

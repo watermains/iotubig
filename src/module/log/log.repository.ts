@@ -58,23 +58,33 @@ export class LogRepository implements ILog {
 
     const fields = [
       {
-        label: 'date',
+        label: 'Date',
         value: 'date',
       },
       {
-        label: 'meter_name',
+        label: 'Meter Name',
         value: 'meter_name',
       },
       {
-        label: 'action',
+        label: 'Actions',
         value: 'action',
       },
       {
-        label: 'data',
+        label: 'Data (JSON Formatted)',
         value: 'data',
       },
     ];
 
-    return { data, fields };
+    const workSheetName = 'System Logs';
+    const sheetHeaderTitle = 'System Logs Report';
+
+    return {
+      data,
+      fields,
+      startDate,
+      endDate,
+      workSheetName,
+      sheetHeaderTitle,
+    };
   }
 }

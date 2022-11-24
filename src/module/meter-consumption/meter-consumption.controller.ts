@@ -14,8 +14,7 @@ import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/guard';
 import {
-  DocumentsInterceptor,
-  ReportsInterceptor,
+  CsvReportsInterceptor,
   ResponseInterceptor,
 } from 'src/response.interceptor';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
@@ -34,7 +33,7 @@ export class MeterConsumptionController {
   ) {}
 
   @Get('/reports')
-  @UseInterceptors(ReportsInterceptor)
+  @UseInterceptors(CsvReportsInterceptor)
   generateReports(
     @Req() req,
     @Query() dto: GenerateMeterConsumptionReportsDto,
