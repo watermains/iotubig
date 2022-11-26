@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsOptional } from 'class-validator';
+import { IsBoolean, IsDateString, IsOptional, IsString } from 'class-validator';
 import { CreateMeterIOTDto } from 'src/module/meter/dto/create-meter-iot.dto';
 
 export class CreateMeterConsumptionDto extends CreateMeterIOTDto {
@@ -11,4 +11,9 @@ export class CreateMeterConsumptionDto extends CreateMeterIOTDto {
   @IsOptional()
   @IsBoolean()
   last_uplink: boolean;
+
+  @ApiProperty({ type: 'string' })
+  @IsOptional()
+  @IsString()
+  userId: string;
 }

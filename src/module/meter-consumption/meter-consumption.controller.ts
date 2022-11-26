@@ -72,7 +72,6 @@ export class ExternalMeterConsumptionController {
   ) {}
   @Post()
   create(@Req() req, @Body() dto: CreateMeterConsumptionDto) {
-    console.log(req.org_id);
     return this.meterConsumptionService.create(req.org_id, dto);
   }
 }

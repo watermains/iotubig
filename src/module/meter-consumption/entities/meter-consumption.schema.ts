@@ -12,6 +12,9 @@ export class MeterConsumption {
   @Prop({ default: '' })
   wireless_device_id: string;
 
+  @Prop({ default: '' })
+  userId: string;
+
   @Prop({
     default: 0.0,
     type: Double,

@@ -136,17 +136,29 @@ export class ReportsInterceptor implements NestInterceptor {
           ...filteredFields.map((field: { value: string }) => {
             switch (field.value) {
               case 'date':
-                return moment(item['createdAt']).format('DD-MMM-YYYY');
+                return moment(
+                  new Date(item['createdAt'] ?? item['date']),
+                ).format('DD-MMM-YYYY');
               case 'time':
-                return moment(item['createdAt']).format('h:mm');
+                return {
+                  text: moment(
+                    new Date(
+                      item['createdAt'] ?? `${item['date']} ${item['time']}`,
+                    ),
+                  ).format('h:mm'),
+                  alignment: 'center',
+                };
               case 'cumulative_flow':
                 return {
-                  text: item['meter']['cumulative_flow'],
+                  text: item['meter']
+                    ? Number(item['meter']['cumulative_flow']) /
+                      Number(item['rate'])
+                    : Number(item['cumulative_flow']),
                   alignment: 'center',
                 };
               default:
                 return {
-                  text: item[field.value] ?? 'N/A',
+                  text: item[field.value].toFixed(2) ?? 'N/A',
                   alignment: 'center',
                 };
             }
@@ -155,6 +167,13 @@ export class ReportsInterceptor implements NestInterceptor {
 
         const documentData = [ddFields, ...ddData];
         const widths = [...Array(ddFields.length).keys()].map(() => 'auto');
+
+        const totalAmount = data.reduce(
+          (accumulated: number, current: { amount: number }) => {
+            return (accumulated += current.amount);
+          },
+          0,
+        );
 
         var dd = {
           pageOrientation: 'landscape',
@@ -189,6 +208,11 @@ export class ReportsInterceptor implements NestInterceptor {
               text: `Date Covered: ${moment(startDate).format(
                 'MMM DD, YYYY',
               )} - ${moment(endDate).format('MMM DD, YYYY')}`,
+              fontSize: 12,
+              margin: [0, 0, 0, 8],
+            },
+            {
+              text: `Total Amount Reloaded: ${totalAmount.toFixed(2)}`,
               fontSize: 12,
               margin: [0, 0, 0, 8],
             },
@@ -247,15 +271,21 @@ export class CsvReportsInterceptor implements NestInterceptor {
           worksheet.mergeCells('A1', 'B1');
 
           worksheet.getCell('A1').value = sheetHeaderTitle;
-          worksheet.getCell('A2').value = 'From';
+          if (workSheetName !== 'Meter Status') {
+            worksheet.getCell('A2').value = 'From';
 
-          worksheet.getCell('B2').value = moment(startDate).format('LL');
+            worksheet.getCell('B2').value = moment(startDate).format('LL');
 
-          worksheet.getCell('C2').value = 'To';
+            worksheet.getCell('C2').value = 'To';
 
-          worksheet.getCell('D2').value = moment(endDate).format('LL');
+            worksheet.getCell('D2').value = moment(endDate).format('LL');
+          } else {
+            worksheet.getCell('A2').value = 'Status as of: ';
 
-          if (workSheetName === 'Remittance Report') {
+            worksheet.getCell('B2').value = moment(startDate).format('LL');
+          }
+
+          if (workSheetName === 'Transaction Report') {
             const totalBalance = _data.reduce(
               (accumulated: number, current: { amount: number }) => {
                 return (accumulated += current.amount);
@@ -263,8 +293,8 @@ export class CsvReportsInterceptor implements NestInterceptor {
               0,
             );
             worksheet.getCell('A3').value = 'Total Amount';
-            
-            worksheet.getCell('B3').value = totalBalance;
+
+            worksheet.getCell('B3').value = totalBalance.toFixed(2);
             worksheet.getCell('B3').alignment = { horizontal: 'left' };
           }
 

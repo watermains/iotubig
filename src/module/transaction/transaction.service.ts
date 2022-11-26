@@ -19,6 +19,7 @@ import { MeterService } from '../meter/meter.service';
 import { UserRepository } from '../user/user.repository';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionRepository } from './transaction.repository';
+import { ConsumerType } from '../meter/enum/consumer-type.enum';
 
 @Injectable()
 export class TransactionService {
@@ -204,8 +205,15 @@ export class TransactionService {
     organization_id: string,
     utcOffset: number,
   ) {
+    const {water_meter_id} = await this.userRepo.findOneByID(userId);
+    const {consumer_type} = await this.meterRepo.findMeter({meter_name : water_meter_id});
+    const config = await this.configRepo.findOne(organization_id);
+
+    const rate = consumer_type === ConsumerType.Residential ? config.residential_consumption_rates : config.commercial_consumption_rates;
+
     return this.repo.generateStatements(
-      userId,
+      water_meter_id,
+      rate,
       reportDate,
       organization_id,
       utcOffset,
@@ -250,9 +258,6 @@ export class TransactionService {
     if (meter.document.iot_organization_id.toString() != organization_id) {
       throw new UnauthorizedException();
     }
-
-    const rate = config.getConsumptionRate(meter.document.consumer_type);
-    // const volume = dto.amount / meter.document.getWaterMeterRate(rate);
 
     return lastValueFrom(
       this.iotService

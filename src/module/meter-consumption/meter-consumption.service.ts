@@ -20,9 +20,11 @@ export class MeterConsumptionService {
 
   async create(organization_id: string, dto: CreateMeterConsumptionDto) {
     const config = await this.configRepo.findOne(organization_id);
-
+    const { meter_name } = await this.meterRepo.findByDevEui(dto.dev_eui);
+    const activeUser = await this.userRepo.findActiveUserByMeter(meter_name);
+    
     if (dto.last_uplink) {
-      await this.meterConsRepo.create(dto);
+      await this.meterConsRepo.create({...dto, userId: activeUser[0].id});
     }
 
     delete dto.last_uplink;
@@ -101,9 +103,12 @@ export class MeterConsumptionService {
         createdAt: res.consumed_at,
       };
     });
-    const allTransactions = [ ...meterConsumption, ...transactions];
-    allTransactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return { response: [...allTransactions.slice(0,10)] };
+    const allTransactions = [...meterConsumption, ...transactions];
+    allTransactions.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+    return { response: [...allTransactions.slice(0, 10)] };
   }
 
   generateReports(

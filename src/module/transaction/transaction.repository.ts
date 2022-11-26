@@ -40,7 +40,8 @@ export interface ITransaction {
     utcOffset: number,
   );
   generateStatements(
-    userId: string,
+    water_meter_id: string,
+    rate: number,
     reportDate: string,
     organization_id: string,
     utcOffset: number,
@@ -282,10 +283,17 @@ export class TransactionRepository implements ITransaction {
       },
     ];
 
-    const workSheetName = "Remittance Report";
-    const sheetHeaderTitle = "General Detailed Report";
+    const workSheetName = 'Transaction Report';
+    const sheetHeaderTitle = 'General Detailed Report';
 
-    return { data, fields, startDate, endDate, workSheetName, sheetHeaderTitle };
+    return {
+      data,
+      fields,
+      startDate,
+      endDate,
+      workSheetName,
+      sheetHeaderTitle,
+    };
   }
 
   async getAllAvailableStatements(userId: string) {
@@ -305,7 +313,8 @@ export class TransactionRepository implements ITransaction {
   }
 
   async generateStatements(
-    userId: string,
+    water_meter_id: string,
+    rate: number,
     reportDate: string,
     organization_id: string,
     utcOffset: number,
@@ -346,6 +355,26 @@ export class TransactionRepository implements ITransaction {
         },
       },
       {
+        $lookup: {
+          from: 'meterconsumptions',
+          let: { userId: '$userId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$$userId', '$userId'] },
+                    { $gte: ['$consumed_at', new Date(startDate)] },
+                    { $lte: ['$consumed_at', new Date(endDate)] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'meterconsumptions',
+        },
+      },
+      {
         $addFields: {
           date: {
             $dateToString: {
@@ -358,6 +387,7 @@ export class TransactionRepository implements ITransaction {
           },
           meter: { $arrayElemAt: ['$meter', 0] },
           email: { $arrayElemAt: ['$users.email', 0] },
+          meterconsumptions: '$meterconsumptions',
         },
       },
       {
@@ -379,10 +409,29 @@ export class TransactionRepository implements ITransaction {
       },
     ]);
 
-    const data = transactions.map((transaction) => {
-      const model = new this.transactionModel(transaction);
+    const _meterConsumption = transactions[0].meterconsumptions.map(
+      (consumption: {
+        consumed_at: string | number | Date;
+        allowed_flow: string | number;
+        cumulative_flow: string | number;
+      }) => {
+        return {
+          date: moment(new Date(consumption.consumed_at)).format('YYYY-MM-DD'),
+          time: moment(new Date(consumption.consumed_at)).format('hh:mm a'),
+          iot_meter_id: water_meter_id,
+          amount: 0,
+          current_meter_volume: consumption.allowed_flow,
+          cumulative_flow: Number(consumption.cumulative_flow) / rate,
+        };
+      },
+    );
+
+    const _transactions = transactions.map((transaction) => {
+      const model = new this.transactionModel({...transaction});
       return { ...transaction, ...model.toJSON() };
     });
+
+    const data = [..._transactions, ..._meterConsumption];
 
     const fields = [
       {
@@ -406,7 +455,7 @@ export class TransactionRepository implements ITransaction {
         value: 'current_meter_volume',
       },
       {
-        label: 'Water Consumed',
+        label: 'Water Consumed (cu. m)',
         value: 'cumulative_flow',
       },
     ];
