@@ -50,9 +50,9 @@ export class UserController {
     return this.userService.resetPassword(req, body);
   }
 
-  @Post('auth/change-email')
+  @Post('auth/update-account')
   @UseInterceptors(ResponseInterceptor)
-  changeEmail(@Req() req, @Body() body: UpdateUserDto) {
-    return this.userService.changeEmail(req, body);
+  updateAccount(@Req() req, @Body() body: UpdateUserDto) {
+    return this.userService.updateAccount(req, body);
   }
 }

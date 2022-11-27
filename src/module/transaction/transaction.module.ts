@@ -4,6 +4,7 @@ import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import * as AutoIncrementFactory from 'mongoose-sequence';
 import { IotService } from 'src/iot/iot.service';
 import { MailerModule } from 'src/mailer/mailer.module';
+import { SmsModule } from 'src/sms/sms.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { LogModule } from '../log/log.module';
 import { MeterModule } from '../meter/meter.module';
@@ -29,7 +30,6 @@ import { TransactionService } from './transaction.service';
             inc_field: 'reference_no',
           });
           schema.pre('save', function (next) {
-            // this.created_by = this.$locals.user_id;
             next();
           });
           return schema;
@@ -41,6 +41,7 @@ import { TransactionService } from './transaction.service';
     MailerModule,
     OrganizationModule,
     LogModule,
+    SmsModule,
   ],
   controllers: [TransactionController],
   exports: [

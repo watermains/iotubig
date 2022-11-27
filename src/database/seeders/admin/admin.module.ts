@@ -7,6 +7,7 @@ import { AdminSeederService } from './admin.service';
 import { UserRepository } from 'src/module/user/user.repository';
 import { MailerModule } from 'src/mailer/mailer.module';
 import { OrganizationModule } from 'src/module/organization/organization.module';
+import { SmsModule } from 'src/sms/sms.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { OrganizationModule } from 'src/module/organization/organization.module'
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },
     }),
     MailerModule,
+    SmsModule,
     OrganizationModule,
   ],
   providers: [AdminSeederService, UserRepository],

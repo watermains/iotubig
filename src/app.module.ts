@@ -25,6 +25,7 @@ import {
 import { MailerModule } from './mailer/mailer.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronModule } from './cron/cron.module';
+import { SmsModule } from './sms/sms.module';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -45,7 +46,8 @@ import { CronModule } from './cron/cron.module';
     CronModule,
     AuthModule,
     LogModule,
-    VerifyUsersModule
+    VerifyUsersModule,
+    SmsModule
   ],
   controllers: [AppController],
   providers: [AppService],

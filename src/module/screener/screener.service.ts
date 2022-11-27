@@ -6,6 +6,8 @@ import { OrganizationService } from '../organization/organization.service';
 import { Configuration } from '../configuration/entities/configuration.schema';
 import { MeterStatus } from '../meter/enum/meter.status.enum';
 import { UserDocument } from '../user/entities/user.schema';
+import { smsTypes } from 'src/sms/constants';
+import { SmsService } from 'src/sms/sms.service';
 
 export interface MeterStatusInfo {
   isChanged: boolean;
@@ -22,7 +24,11 @@ export interface MeterScreenerInfo {
 
 @Injectable()
 export class ScreenerService {
-  constructor(private readonly mailerService: MailerService, private readonly orgService: OrganizationService) { }
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly smsService: SmsService,
+    private readonly orgService: OrganizationService,
+  ) {}
 
   private readonly logger = new Logger(ScreenerService.name);
 
@@ -38,28 +44,35 @@ export class ScreenerService {
     const lowBattThreshold = config.battery_level_threshold;
 
     const messages = [];
+    const smsActions = [];
     let message = '';
     this.logger.debug(`EVALUATING: ${meter.meterName}`);
     this.logger.debug(
-      `CHECK OVERDRAW: ${meter.allowedFlow} < ${overdrawThreshold} = ${meter.allowedFlow < overdrawThreshold
+      `CHECK OVERDRAW: ${meter.allowedFlow} < ${overdrawThreshold} = ${
+        meter.allowedFlow < overdrawThreshold
       }`,
     );
     if (Number(meter.allowedFlow) <= overdrawThreshold && message == '') {
       message = `Overdrawn Water Limit <meter will be closed>`;
+      smsActions.push(smsTypes.OVERDRAWN);
     }
     this.logger.debug(
-      `CHECK BELOW ZERO: ${meter.allowedFlow} < ${belowZeroThreshold} = ${meter.allowedFlow < belowZeroThreshold
+      `CHECK BELOW ZERO: ${meter.allowedFlow} < ${belowZeroThreshold} = ${
+        meter.allowedFlow < belowZeroThreshold
       }`,
     );
     if (Number(meter.allowedFlow) <= belowZeroThreshold && message == '') {
       message = `Below Zero Balance`;
+      smsActions.push(smsTypes.BELOW_ZERO);
     }
     this.logger.debug(
-      `CHECK LOW THRESHOLD ${meter.allowedFlow} < ${lowThreshold} = ${meter.allowedFlow < lowThreshold
+      `CHECK LOW THRESHOLD ${meter.allowedFlow} < ${lowThreshold} = ${
+        meter.allowedFlow < lowThreshold
       }`,
     );
     if (Number(meter.allowedFlow) <= lowThreshold && message == '') {
       message = `Low Balance`;
+      smsActions.push(smsTypes.LOW_BALANCE);
     }
     if (message != '') {
       message += ` (${meter.allowedFlow} Php)`;
@@ -68,11 +81,13 @@ export class ScreenerService {
 
     //CHECK FOR BATTERY THRESHOLD
     this.logger.debug(
-      `CHECK LOW BATTERY THRESHOLD ${meter.batteryLevel
+      `CHECK LOW BATTERY THRESHOLD ${
+        meter.batteryLevel
       } < ${lowBattThreshold} = ${meter.batteryLevel < lowBattThreshold}`,
     );
     if (meter.batteryLevel <= lowBattThreshold) {
       messages.push(`Low Battery ${meter.batteryLevel}%`);
+      smsActions.push(smsTypes.LOW_BATTERY);
     }
 
     if (messages.length != 0) {
@@ -99,6 +114,31 @@ export class ScreenerService {
             `${user.email}`,
             `Water Meter (${meterName}) Alert`,
           );
+          smsActions.forEach((action) => {
+            if (action === smsTypes.LOW_BATTERY) {
+              this.smsService.sendSms(
+                meterName,
+                user.first_name,
+                action,
+                user.phone,
+                null,
+                null,
+                null,
+                meter.batteryLevel,
+              );
+            } else {
+              this.smsService.sendSms(
+                meterName,
+                user.first_name,
+                action,
+                user.phone,
+                null,
+                null,
+                meter.allowedFlow,
+                null,
+              );
+            }
+          });
         });
       }
     }
@@ -151,6 +191,16 @@ export class ScreenerService {
             `${user.email}`,
             header,
           );
+          if (!!user.phone) {
+            this.smsService.sendSms(
+              meterName,
+              user.first_name,
+              smsTypes.STATUS,
+              user.phone,
+              null,
+              meterStatus,
+            );
+          }
         });
       }
     }

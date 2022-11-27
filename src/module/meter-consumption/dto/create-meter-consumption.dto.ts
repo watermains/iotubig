@@ -15,5 +15,5 @@ export class CreateMeterConsumptionDto extends CreateMeterIOTDto {
   @ApiProperty({ type: 'string' })
   @IsOptional()
   @IsString()
-  userId: string;
+  userId?: string;
 }

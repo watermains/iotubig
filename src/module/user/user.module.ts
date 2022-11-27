@@ -15,12 +15,14 @@ import { MeterCheckConstraint } from 'src/validators/meter.validator';
 import { MailerModule } from 'src/mailer/mailer.module';
 import { MeterModule } from '../meter/meter.module';
 import { OrganizationModule } from '../organization/organization.module';
+import { SmsModule } from 'src/sms/sms.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     forwardRef(() => MeterModule),
     MailerModule,
+    SmsModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,

@@ -30,6 +30,11 @@ export class CreateUserDto {
 
   @ApiProperty({ type: 'string' })
   @IsString()
+  phone: string;
+
+
+  @ApiProperty({ type: 'string' })
+  @IsString()
   password: string;
 
   @ApiProperty({ type: 'string' })

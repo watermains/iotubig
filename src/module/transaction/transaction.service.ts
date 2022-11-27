@@ -20,6 +20,8 @@ import { UserRepository } from '../user/user.repository';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionRepository } from './transaction.repository';
 import { ConsumerType } from '../meter/enum/consumer-type.enum';
+import { SmsService } from 'src/sms/sms.service';
+import { smsTypes } from 'src/sms/constants';
 
 @Injectable()
 export class TransactionService {
@@ -28,6 +30,7 @@ export class TransactionService {
     private readonly meterRepo: MeterRepository,
     private readonly configRepo: ConfigurationRepository,
     private readonly mailerService: MailerService,
+    private readonly smsService: SmsService,
     private readonly userRepo: UserRepository,
     private readonly iotService: IotService,
     private readonly meterService: MeterService,
@@ -89,6 +92,8 @@ export class TransactionService {
               user.organization_id.toString(),
             );
 
+            const amount = `Php ${transaction.amount}`;
+
             this.mailerService.sendCreditNotification(
               {
                 header,
@@ -98,12 +103,21 @@ export class TransactionService {
                 meterName: meter.meter_name,
                 orgName: org.name,
                 dateTriggered: triggerDate,
-                amount: `Php ${transaction.amount}`,
+                amount,
                 balanceStatus: 'credited',
               },
               user.email,
               header,
             );
+            if (!!user.phone) {
+              this.smsService.sendSms(
+                meter.meter_name,
+                user.first_name,
+                smsTypes.RELOAD,
+                user.phone,
+                amount,
+              );
+            }
           });
         }
       } else {
@@ -194,9 +208,7 @@ export class TransactionService {
   }
 
   async getAllAvailableStatements(userId: string) {
-    return this.repo.getAllAvailableStatements(
-      userId,
-    );
+    return this.repo.getAllAvailableStatements(userId);
   }
 
   async generateStatements(
@@ -205,11 +217,16 @@ export class TransactionService {
     organization_id: string,
     utcOffset: number,
   ) {
-    const {water_meter_id} = await this.userRepo.findOneByID(userId);
-    const {consumer_type} = await this.meterRepo.findMeter({meter_name : water_meter_id});
+    const { water_meter_id } = await this.userRepo.findOneByID(userId);
+    const { consumer_type } = await this.meterRepo.findMeter({
+      meter_name: water_meter_id,
+    });
     const config = await this.configRepo.findOne(organization_id);
 
-    const rate = consumer_type === ConsumerType.Residential ? config.residential_consumption_rates : config.commercial_consumption_rates;
+    const rate =
+      consumer_type === ConsumerType.Residential
+        ? config.residential_consumption_rates
+        : config.commercial_consumption_rates;
 
     return this.repo.generateStatements(
       water_meter_id,

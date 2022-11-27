@@ -16,7 +16,7 @@ export class IsEmailAlreadyExistConstraint
   constructor(private userRepository: UserRepository) {}
   async validate(aemail: any, args: ValidationArguments) {
     return await this.userRepository.findOneByEmail(aemail).then((user) => {
-      if (user) return false;
+      if (user && user.water_meter_id !== args.object['meter']) return false;
       return true;
     });
   }

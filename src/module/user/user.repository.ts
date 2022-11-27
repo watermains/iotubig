@@ -10,6 +10,7 @@ import { isIn } from 'class-validator';
 import { Model } from 'mongoose';
 import { RoleTypes } from 'src/decorators/roles.decorator';
 import { MailerService } from 'src/mailer/mailer.service';
+import { SmsService } from 'src/sms/sms.service';
 import { Organization } from '../organization/entities/organization.schema';
 import { OrganizationService } from '../organization/organization.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -28,11 +29,16 @@ export class UserRepository {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
     private mailerService: MailerService,
+    private smsService: SmsService,
     private readonly orgService: OrganizationService,
   ) {}
 
   async findOneByEmail(email: string) {
     return this.userModel.findOne({ email });
+  }
+
+  async findAllByEmail(email: string) {
+    return this.userModel.find({ email });
   }
 
   async findOneByID(id: string) {
@@ -221,20 +227,21 @@ export class UserRepository {
     throw new NotAcceptableException(['Same as old password']);
   }
 
-  async changeEmail(request, dto: UpdateUserDto) {
+  async updateAccount(request, dto: UpdateUserDto) {
     const user = await this.userModel
       .findOne({ water_meter_id: request.body.meter })
-      .select('+email');
-    const match = await bcrypt.compare(dto.email, user.email);
-    if (!match) {
-      user.email = dto.email;
-      user.save();
-      return { message: 'Email Changed Successfully!' };
+      .select('+email').select('+phone');
+    const match = await bcrypt.compare(dto.email, user.email) && await bcrypt.compare(dto.phone, user.phone);
+    if (!!match) {
+      throw new NotAcceptableException([
+        'You are entering the same Email address and Phone number.',
+      ]);
     }
-
-    throw new NotAcceptableException([
-      'You are entering the same Email address.',
-    ]);
+    user.email = dto.email;
+    user.phone = dto.phone;
+    user.save();
+    return { message: 'Account updated Successfully!' };
+    
   }
 
   // ADMIN

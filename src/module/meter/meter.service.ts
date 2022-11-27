@@ -195,11 +195,15 @@ export class MeterService {
     meter_name?: string,
     dev_eui?: string,
     role?: RoleTypes,
+    email?: string,
+    phone?: string,
   ) {
     if (!meter_name && !dev_eui) {
-      const { water_meter_id } = await this.userRepo.findOneByID(user_id);
+      const { water_meter_id, email : _email, phone: _phone } = await this.userRepo.findOneByID(user_id);
 
       meter_name = water_meter_id;
+      email = _email;
+      phone = _phone;
     }
 
     const params: {
@@ -254,6 +258,8 @@ export class MeterService {
         estimated_balance,
         battery_level_threshold,
         org,
+        email,
+        phone,
       },
     };
   }

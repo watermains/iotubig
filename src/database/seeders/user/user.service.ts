@@ -37,6 +37,7 @@ export class UserSeederService {
         water_meter_id: meter.meter_name,
         isActive: true,
         isDeactivated: false,
+        phone: ''
       });
     });
 
