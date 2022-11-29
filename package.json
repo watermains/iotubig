@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.204.0",
-    "@mongoosejs/double": "^0.2.0",
+    "@mongoosejs/double": "^0.3.0",
     "@nestjs/axios": "^0.0.4",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.1.6",

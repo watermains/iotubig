@@ -9,8 +9,9 @@ Hi ${user},\n
 Your water meter has been credited with Php ${amount} as of ${moment().format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
-Note: Credit application to the meter is not in real time. Please check your IoTubig account in the next three hours for your updated balance.\n\n
-For other concerns, please contact your Administrator.`;
+Note: Load application to the meter is not in real time. Please check your IoTubig account in the next 12-24 hours for your updated balance.\n
+For other concerns, please contact your Building Administrator.
+`;
 
 export const meterStatusAlert = ({
   meterName,
@@ -23,7 +24,7 @@ Your water meter has been ${status} as of ${moment().format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
 
-For other concerns, please contact your Administrator.
+For other concerns, please contact your Building Administrator.
 `;
 
 export const lowBalanceAlert = ({
@@ -48,7 +49,9 @@ Hi ${user},\n
 Your water meter is Below Zero Balance (${balance} Php) as of ${moment().format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
-Please reload immediately.`;
+Please reload immediately.\n
+Warning: If your meter closes even after reloading, your meter will open in the next 12-24 hours.
+`;
 
 export const overdrawnLimitAlert = ({
   meterName,
@@ -60,7 +63,9 @@ Hi ${user},\n
 Your water meter is near the Overdrawn Water Limit as of ${moment().format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
-Meter will be closed. Please pay your balance (${balance} Php) immediately.`;
+Meter will be closed. Please pay at least (${balance} Php) immediately for your meter to open.\n
+Warning: If your meter closes even after reloading, your meter will open in the next 12-24 hours.
+`;
 
 export const lowBatteryAlert = ({
   meterName,
@@ -69,7 +74,7 @@ export const lowBatteryAlert = ({
 }) => `Water Meter (${meterName}) Alert\n
 Hi ${user},\n
 
-Your water meter has a Low Battery status (${batteryLevel}%) as of ${moment().format(
+Your water meter is WEAK (Low Battery ${batteryLevel}%) as of ${moment().format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
-Please contact your Building Administrator immediately to change your battery.`;
+Please contact your Building Administrator immediately to change your battery  or it will close soon.`;
