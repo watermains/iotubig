@@ -182,6 +182,8 @@ export class MeterConsumptionRepository implements IMeterConsumption {
           accumulator + currentValue.volume_cubic_meter,
         0,
       );
+      
+      const total_consumed = last.cumulative_flow - first.cumulative_flow;
 
       return {
         meter,
@@ -191,6 +193,7 @@ export class MeterConsumptionRepository implements IMeterConsumption {
         meter_name,
         dev_eui,
         unit_name,
+        total_consumed,
       };
     });
 

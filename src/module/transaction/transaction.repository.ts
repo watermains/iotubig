@@ -224,6 +224,25 @@ export class TransactionRepository implements ITransaction {
         },
       },
       {
+        $lookup: {
+          from: 'users',
+          let: { meter_name: '$iot_meter_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$isActive', true] },
+                    { $eq: ['$$meter_name', '$water_meter_id'] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'users',
+        },
+      },
+      {
         $addFields: {
           date: {
             $dateToString: {
@@ -235,6 +254,10 @@ export class TransactionRepository implements ITransaction {
             $divide: ['$volume', 1000],
           },
           meter: { $arrayElemAt: ['$meter', 0] },
+          email: { $arrayElemAt: ['$users.email', 0] },
+          firstName: { $arrayElemAt: ['$users.first_name', 0] },
+          lastName: { $arrayElemAt: ['$users.last_name', 0] },
+          unitName: { $arrayElemAt: ['$meter.unit_name', 0] },
         },
       },
       {
@@ -257,7 +280,7 @@ export class TransactionRepository implements ITransaction {
 
     const data = transactions.map((transaction) => {
       const model = new this.transactionModel(transaction);
-      return { ...transaction, ...model.toJSON() };
+      return { ...transaction, ...model.toJSON(), tenantName: `${transaction.firstName} ${transaction.lastName}` };
     });
 
     const fields = [
@@ -268,6 +291,18 @@ export class TransactionRepository implements ITransaction {
       {
         label: 'Time',
         value: 'time',
+      },
+      {
+        label: 'Tenant Name',
+        value: 'tenantName',
+      },
+      {
+        label: 'Email',
+        value: 'email',
+      },
+      {
+        label: 'Unit/Address',
+        value: 'unitName',
       },
       {
         label: 'Meter Name',

@@ -176,7 +176,7 @@ export class ReportsInterceptor implements NestInterceptor {
         );
 
         var dd = {
-          pageOrientation: 'landscape',
+          pageOrientation: 'portrait',
           defaultStyle: {
             fontSize: 10,
             font: 'Helvetica',
@@ -295,6 +295,19 @@ export class CsvReportsInterceptor implements NestInterceptor {
             worksheet.getCell('A3').value = 'Total Amount';
 
             worksheet.getCell('B3').value = totalBalance.toFixed(2);
+            worksheet.getCell('B3').alignment = { horizontal: 'left' };
+          }
+
+          if (workSheetName === 'Meter Consumption') {
+            const totalVolume = _data.reduce(
+              (accumulated: number, current: { total_consumed: number }) => {
+                return (accumulated += current.total_consumed);
+              },
+              0,
+            );
+            worksheet.getCell('A3').value = 'Total Volume';
+
+            worksheet.getCell('B3').value = totalVolume.toFixed(3);
             worksheet.getCell('B3').alignment = { horizontal: 'left' };
           }
 
