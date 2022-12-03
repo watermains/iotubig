@@ -141,11 +141,7 @@ export class ReportsInterceptor implements NestInterceptor {
                 ).format('DD-MMM-YYYY');
               case 'time':
                 return {
-                  text: moment(
-                    new Date(
-                      item['createdAt'] ?? `${item['date']} ${item['time']}`,
-                    ),
-                  ).format('h:mm'),
+                  text: item['time'],
                   alignment: 'center',
                 };
               case 'cumulative_flow':

@@ -226,19 +226,8 @@ export class TransactionRepository implements ITransaction {
       {
         $lookup: {
           from: 'users',
-          let: { meter_name: '$iot_meter_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$isActive', true] },
-                    { $eq: ['$$meter_name', '$water_meter_id'] },
-                  ],
-                },
-              },
-            },
-          ],
+          localField: 'iot_meter_id',
+          foreignField: 'water_meter_id',
           as: 'users',
         },
       },
@@ -254,10 +243,7 @@ export class TransactionRepository implements ITransaction {
             $divide: ['$volume', 1000],
           },
           meter: { $arrayElemAt: ['$meter', 0] },
-          email: { $arrayElemAt: ['$users.email', 0] },
-          firstName: { $arrayElemAt: ['$users.first_name', 0] },
-          lastName: { $arrayElemAt: ['$users.last_name', 0] },
-          unitName: { $arrayElemAt: ['$meter.unit_name', 0] },
+          users: '$users',
         },
       },
       {
@@ -277,10 +263,20 @@ export class TransactionRepository implements ITransaction {
         },
       },
     ]);
+    const _transactions = transactions.map((transaction) => {
+      const userInfo = transaction.users.filter(
+        (user: { isActive: boolean }) => user.isActive,
+      )[0];
+      return {
+        ...transaction,
+        tenantName: `${userInfo.first_name} ${userInfo.last_name}`,
+        email: userInfo.email,
+      };
+    });
 
-    const data = transactions.map((transaction) => {
+    const data = _transactions.map((transaction) => {
       const model = new this.transactionModel(transaction);
-      return { ...transaction, ...model.toJSON(), tenantName: `${transaction.firstName} ${transaction.lastName}` };
+      return { ...transaction, ...model.toJSON() };
     });
 
     const fields = [
@@ -302,7 +298,7 @@ export class TransactionRepository implements ITransaction {
       },
       {
         label: 'Unit/Address',
-        value: 'unitName',
+        value: 'unit_name',
       },
       {
         label: 'Meter Name',
@@ -373,39 +369,16 @@ export class TransactionRepository implements ITransaction {
       {
         $lookup: {
           from: 'users',
-          let: { meter_name: '$iot_meter_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$isActive', true] },
-                    { $eq: ['$$meter_name', '$water_meter_id'] },
-                  ],
-                },
-              },
-            },
-          ],
+          localField: 'iot_meter_id',
+          foreignField: 'water_meter_id',
           as: 'users',
         },
       },
       {
         $lookup: {
           from: 'meterconsumptions',
-          let: { userId: '$userId' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$$userId', '$userId'] },
-                    { $gte: ['$consumed_at', new Date(startDate)] },
-                    { $lte: ['$consumed_at', new Date(endDate)] },
-                  ],
-                },
-              },
-            },
-          ],
+          localField: 'userId',
+          foreignField: 'userId',
           as: 'meterconsumptions',
         },
       },
@@ -421,7 +394,6 @@ export class TransactionRepository implements ITransaction {
             $divide: ['$volume', 1000],
           },
           meter: { $arrayElemAt: ['$meter', 0] },
-          email: { $arrayElemAt: ['$users.email', 0] },
           meterconsumptions: '$meterconsumptions',
         },
       },
@@ -434,7 +406,6 @@ export class TransactionRepository implements ITransaction {
           'meter.iot_organization_id': new Mongoose.Types.ObjectId(
             organization_id,
           ),
-          'users.isActive': true,
         },
       },
       {
@@ -443,30 +414,53 @@ export class TransactionRepository implements ITransaction {
         },
       },
     ]);
-
-    const _meterConsumption = transactions[0].meterconsumptions.map(
-      (consumption: {
-        consumed_at: string | number | Date;
-        allowed_flow: string | number;
-        cumulative_flow: string | number;
-      }) => {
-        return {
-          date: moment(new Date(consumption.consumed_at)).format('YYYY-MM-DD'),
-          time: moment(new Date(consumption.consumed_at)).format('hh:mm a'),
-          iot_meter_id: water_meter_id,
-          amount: 0,
-          current_meter_volume: consumption.allowed_flow,
-          cumulative_flow: Number(consumption.cumulative_flow) / rate,
-        };
-      },
-    );
+    
+    const _meterConsumption = transactions[0].meterconsumptions
+      .filter(
+        (item: { consumed_at: string | number | Date }) =>
+          new Date(startDate).getTime() <=
+            new Date(item.consumed_at).getTime() &&
+          new Date(item.consumed_at).getTime() <= new Date(endDate).getTime(),
+      )
+      .map(
+        (consumption: {
+          consumed_at: string | number | Date;
+          allowed_flow: string | number;
+          cumulative_flow: string | number;
+        }) => {
+          return {
+            date: moment(new Date(consumption.consumed_at)).format(
+              'YYYY-MM-DD',
+            ),
+            time: moment(new Date(consumption.consumed_at)).format('hh:mm a'),
+            iot_meter_id: water_meter_id,
+            amount: 0,
+            current_meter_volume: consumption.allowed_flow,
+            cumulative_flow: Number(consumption.cumulative_flow) / rate,
+          };
+        },
+      );
 
     const _transactions = transactions.map((transaction) => {
-      const model = new this.transactionModel({...transaction});
-      return { ...transaction, ...model.toJSON() };
+      const userInfo = transaction.users.filter(
+        (user: { isActive: boolean }) => user.isActive,
+      )[0];
+      const model = new this.transactionModel({
+        ...transaction,
+      });
+      return {
+        ...transaction,
+        ...model.toJSON(),
+        email: userInfo.email,
+        time: moment(transaction.createdAt).format('hh:mm a'),
+      };
     });
 
-    const data = [..._transactions, ..._meterConsumption];
+    const data = [..._transactions, ..._meterConsumption].sort(
+      (a, b) =>
+        new Date(`${a.date} ${a.time}`).getTime() -
+        new Date(`${b.date} ${b.time}`).getTime(),
+    );
 
     const fields = [
       {
