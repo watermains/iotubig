@@ -267,7 +267,7 @@ export class TransactionRepository implements ITransaction {
       const userInfo = transaction.users.filter(
         (user: { isActive: boolean }) => user.isActive,
       )[0];
-      const isOccupied = !!Object.keys(userInfo).length;
+      const isOccupied = !!userInfo && !!Object.keys(userInfo).length;
       return {
         ...transaction,
         tenantName: isOccupied ? `${userInfo.first_name} ${userInfo.last_name}` : 'Vacant',
@@ -448,7 +448,7 @@ export class TransactionRepository implements ITransaction {
       const userInfo = transaction.users.filter(
         (user: { isActive: boolean }) => user.isActive,
       )[0];
-      const isOccupied = !!Object.keys(userInfo).length;
+      const isOccupied = !!userInfo && !!Object.keys(userInfo).length;
       const model = new this.transactionModel({
         ...transaction,
       });
