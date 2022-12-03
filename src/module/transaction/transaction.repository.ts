@@ -267,10 +267,11 @@ export class TransactionRepository implements ITransaction {
       const userInfo = transaction.users.filter(
         (user: { isActive: boolean }) => user.isActive,
       )[0];
+      const isOccupied = !!Object.keys(userInfo).length;
       return {
         ...transaction,
-        tenantName: `${userInfo.first_name} ${userInfo.last_name}`,
-        email: userInfo.email,
+        tenantName: isOccupied ? `${userInfo.first_name} ${userInfo.last_name}` : 'Vacant',
+        email: isOccupied ? userInfo.email : 'No email available',
       };
     });
 
@@ -334,8 +335,10 @@ export class TransactionRepository implements ITransaction {
     });
 
     allTransactions.map((transaction) => {
-      const _date = moment(new Date(transaction.createdAt)).format('MMMM YYYY');
-      if (!dateValues.includes(_date)) {
+      const date = moment(new Date(transaction.createdAt));
+      const thisMonth = moment().startOf('month');
+      const _date = date.format('MMMM YYYY');
+      if (!dateValues.includes(_date) && (date.startOf('month') < thisMonth) && dateValues.length < 4) {
         dateValues.push(_date);
       }
     });
@@ -413,8 +416,8 @@ export class TransactionRepository implements ITransaction {
           _id: 1,
         },
       },
-    ]);
-    
+    ], { allowDiskUse: true });
+
     const _meterConsumption = transactions[0].meterconsumptions
       .filter(
         (item: { consumed_at: string | number | Date }) =>
@@ -445,13 +448,14 @@ export class TransactionRepository implements ITransaction {
       const userInfo = transaction.users.filter(
         (user: { isActive: boolean }) => user.isActive,
       )[0];
+      const isOccupied = !!Object.keys(userInfo).length;
       const model = new this.transactionModel({
         ...transaction,
       });
       return {
         ...transaction,
         ...model.toJSON(),
-        email: userInfo.email,
+        email: isOccupied ? userInfo.email : 'No email available (Vacant)',
         time: moment(transaction.createdAt).format('hh:mm a'),
       };
     });
