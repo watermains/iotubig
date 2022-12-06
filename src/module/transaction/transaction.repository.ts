@@ -40,6 +40,7 @@ export interface ITransaction {
     utcOffset: number,
   );
   generateStatements(
+    userId: string,
     water_meter_id: string,
     rate: number,
     reportDate: string,
@@ -355,6 +356,7 @@ export class TransactionRepository implements ITransaction {
   }
 
   async generateStatements(
+    userId: string,
     water_meter_id: string,
     rate: number,
     reportDate: string,
@@ -431,10 +433,10 @@ export class TransactionRepository implements ITransaction {
 
     const _meterConsumption = transactions[0].meterconsumptions
       .filter(
-        (item: { consumed_at: string | number | Date }) =>
+        (item: { consumed_at: string | number | Date, userId: string }) =>
           new Date(startDate).getTime() <=
             new Date(item.consumed_at).getTime() &&
-          new Date(item.consumed_at).getTime() <= new Date(endDate).getTime(),
+          new Date(item.consumed_at).getTime() <= new Date(endDate).getTime() && item.userId === userId,
       )
       .map(
         (consumption: {

@@ -229,6 +229,7 @@ export class TransactionService {
         : config.commercial_consumption_rates;
 
     return this.repo.generateStatements(
+      userId,
       water_meter_id,
       rate,
       reportDate,
