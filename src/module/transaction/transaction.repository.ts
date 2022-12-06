@@ -270,15 +270,19 @@ export class TransactionRepository implements ITransaction {
       const isOccupied = !!userInfo && !!Object.keys(userInfo).length;
       return {
         ...transaction,
-        tenantName: isOccupied ? `${userInfo.first_name} ${userInfo.last_name}` : 'Vacant',
+        tenantName: isOccupied
+          ? `${userInfo.first_name} ${userInfo.last_name}`
+          : 'Vacant',
         email: isOccupied ? userInfo.email : 'No email available',
       };
     });
 
-    const data = _transactions.map((transaction) => {
-      const model = new this.transactionModel(transaction);
-      return { ...transaction, ...model.toJSON() };
-    });
+    const data = _transactions
+      .filter((item) => item.amount >= 0)
+      .map((transaction) => {
+        const model = new this.transactionModel(transaction);
+        return { ...transaction, ...model.toJSON() };
+      });
 
     const fields = [
       {
@@ -338,7 +342,11 @@ export class TransactionRepository implements ITransaction {
       const date = moment(new Date(transaction.createdAt));
       const thisMonth = moment().startOf('month');
       const _date = date.format('MMMM YYYY');
-      if (!dateValues.includes(_date) && (date.startOf('month') < thisMonth) && dateValues.length < 4) {
+      if (
+        !dateValues.includes(_date) &&
+        date.startOf('month') < thisMonth &&
+        dateValues.length < 4
+      ) {
         dateValues.push(_date);
       }
     });
@@ -360,63 +368,66 @@ export class TransactionRepository implements ITransaction {
       .endOf('month')
       .format('YYYY-MM-DD');
 
-    const transactions = await this.transactionModel.aggregate([
-      {
-        $lookup: {
-          from: 'meters',
-          localField: 'iot_meter_id',
-          foreignField: 'meter_name',
-          as: 'meter',
+    const transactions = await this.transactionModel.aggregate(
+      [
+        {
+          $lookup: {
+            from: 'meters',
+            localField: 'iot_meter_id',
+            foreignField: 'meter_name',
+            as: 'meter',
+          },
         },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'iot_meter_id',
-          foreignField: 'water_meter_id',
-          as: 'users',
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'iot_meter_id',
+            foreignField: 'water_meter_id',
+            as: 'users',
+          },
         },
-      },
-      {
-        $lookup: {
-          from: 'meterconsumptions',
-          localField: 'userId',
-          foreignField: 'userId',
-          as: 'meterconsumptions',
+        {
+          $lookup: {
+            from: 'meterconsumptions',
+            localField: 'userId',
+            foreignField: 'userId',
+            as: 'meterconsumptions',
+          },
         },
-      },
-      {
-        $addFields: {
-          date: {
-            $dateToString: {
-              format: '%Y-%m-%d',
-              date: { $add: ['$createdAt', utcOffset * 60 * 60 * 1000] },
+        {
+          $addFields: {
+            date: {
+              $dateToString: {
+                format: '%Y-%m-%d',
+                date: { $add: ['$createdAt', utcOffset * 60 * 60 * 1000] },
+              },
             },
+            volume_cubic_meter: {
+              $divide: ['$volume', 1000],
+            },
+            meter: { $arrayElemAt: ['$meter', 0] },
+            meterconsumptions: '$meterconsumptions',
           },
-          volume_cubic_meter: {
-            $divide: ['$volume', 1000],
+        },
+        {
+          $match: {
+            date: {
+              $gte: startDate,
+              $lte: endDate,
+            },
+            'meter.iot_organization_id': new Mongoose.Types.ObjectId(
+              organization_id,
+            ),
           },
-          meter: { $arrayElemAt: ['$meter', 0] },
-          meterconsumptions: '$meterconsumptions',
         },
-      },
-      {
-        $match: {
-          date: {
-            $gte: startDate,
-            $lte: endDate,
+        {
+          $sort: {
+            _id: 1,
           },
-          'meter.iot_organization_id': new Mongoose.Types.ObjectId(
-            organization_id,
-          ),
         },
-      },
-      {
-        $sort: {
-          _id: 1,
-        },
-      },
-    ], { allowDiskUse: true });
+      ],
+      { allowDiskUse: true },
+    );
 
     const _meterConsumption = transactions[0].meterconsumptions
       .filter(
