@@ -147,14 +147,14 @@ export class ReportsInterceptor implements NestInterceptor {
               case 'cumulative_flow':
                 return {
                   text: item['meter']
-                    ? Number(item['meter']['cumulative_flow']) /
-                      Number(item['rate'])
-                    : Number(item['cumulative_flow']),
+                    ? (Number(item['meter']['cumulative_flow']) /
+                      Number(item['rate'])).toFixed(2)
+                    : Number(item['cumulative_flow']).toFixed(2),
                   alignment: 'center',
                 };
               default:
                 return {
-                  text: item[field.value].toFixed(2) ?? 'N/A',
+                  text: item[field.value]?.toFixed(2) ?? item[field.value] ?? 'N/A',
                   alignment: 'center',
                 };
             }

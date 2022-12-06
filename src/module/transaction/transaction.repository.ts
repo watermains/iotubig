@@ -438,8 +438,8 @@ export class TransactionRepository implements ITransaction {
             time: moment(new Date(consumption.consumed_at)).format('hh:mm a'),
             iot_meter_id: water_meter_id,
             amount: 0,
-            current_meter_volume: Number(consumption.allowed_flow).toFixed(2),
-            cumulative_flow: (Number(consumption.cumulative_flow) / rate).toFixed(2),
+            current_meter_volume: consumption.allowed_flow,
+            cumulative_flow: Number(consumption.cumulative_flow) / rate,
           };
         },
       );
