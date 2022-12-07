@@ -34,7 +34,8 @@ export class BalanceCheckService {
 
   @Cron(
     process.env.NODE_ENV === 'development'
-      ? '00 27 18 * * *'
+    // ? '* * * * *'
+    ? '00 27 18 * * *'
       : CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT,
       // : '00 00 00 1 * *',
     {
@@ -116,20 +117,35 @@ export class BalanceCheckService {
           rate = perResidentialRate;
         }
 
-        const startConsume = await this.consumptionModel.findOne({
+        const userInfo = await this.userModel.findOne({water_meter_id: val.meter_name, isActive: true})
+
+        // const startConsume = await this.consumptionModel.findOne({
+        //   dev_eui: val.dev_eui,
+        //   consumed_at: {
+        //     $gte: startDate,
+        //     $lt: startDatePlus,
+        //   },
+        // });
+        // const endConsume = await this.consumptionModel.findOne({
+        //   dev_eui: val.dev_eui,
+        //   consumed_at: {
+        //     $gte: endDate,
+        //     $lt: endDatePlus,
+        //   },
+        // });
+
+        const consumption = await this.consumptionModel.find({
           dev_eui: val.dev_eui,
+          userId: userInfo?.id ?? null,
           consumed_at: {
-            $gte: startDate,
-            $lt: startDatePlus,
-          },
-        });
-        const endConsume = await this.consumptionModel.findOne({
-          dev_eui: val.dev_eui,
-          consumed_at: {
-            $gte: endDate,
+            $gte: startDatePlus,
             $lt: endDatePlus,
-          },
+          }
         });
+
+        const startConsume = consumption.length ? consumption[0] : null;
+        const endConsume = consumption.length ? consumption[consumption.length - 1] : null;
+
         this.logger.debug(`*************`);
 
         const hasUser = await this.userModel.findOne({
@@ -147,13 +163,13 @@ export class BalanceCheckService {
             `evaluating: ${val.meter_name} of type ${val.consumer_type} with DEV EUI: ${val.dev_eui}`,
           );
           const deltaFlow =
-            endConsume.cumulative_flow - startConsume.cumulative_flow;
+            Math.abs(Number(endConsume.cumulative_flow) - Number(startConsume.cumulative_flow));
           this.logger.debug(
             `deltaFlow: ${deltaFlow}; with threshold: ${minimum}L`,
           );
           if (deltaFlow < minimum) {
             // const normalizedDeductionAmount = rate * (minimum - deltaFlow) * -1;
-            const normalizedDeductionAmount = (minimum - deltaFlow) * -1;
+            const normalizedDeductionAmount = Math.abs(minimum - deltaFlow);
             const displayDeductionAmount = parseFloat(
               normalizedDeductionAmount.toFixed(2),
             );
