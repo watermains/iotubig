@@ -224,11 +224,17 @@ export class ReportsInterceptor implements NestInterceptor {
           ],
         };
         const printer = new PdfPrinter(fonts);
-        const res = context.switchToHttp().getResponse();
-        res.setHeader('Content-Type', 'application/pdf');
+        // const res = context.switchToHttp().getResponse();
+        // res.setHeader('Content-Type', 'application/pdf');
         const pdfDoc = printer.createPdfKitDocument(dd, {});
+        console.log('pdf created');
         pdfDoc.end();
-        return new StreamableFile(pdfDoc);
+        console.log('pdf end');
+
+        const streamableFile = new StreamableFile(pdfDoc);
+        console.log('file stream done');
+
+        return streamableFile;
       }),
     );
   }
