@@ -369,7 +369,7 @@ export class TransactionRepository implements ITransaction {
     const endDate = moment(new Date(reportDate))
       .endOf('month')
       .format('YYYY-MM-DD');
-
+    console.log('start aggregating');
     const transactions = await this.transactionModel.aggregate(
       [
         {
@@ -430,6 +430,8 @@ export class TransactionRepository implements ITransaction {
       ],
       { allowDiskUse: true },
     );
+    console.log('end aggregating');
+
 
     const _meterConsumption = transactions[0].meterconsumptions
       .filter(
