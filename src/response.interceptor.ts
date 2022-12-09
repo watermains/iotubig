@@ -228,7 +228,6 @@ export class ReportsInterceptor implements NestInterceptor {
         pdfDoc.end();
 
         const streamableFile = new StreamableFile(pdfDoc);
-        console.log('file stream done');
 
         return streamableFile;
       }),

@@ -41,7 +41,7 @@ export interface ITransaction {
   );
   generateStatements(
     userId: string,
-    water_meter_id: string,
+    user: { water_meter_id: string, email: string },
     rate: number,
     reportDate: string,
     organization_id: string,
@@ -357,7 +357,7 @@ export class TransactionRepository implements ITransaction {
 
   async generateStatements(
     userId: string,
-    water_meter_id: string,
+    user: { water_meter_id: string, email: string },
     rate: number,
     reportDate: string,
     organization_id: string,
@@ -369,7 +369,6 @@ export class TransactionRepository implements ITransaction {
     const endDate = moment(new Date(reportDate))
       .endOf('month')
       .format('YYYY-MM-DD');
-    console.log('start aggregating');
     const transactions = await this.transactionModel.aggregate(
       [
         {
@@ -378,14 +377,6 @@ export class TransactionRepository implements ITransaction {
             localField: 'iot_meter_id',
             foreignField: 'meter_name',
             as: 'meter',
-          },
-        },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'iot_meter_id',
-            foreignField: 'water_meter_id',
-            as: 'users',
           },
         },
         {
@@ -428,17 +419,15 @@ export class TransactionRepository implements ITransaction {
           },
         },
       ],
-      { allowDiskUse: true },
     );
-    console.log('end aggregating');
-
 
     const _meterConsumption = transactions[0].meterconsumptions
       .filter(
-        (item: { consumed_at: string | number | Date, userId: string }) =>
+        (item: { consumed_at: string | number | Date; userId: string }) =>
           new Date(startDate).getTime() <=
             new Date(item.consumed_at).getTime() &&
-          new Date(item.consumed_at).getTime() <= new Date(endDate).getTime() && item.userId === userId,
+          new Date(item.consumed_at).getTime() <= new Date(endDate).getTime() &&
+          item.userId === userId,
       )
       .map(
         (consumption: {
@@ -451,7 +440,7 @@ export class TransactionRepository implements ITransaction {
               'YYYY-MM-DD',
             ),
             time: moment(new Date(consumption.consumed_at)).format('hh:mm a'),
-            iot_meter_id: water_meter_id,
+            iot_meter_id: user.water_meter_id,
             amount: 0,
             current_meter_volume: consumption.allowed_flow,
             cumulative_flow: Number(consumption.cumulative_flow) / rate,
@@ -460,17 +449,14 @@ export class TransactionRepository implements ITransaction {
       );
 
     const _transactions = transactions.map((transaction) => {
-      const userInfo = transaction.users.filter(
-        (user: { isActive: boolean }) => user.isActive,
-      )[0];
-      const isOccupied = !!userInfo && !!Object.keys(userInfo).length;
+      const isOccupied = !!user && !!Object.keys(user).length;
       const model = new this.transactionModel({
         ...transaction,
       });
       return {
         ...transaction,
         ...model.toJSON(),
-        email: isOccupied ? userInfo.email : 'No email available (Vacant)',
+        email: isOccupied ? user.email : 'No email available (Vacant)',
         time: moment(transaction.createdAt).format('hh:mm a'),
       };
     });

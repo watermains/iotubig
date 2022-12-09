@@ -217,11 +217,12 @@ export class TransactionService {
     organization_id: string,
     utcOffset: number,
   ) {
-    const { water_meter_id } = await this.userRepo.findOneByID(userId);
+    const user = await this.userRepo.findOneByID(userId);
     const { consumer_type } = await this.meterRepo.findMeter({
-      meter_name: water_meter_id,
+      meter_name: user.water_meter_id,
     });
     const config = await this.configRepo.findOne(organization_id);
+    
 
     const rate =
       consumer_type === ConsumerType.Residential
@@ -230,7 +231,7 @@ export class TransactionService {
 
     return this.repo.generateStatements(
       userId,
-      water_meter_id,
+      user,
       rate,
       reportDate,
       organization_id,
