@@ -51,6 +51,13 @@ export class Transaction {
 
   @Prop({ required: true })
   status: string;
+
+  @Prop({
+    default: 0.0,
+    type: Double,
+    get: (val) => val.toString(),
+  })
+  cumulative_flow: number;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

@@ -42,6 +42,7 @@ export interface ITransaction {
   generateStatements(
     userId: string,
     user: { water_meter_id: string, email: string },
+    meter: any,
     rate: number,
     reportDate: string,
     organization_id: string,
@@ -80,6 +81,7 @@ export class TransactionRepository implements ITransaction {
       unit_name: meter.unit_name,
       current_meter_volume: meter.allowed_flow,
       created_by,
+      cumulative_flow: meter.cumulative_flow,
     });
 
     return transaction;
@@ -358,6 +360,7 @@ export class TransactionRepository implements ITransaction {
   async generateStatements(
     userId: string,
     user: { water_meter_id: string, email: string },
+    meter: any,
     rate: number,
     reportDate: string,
     organization_id: string,
@@ -371,14 +374,6 @@ export class TransactionRepository implements ITransaction {
       .format('YYYY-MM-DD');
     const transactions = await this.transactionModel.aggregate(
       [
-        {
-          $lookup: {
-            from: 'meters',
-            localField: 'iot_meter_id',
-            foreignField: 'meter_name',
-            as: 'meter',
-          },
-        },
         {
           $lookup: {
             from: 'meterconsumptions',
@@ -398,7 +393,6 @@ export class TransactionRepository implements ITransaction {
             volume_cubic_meter: {
               $divide: ['$volume', 1000],
             },
-            meter: { $arrayElemAt: ['$meter', 0] },
             meterconsumptions: '$meterconsumptions',
           },
         },
@@ -408,9 +402,6 @@ export class TransactionRepository implements ITransaction {
               $gte: startDate,
               $lte: endDate,
             },
-            'meter.iot_organization_id': new Mongoose.Types.ObjectId(
-              organization_id,
-            ),
           },
         },
         {
