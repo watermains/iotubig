@@ -78,7 +78,7 @@ export class MeterConsumptionRepository implements IMeterConsumption {
   }
 
   findMeterConsumptionByUserId(userId: string, startDate: Date, endDate?: Date) {
-    const consumed_at: { $gte: Date; $lte?: Date } = { $gte: startDate };
+    const consumed_at: { $gt: Date; $lte?: Date } = { $gt: startDate };
 
     if (endDate) {
       consumed_at.$lte = endDate;
