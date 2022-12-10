@@ -82,13 +82,13 @@ export class ConfigurationService {
                 if (updateConfigurationDto.overdraw_limitation) {
                   // const overDrawVolume =
                   //   config.overdraw_limitation / meter.getWaterMeterRate(rate);
-
+                  const overDrawReloadValue = config.overdraw_limitation - config.water_alarm_threshold;
                   lastValueFrom(
                     this.iotService.sendOverdrawUpdate(
                       meter.wireless_device_id,
                       meter.meter_name,
                       meter.site_name,
-                      config.overdraw_limitation,
+                      overDrawReloadValue,
                     ),
                   );
                 }

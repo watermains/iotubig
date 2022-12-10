@@ -7,6 +7,7 @@ import { MailerModule } from 'src/mailer/mailer.module';
 import { SmsModule } from 'src/sms/sms.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { LogModule } from '../log/log.module';
+import { MeterConsumptionModule } from '../meter-consumption/meter-consumption.module';
 import { MeterModule } from '../meter/meter.module';
 import { OrganizationModule } from '../organization/organization.module';
 import { UserModule } from '../user/user.module';
@@ -19,6 +20,7 @@ import { TransactionService } from './transaction.service';
   imports: [
     forwardRef(() => ConfigurationModule),
     forwardRef(() => MeterModule),
+    forwardRef(() => MeterConsumptionModule),
     UserModule,
     MongooseModule.forFeatureAsync([
       {

@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod, forwardRef } from '@nestjs/common';
 import { MeterConsumptionService } from './meter-consumption.service';
 import {
   MeterConsumptionController,
@@ -35,14 +35,19 @@ import { TransactionModule } from '../transaction/transaction.module';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRATION },
     }),
+    forwardRef(() => TransactionModule),
+    forwardRef(() => ConfigurationModule),
     ScreenerModule,
     MeterModule,
     UserModule,
-    ConfigurationModule,
-    TransactionModule,
   ],
   controllers: [MeterConsumptionController, ExternalMeterConsumptionController],
   providers: [MeterConsumptionService, MeterConsumptionRepository],
+  exports:[
+    MongooseModule.forFeature([{ name: MeterConsumption.name, schema: MeterConsumptionSchema }]),
+    MeterConsumptionService,
+    MeterConsumptionRepository,
+  ]
 })
 export class MeterConsumptionModule {
   configure(consumer: MiddlewareConsumer) {

@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MeterModule } from 'src/module';
+import { MeterModule, TransactionModule, UserModule } from 'src/module';
 import {
   Configuration,
   ConfigurationSchema,
@@ -25,7 +25,9 @@ import { MeterConsumptionSeederService } from './consumption.service';
     MongooseModule.forFeature([
       { name: MeterConsumption.name, schema: MeterConsumptionSchema },
     ]),
-    MeterModule,
+    forwardRef(() => MeterModule),
+    forwardRef(() => TransactionModule),
+    forwardRef(() => UserModule),
     ScreenerModule,
   ],
   providers: [MeterConsumptionSeederService, MeterConsumptionRepository],

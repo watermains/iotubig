@@ -16,11 +16,13 @@ import { MailerModule } from 'src/mailer/mailer.module';
 import { MeterModule } from '../meter/meter.module';
 import { OrganizationModule } from '../organization/organization.module';
 import { SmsModule } from 'src/sms/sms.module';
+import { MeterConsumptionModule } from '../meter-consumption/meter-consumption.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     forwardRef(() => MeterModule),
+    forwardRef(() => MeterConsumptionModule),
     MailerModule,
     SmsModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
