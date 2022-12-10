@@ -43,6 +43,7 @@ export interface ITransaction {
     userId: string,
     user: { water_meter_id: string, email: string },
     meter: any,
+    consumptions:any,
     rate: number,
     reportDate: string,
     organization_id: string,
@@ -361,6 +362,7 @@ export class TransactionRepository implements ITransaction {
     userId: string,
     user: { water_meter_id: string, email: string },
     meter: any,
+    consumptions: any,
     rate: number,
     reportDate: string,
     organization_id: string,
@@ -375,14 +377,6 @@ export class TransactionRepository implements ITransaction {
     const transactions = await this.transactionModel.aggregate(
       [
         {
-          $lookup: {
-            from: 'meterconsumptions',
-            localField: 'userId',
-            foreignField: 'userId',
-            as: 'meterconsumptions',
-          },
-        },
-        {
           $addFields: {
             date: {
               $dateToString: {
@@ -393,7 +387,6 @@ export class TransactionRepository implements ITransaction {
             volume_cubic_meter: {
               $divide: ['$volume', 1000],
             },
-            meterconsumptions: '$meterconsumptions',
           },
         },
         {
@@ -412,14 +405,7 @@ export class TransactionRepository implements ITransaction {
       ],
     );
 
-    const _meterConsumption = transactions[0].meterconsumptions
-      .filter(
-        (item: { consumed_at: string | number | Date; userId: string }) =>
-          new Date(startDate).getTime() <=
-            new Date(item.consumed_at).getTime() &&
-          new Date(item.consumed_at).getTime() <= new Date(endDate).getTime() &&
-          item.userId === userId,
-      )
+    const _meterConsumption = consumptions
       .map(
         (consumption: {
           consumed_at: string | number | Date;

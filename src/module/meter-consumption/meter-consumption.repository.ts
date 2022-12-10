@@ -77,6 +77,21 @@ export class MeterConsumptionRepository implements IMeterConsumption {
       .sort({ consumed_at: 1 });
   }
 
+  findMeterConsumptionByUserId(userId: string, startDate: Date, endDate?: Date) {
+    const consumed_at: { $gte: Date; $lte?: Date } = { $gte: startDate };
+
+    if (endDate) {
+      consumed_at.$lte = endDate;
+    }
+
+    return this.meterConsumptionModel
+      .find({
+        userId,
+        consumed_at,
+      })
+      .sort({ consumed_at: 1 });
+  }
+
   private groupBy(items: object[], key: string): object {
     return items.reduce(
       (result, item) => ({
