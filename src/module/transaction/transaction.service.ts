@@ -211,7 +211,22 @@ export class TransactionService {
   }
 
   async getAllAvailableStatements(userId: string) {
-    return this.repo.getAllAvailableStatements(userId);
+    const dateValues = [];
+    const allConsumption = await this.meterConsumptionRepo.findMeterConsumptionByUserId(userId);
+    allConsumption?.map((consumption) => {
+      const date = moment(new Date(consumption.consumed_at));
+      const thisMonth = moment().startOf('month');
+      const _date = date.format('MMMM YYYY');
+      if (
+        !dateValues.includes(_date) &&
+        date.startOf('month') < thisMonth &&
+        dateValues.length < 4
+      ) {
+        dateValues.push(_date);
+      }
+    });
+
+    return this.repo.getAllAvailableStatements(userId, dateValues);
   }
 
   async generateStatements(
@@ -225,8 +240,14 @@ export class TransactionService {
       meter_name: user.water_meter_id,
     });
     const config = await this.configRepo.findOne(organization_id);
-    const _startDate = moment(new Date(reportDate)).startOf('month').tz('Asia/Manila').toString();
-    const _endDate = moment(new Date(reportDate)).endOf('month').tz('Asia/Manila').toString();
+    const _startDate = moment(new Date(reportDate))
+      .startOf('month')
+      .tz('Asia/Manila')
+      .toString();
+    const _endDate = moment(new Date(reportDate))
+      .endOf('month')
+      .tz('Asia/Manila')
+      .toString();
     const consumptions =
       await this.meterConsumptionRepo.findMeterConsumptionByUserId(
         userId,
