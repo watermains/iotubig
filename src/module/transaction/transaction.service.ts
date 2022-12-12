@@ -24,6 +24,7 @@ import { SmsService } from 'src/sms/sms.service';
 import { smsTypes } from 'src/sms/constants';
 import { MeterConsumptionRepository } from '../meter-consumption/meter-consumption.repository';
 
+
 @Injectable()
 export class TransactionService {
   constructor(
@@ -224,11 +225,14 @@ export class TransactionService {
       meter_name: user.water_meter_id,
     });
     const config = await this.configRepo.findOne(organization_id);
-    const _startDate = moment(new Date(reportDate))
-    .startOf('month').toString();
-    const _endDate = moment(new Date(reportDate))
-    .endOf('month').toString();
-    const consumptions = await this.meterConsumptionRepo.findMeterConsumptionByUserId(userId, new Date(_startDate), new Date(_endDate));
+    const _startDate = moment(new Date(reportDate)).startOf('month').tz('Asia/Manila').toString();
+    const _endDate = moment(new Date(reportDate)).endOf('month').tz('Asia/Manila').toString();
+    const consumptions =
+      await this.meterConsumptionRepo.findMeterConsumptionByUserId(
+        userId,
+        new Date(_startDate),
+        new Date(_endDate),
+      );
 
     const rate =
       meter.consumer_type === ConsumerType.Residential
@@ -302,4 +306,5 @@ export class TransactionService {
         ),
     );
   }
+
 }
