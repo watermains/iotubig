@@ -77,19 +77,35 @@ export class MeterConsumptionRepository implements IMeterConsumption {
       .sort({ consumed_at: 1 });
   }
 
-  findMeterConsumptionByUserId(userId: string, startDate: Date, endDate?: Date) {
-    const consumed_at: { $gt: Date; $lte?: Date } = { $gt: startDate };
+  findMeterConsumptionByUserId(
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ) {
+    let consumed_at: { $gt?: Date; $lte?: Date } = {};
+
+    if (startDate) {
+      consumed_at.$gt = startDate;
+    }
 
     if (endDate) {
       consumed_at.$lte = endDate;
     }
 
-    return this.meterConsumptionModel
-      .find({
-        userId,
-        consumed_at,
-      })
-      .sort({ consumed_at: 1 });
+    if (startDate || endDate) {
+      return this.meterConsumptionModel
+        .find({
+          userId,
+          consumed_at,
+        })
+        .sort({ consumed_at: 1 });
+    } else {
+      return this.meterConsumptionModel
+        .find({
+          userId,
+        })
+        .sort({ consumed_at: 1 });
+    }
   }
 
   private groupBy(items: object[], key: string): object {
@@ -197,7 +213,7 @@ export class MeterConsumptionRepository implements IMeterConsumption {
           accumulator + currentValue.volume_cubic_meter,
         0,
       );
-      
+
       const total_consumed = last.cumulative_flow - first.cumulative_flow;
 
       return {
