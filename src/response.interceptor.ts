@@ -117,7 +117,7 @@ export class MutableDocumentsInterceptor<T extends Document[], U extends JSON>
 export class ReportsInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      map(async ({ data, fields, startDate, endDate }) => {
+      map(async ({ data, fields, startDate, endDate, meter_name, email }) => {
         const fonts = {
           Helvetica: {
             normal: 'Helvetica',
@@ -188,12 +188,12 @@ export class ReportsInterceptor implements NestInterceptor {
               margin: [0, 0, 0, 8],
             },
             {
-              text: `User Account Email: ${data[0].email}`,
+              text: `User Account Email: ${email}`,
               fontSize: 12,
               margin: [0, 0, 0, 8],
             },
             {
-              text: `Meter Name: ${data[0].iot_meter_id}`,
+              text: `Meter Name: ${meter_name}`,
               fontSize: 12,
               margin: [0, 0, 0, 8],
             },

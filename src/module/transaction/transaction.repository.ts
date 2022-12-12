@@ -374,6 +374,8 @@ export class TransactionRepository implements ITransaction {
     const endDate = moment(new Date(reportDate))
       .endOf('month')
       .format('YYYY-MM-DD');
+    const { meter_name } = meter;
+    const { email } = user;
     const transactions = await this.transactionModel.aggregate(
       [
         {
@@ -391,6 +393,7 @@ export class TransactionRepository implements ITransaction {
         },
         {
           $match: {
+            userId,
             date: {
               $gte: startDate,
               $lte: endDate,
@@ -471,7 +474,7 @@ export class TransactionRepository implements ITransaction {
       },
     ];
 
-    return { data, fields, startDate, endDate };
+    return { data, fields, startDate, endDate, meter_name, email };
   }
 
   async findByDevEui(dev_eui: string) {
@@ -490,5 +493,9 @@ export class TransactionRepository implements ITransaction {
 
   updateMany(filter: object, update: object): any {
     return this.transactionModel.updateMany(filter, update);
+  }
+
+  async payInGcash() {
+    return 
   }
 }
