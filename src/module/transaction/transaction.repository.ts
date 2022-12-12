@@ -4,7 +4,6 @@ import * as moment from 'moment';
 import * as Mongoose from 'mongoose';
 import { Model, PipelineStage } from 'mongoose';
 import { Configuration } from '../configuration/entities/configuration.schema';
-import { MeterConsumptionDocument } from '../meter-consumption/entities/meter-consumption.schema';
 import { Meter } from '../meter/entities/meter.schema';
 import { PaginatedData } from '../pagination/paginate';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
@@ -59,7 +58,6 @@ export class TransactionRepository implements ITransaction {
   constructor(
     @InjectModel(Transaction.name)
     private transactionModel: Model<TransactionDocument>,
-    private consumptionModel: Model<MeterConsumptionDocument>,
   ) {}
   async create(
     created_by: string,
@@ -338,12 +336,9 @@ export class TransactionRepository implements ITransaction {
     };
   }
 
-  async getAllAvailableStatements(userId: string) {
-    const dateValues = [];
+  async getAllAvailableStatements(userId: string, dateValues: string[]) {
+    const _dateValues = dateValues;
     const allTransactions = await this.transactionModel.find({ userId }, [], {
-      sort: { createdAt: -1 },
-    });
-    const allConsumption = await this.consumptionModel.find({ userId }, [], {
       sort: { createdAt: -1 },
     });
 
@@ -352,28 +347,15 @@ export class TransactionRepository implements ITransaction {
       const thisMonth = moment().startOf('month');
       const _date = date.format('MMMM YYYY');
       if (
-        !dateValues.includes(_date) &&
+        !_dateValues.includes(_date) &&
         date.startOf('month') < thisMonth &&
-        dateValues.length < 4
+        _dateValues.length < 4
       ) {
-        dateValues.push(_date);
+        _dateValues.push(_date);
       }
     });
 
-    allConsumption?.map((consumption) => {
-      const date = moment(new Date(consumption.consumed_at));
-      const thisMonth = moment().startOf('month');
-      const _date = date.format('MMMM YYYY');
-      if (
-        !dateValues.includes(_date) &&
-        date.startOf('month') < thisMonth &&
-        dateValues.length < 4
-      ) {
-        dateValues.push(_date);
-      }
-    });
-
-    return { response: { all_statements: dateValues } };
+    return { response: { all_statements: _dateValues } };
   }
 
   async generateStatements(
