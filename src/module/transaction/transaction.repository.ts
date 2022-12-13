@@ -349,7 +349,7 @@ export class TransactionRepository implements ITransaction {
       if (
         !_dateValues.includes(_date) &&
         date.startOf('month') < thisMonth &&
-        _dateValues.length < 4
+        _dateValues.length < 7
       ) {
         _dateValues.push(_date);
       }
