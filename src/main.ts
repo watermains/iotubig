@@ -14,6 +14,11 @@ async function bootstrap() {
       name: 'x-api-key',
       in: 'header',
       description: 'API Key for External calls',
+    }).addApiKey({
+      type: 'apiKey',
+      name: 'x-callback-token',
+      in: 'header',
+      description: 'API Key for Xendit calls',
     })
     .addBearerAuth()
     .setTitle('IoTubig')

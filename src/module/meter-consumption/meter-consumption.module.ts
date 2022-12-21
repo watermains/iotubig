@@ -56,3 +56,4 @@ export class MeterConsumptionModule {
       .forRoutes({ path: 'meter-consumption', method: RequestMethod.POST });
   }
 }
+  

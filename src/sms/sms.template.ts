@@ -6,9 +6,22 @@ export const reloadAlertTemplate = ({
   amount,
 }) => `Water Meter (${meterName}) Reload \n
 Hi ${user},\n
-Your water meter has been credited with Php ${amount} as of ${moment().format(
+Your water meter has been credited with ${amount} as of ${moment().format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
+Note: Load application to the meter is not in real time. Please check your IoTubig account in the next 12-24 hours for your updated balance.\n
+For other concerns, please contact your Building Administrator.
+`;
+
+export const reloadDeductionTemplate = ({
+  meterName,
+  user,
+  amount,
+}) => `Water Meter (${meterName}) Deduction \n
+Hi ${user},\n
+Your water meter has been deducted with ${amount} as of ${moment().format(
+  'MMMM Do YYYY, h:mm:ss a',
+)}. This is due to your monthly consumption wasn't able to reach the minimum amount set by the building Administrator.\n
 Note: Load application to the meter is not in real time. Please check your IoTubig account in the next 12-24 hours for your updated balance.\n
 For other concerns, please contact your Building Administrator.
 `;

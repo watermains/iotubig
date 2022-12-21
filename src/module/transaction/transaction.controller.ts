@@ -10,7 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Roles, RoleTypes } from 'src/decorators/roles.decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import {
@@ -23,8 +23,10 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { GenerateStatementReportsDto } from './dto/generate-statement.report';
 import { GenerateTransactionReportsDto } from './dto/generate-transaction-reports.dto';
 import { GetTransactionsTotalAmountsDto } from './dto/get-transactions-total-amounts.dto';
+import { GetPaymentTransactionDto } from './dto/get_payment_transaction.dto';
 import { GetTransactionsDto } from './dto/get-transactions.dto';
 import { TransactionService } from './transaction.service';
+import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dto';
 
 @ApiTags('Transactions')
 @ApiBearerAuth()
@@ -69,9 +71,7 @@ export class TransactionController {
   @UseInterceptors(ResponseInterceptor)
   @Roles(RoleTypes.customer)
   getAllAvailableStatements(@Req() req) {
-    return this.transactionService.getAllAvailableStatements(
-      req.user.id,
-    );
+    return this.transactionService.getAllAvailableStatements(req.user.id);
   }
 
   @Get('/statements')
@@ -83,6 +83,17 @@ export class TransactionController {
       dto.reportDate,
       req.user.org_id,
       dto.utcOffset,
+    );
+  }
+
+  @Post('/reload')
+  @UseInterceptors(ResponseInterceptor)
+  @Roles(RoleTypes.customer)
+  reloadMeter(@Req() req, @Body() dto: CreatePaymentTransactionDto) {
+    return this.transactionService.reloadMeter(
+      req.user.id,
+      req.user.org_id,
+      dto
     );
   }
 
@@ -120,5 +131,20 @@ export class TransactionController {
   @UseInterceptors(ResponseInterceptor)
   remove(@Param('id') id: string) {
     return this.transactionService.remove(+id);
+  }
+}
+
+@ApiTags('Transactions')
+@ApiSecurity('callback_token', ['x-callback-token'])
+@Controller('transactions')
+export class ExternalTransactionController {
+  constructor(private readonly transactionService: TransactionService) {}
+
+  @Post('payment/ewallet')
+  create(@Body() body: { data: GetPaymentTransactionDto }) {
+    if(!!body?.data?.metadata?.user_id) {
+      return this.transactionService.ewalletPayment(body.data);
+    }
+    return 'Tested and Saved!';
   }
 }

@@ -22,6 +22,7 @@ export class AdminController {
   @Post('auth/login')
   @UseInterceptors(ResponseInterceptor)
   login(@Body() body: LoginUserDto) {
+    console.log("orayt")
     return this.adminService.login(body);
   }
 

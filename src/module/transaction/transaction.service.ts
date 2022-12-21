@@ -1,13 +1,11 @@
 import {
   BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as moment from 'moment';
-import { lastValueFrom, map } from 'rxjs';
+import { catchError, lastValueFrom, map, Observable, throwError } from 'rxjs';
 import { IotService } from 'src/iot/iot.service';
 import { MailerService } from 'src/mailer/mailer.service';
 import { OrganizationService } from '../organization/organization.service';
@@ -23,7 +21,11 @@ import { ConsumerType } from '../meter/enum/consumer-type.enum';
 import { SmsService } from 'src/sms/sms.service';
 import { smsTypes } from 'src/sms/constants';
 import { MeterConsumptionRepository } from '../meter-consumption/meter-consumption.repository';
-
+import { GetPaymentTransactionDto } from './dto/get_payment_transaction.dto';
+import { TransactionPaymentOptions, TransactionStatus } from './enum/transaction.status.enum';
+import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dto';
+import { HttpService } from '@nestjs/axios';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class TransactionService {
@@ -39,6 +41,7 @@ export class TransactionService {
     private readonly logService: LogService,
     private readonly orgService: OrganizationService,
     private readonly meterConsumptionRepo: MeterConsumptionRepository,
+    private httpService: HttpService,
   ) {}
 
   async create(
@@ -116,7 +119,7 @@ export class TransactionService {
               this.smsService.sendSms(
                 meter.meter_name,
                 user.first_name,
-                smsTypes.RELOAD,
+                user_id === '-1' ? smsTypes.DEDUCT : smsTypes.RELOAD,
                 user.phone,
                 amount,
               );
@@ -212,7 +215,8 @@ export class TransactionService {
 
   async getAllAvailableStatements(userId: string) {
     const dateValues = [];
-    const allConsumption = await this.meterConsumptionRepo.findMeterConsumptionByUserId(userId);
+    const allConsumption =
+      await this.meterConsumptionRepo.findMeterConsumptionByUserId(userId);
     allConsumption?.map((consumption) => {
       const date = moment(new Date(consumption.consumed_at));
       const thisMonth = moment().startOf('month');
@@ -328,4 +332,87 @@ export class TransactionService {
     );
   }
 
+  async reloadMeter(
+    user_id: string,
+    org_id: string,
+    dto: CreatePaymentTransactionDto,
+  ) {
+    const { water_meter_id } = await this.userRepo.findOneByID(user_id);
+    const { dev_eui } = await this.meterRepo.findMeter({
+      meter_name: water_meter_id,
+    });
+    const resp = lastValueFrom(
+      this.createReload(user_id, org_id, dto, water_meter_id, dev_eui).pipe(
+        (data) => {
+          return data;
+        },
+      ),
+    );
+    const response = await resp;
+    return { response };
+  }
+
+  private createReload(
+    user_id: string,
+    org_id: string,
+    dto: CreatePaymentTransactionDto,
+    water_meter_id: string,
+    dev_eui: string,
+  ): Observable<AxiosResponse<unknown>> {
+    const timeStamp = moment().format('X');
+
+    const btoa64 = btoa(process.env.XENDIT_SECRET);
+    const channel_code = TransactionPaymentOptions[dto.payment_channel];
+    const response = this.httpService
+      .post(
+        `${process.env.XENDIT_URL}/ewallets/charges`,
+        {
+          reference_id: `order-id-${user_id}-${timeStamp}`,
+          currency: 'PHP',
+          amount: parseFloat(Number(dto.amount).toFixed(2)),
+          checkout_method: 'ONE_TIME_PAYMENT',
+          channel_code,
+          channel_properties: {
+            success_redirect_url: `${process.env.CUSTOMER_FRONT_END_URL}dashboard`,
+            failure_redirect_url: `${process.env.CUSTOMER_FRONT_END_URL}payment/failed`,
+            cancel_redirect_url: `${process.env.CUSTOMER_FRONT_END_URL}payment/cancel`,
+          },
+          metadata: {
+            user_id,
+            organization_id: org_id,
+            meter_name: water_meter_id,
+            dev_eui,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Basic ${btoa64}`,
+          },
+        },
+      )
+      .pipe(
+        map((resp) => {
+          console.log(resp);
+          return resp.data;
+        }),
+      );
+    return response;
+  }
+
+  async ewalletPayment(dto: GetPaymentTransactionDto) {
+    const { metadata, status, currency, capture_amount, created } = dto;
+    const { dev_eui, meter_name, organization_id, user_id } = metadata;
+
+    const createDto: CreateTransactionDto = {
+      amount: capture_amount,
+      dev_eui,
+      iot_meter_id: meter_name,
+    };
+
+    if (status === TransactionStatus.succeeded) {
+      this.sendBalanceUpdate(user_id, organization_id, createDto);
+    }
+
+    return { paymentStatus: status };
+  }
 }

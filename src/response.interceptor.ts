@@ -183,7 +183,7 @@ export class ReportsInterceptor implements NestInterceptor {
           },
           content: [
             {
-              text: 'Detailed Individual Report',
+              text: 'Detailed User Report',
               fontSize: 14,
               margin: [0, 0, 0, 8],
             },

@@ -176,6 +176,7 @@ export class MeterService {
           low_balance_threshold,
           battery_level_threshold,
           last_uplink,
+          full_name: `${response[0]?.first_name ?? 'VACANT'} ${response[0]?.last_name ?? ''}`,
           email: response[0]?.email ?? '',
         };
       }),

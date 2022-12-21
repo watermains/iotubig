@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
+import { RoleTypes } from 'src/decorators/roles.decorator';
 import { ConfigurationRepository } from 'src/module/configuration/configuration.repository';
 import {
   MeterConsumption,
@@ -47,7 +48,7 @@ export class BalanceCheckService {
     const organizations = await this.orgModel.find();
 
     //get first day of last month
-    const now = moment();
+    const now = moment().tz('Asia/Manila');
     const previousMonth = now.month() - 1;
     const startDate = this.getFirstDateOfMonth(previousMonth).subtract(
       1,
@@ -109,12 +110,12 @@ export class BalanceCheckService {
         let minimum = 0;
         let rate = 0;
         if (val.consumer_type == ConsumerType.Commercial) {
-          minimum = commercialMinimum;
-          rate = perCommercialRate;
+          minimum = Number(commercialMinimum);
+          rate = Number(perCommercialRate);
         }
         if (val.consumer_type == ConsumerType.Residential) {
-          minimum = residentialMinimum;
-          rate = perResidentialRate;
+          minimum = Number(residentialMinimum);
+          rate = Number(perResidentialRate);
         }
 
         const userInfo = await this.userModel.findOne({water_meter_id: val.meter_name, isActive: true})
@@ -143,8 +144,8 @@ export class BalanceCheckService {
           }
         });
 
-        const startConsume = consumption.length ? consumption[0] : null;
-        const endConsume = consumption.length ? consumption[consumption.length - 1] : null;
+        const startConsume = consumption.length && now.format('MM DD YYYY') === endDatePlus.format('MM DD YYYY') ? consumption[0] : null;
+        const endConsume = consumption.length && now.format('MM DD YYYY') === endDatePlus.format('MM DD YYYY') ? consumption[consumption.length - 1] : null;
 
         this.logger.debug(`*************`);
 
@@ -158,15 +159,38 @@ export class BalanceCheckService {
           return;
         }
 
+        if(hasUser.role === RoleTypes.admin || hasUser.role === RoleTypes.superAdmin) {
+          this.logger.debug(
+            `USER RESERVED (${hasUser.role}): ${val.meter_name} with DEV EUI: ${val.dev_eui}`,
+          );
+          return;
+        }
+
         if (startConsume && endConsume) {
           this.logger.debug(
-            `evaluating: ${val.meter_name} of type ${val.consumer_type} with DEV EUI: ${val.dev_eui}`,
+            `evaluating: ${val.meter_name} of type ${val.consumer_type} with DEV EUI: ${val.dev_eui}, tenant email: ${hasUser.email}`,
           );
           const deltaFlow =
-            Math.abs(Number(endConsume.cumulative_flow) - Number(startConsume.cumulative_flow));
+            Number(endConsume.cumulative_flow) - Number(startConsume.cumulative_flow);
           this.logger.debug(
             `deltaFlow: ${deltaFlow}; with threshold: ${minimum}L`,
           );
+
+          if (deltaFlow < 0) {
+            this.logger.debug(
+              `Invalid CUMULATIVE FLOW. Kindly check ${val.meter_name}`,
+            );
+            this.logger.debug(
+              `DELTA = ${deltaFlow} | MINIMUM = ${minimum} | END_CONSUME = ${endConsume.cumulative_flow} | START_CONSUME = ${startConsume.cumulative_flow}`,
+            );
+            this.logger.debug(
+              `END_DATE = ${endConsume.consumed_at} | START_CONSUME = ${startConsume.consumed_at}`,
+            );
+            this.logger.debug(
+              `USER_EMAIL = ${hasUser.email}`,
+            );
+          }
+
           if (deltaFlow < minimum) {
             // const normalizedDeductionAmount = rate * (minimum - deltaFlow) * -1;
             const normalizedDeductionAmount = Math.abs(minimum - deltaFlow);
@@ -180,6 +204,9 @@ export class BalanceCheckService {
                 iot_meter_id: val.meter_name,
                 dev_eui: val.dev_eui,
               });
+              this.logger.debug(
+                `DEDUCT METER: ${val.meter_name} with DEV EUI: ${val.dev_eui} with AMOUNT: ${displayDeductionAmount}`,
+              );
             } catch (ex) {
               this.logger.debug(
                 `Failed to deduct balance in IoT with error ${ex}`,

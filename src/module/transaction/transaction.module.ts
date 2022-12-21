@@ -12,7 +12,7 @@ import { MeterModule } from '../meter/meter.module';
 import { OrganizationModule } from '../organization/organization.module';
 import { UserModule } from '../user/user.module';
 import { Transaction, TransactionSchema } from './entities/transaction.schema';
-import { TransactionController } from './transaction.controller';
+import { ExternalTransactionController, TransactionController } from './transaction.controller';
 import { TransactionRepository } from './transaction.repository';
 import { TransactionService } from './transaction.service';
 
@@ -45,7 +45,7 @@ import { TransactionService } from './transaction.service';
     LogModule,
     SmsModule,
   ],
-  controllers: [TransactionController],
+  controllers: [TransactionController, ExternalTransactionController],
   exports: [
     TransactionService,
     TransactionRepository,

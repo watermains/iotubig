@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SNS, config } from 'aws-sdk';
 import { smsTypes } from './constants';
-import { belowZeroBalanceAlert, lowBalanceAlert, lowBatteryAlert, meterStatusAlert, overdrawnLimitAlert, reloadAlertTemplate } from './sms.template';
+import { belowZeroBalanceAlert, lowBalanceAlert, lowBatteryAlert, meterStatusAlert, overdrawnLimitAlert, reloadAlertTemplate, reloadDeductionTemplate } from './sms.template';
 
 @Injectable()
 export class SmsService {
@@ -32,6 +32,9 @@ export class SmsService {
     switch(smsType) {
       case (smsTypes.RELOAD):
         msg = reloadAlertTemplate({ meterName, user, amount });
+        break;
+      case (smsTypes.DEDUCT):
+        msg = reloadDeductionTemplate({ meterName, user, amount });
         break;
       case (smsTypes.STATUS):
         msg = meterStatusAlert({ meterName, user, status: meterStatus });
