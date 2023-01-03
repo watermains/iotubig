@@ -54,7 +54,7 @@ export class TransactionService {
     const user = await this.userRepo.findActiveUserByMeter(meter?.meter_name);
     const transaction = await this.repo.create(
       user_id,
-      user[0]._id,
+      user[0].id,
       dto,
       meter,
       config,

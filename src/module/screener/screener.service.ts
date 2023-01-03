@@ -114,31 +114,33 @@ export class ScreenerService {
             `${user.email}`,
             `Water Meter (${meterName}) Alert`,
           );
-          smsActions.forEach((action) => {
-            if (action === smsTypes.LOW_BATTERY) {
-              this.smsService.sendSms(
-                meterName,
-                user.first_name,
-                action,
-                user.phone,
-                null,
-                null,
-                null,
-                meter.batteryLevel,
-              );
-            } else {
-              this.smsService.sendSms(
-                meterName,
-                user.first_name,
-                action,
-                user.phone,
-                null,
-                null,
-                meter.allowedFlow,
-                null,
-              );
-            }
-          });
+          if (!!user.phone) {
+            smsActions.forEach((action) => {
+              if (action === smsTypes.LOW_BATTERY) {
+                this.smsService.sendSms(
+                  meterName,
+                  user.first_name,
+                  action,
+                  user.phone,
+                  null,
+                  null,
+                  null,
+                  meter.batteryLevel,
+                );
+              } else {
+                this.smsService.sendSms(
+                  meterName,
+                  user.first_name,
+                  action,
+                  user.phone,
+                  null,
+                  null,
+                  meter.allowedFlow,
+                  null,
+                );
+              }
+            });
+          }
         });
       }
     }
