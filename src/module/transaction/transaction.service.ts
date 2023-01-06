@@ -54,11 +54,13 @@ export class TransactionService {
     const user = await this.userRepo.findActiveUserByMeter(meter?.meter_name);
     const transaction = await this.repo.create(
       user_id,
-      user[0].id,
+      user[0].id ?? user[0]._id,
       dto,
       meter,
       config,
     );
+    console.log("user id: ", user[0].id)
+    console.log("user _id: ", user[0]._id)
     if (transaction === undefined) {
       throw new InternalServerErrorException(
         'Transaction not recorded on the application. Contact your administrator.',
