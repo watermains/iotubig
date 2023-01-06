@@ -59,6 +59,7 @@ export class TransactionService {
       meter,
       config,
     );
+    console.log("user object: ", user[0])
     console.log("user id: ", user[0].id)
     console.log("user _id: ", user[0]._id)
     if (transaction === undefined) {
