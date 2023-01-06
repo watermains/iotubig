@@ -60,8 +60,8 @@ export class TransactionService {
       config,
     );
     console.log("user object: ", user[0])
-    console.log("user id: ", user[0].id)
-    console.log("user _id: ", user[0]._id)
+    console.log("user id: ", user[0]?.id)
+    console.log("user _id: ", user[0]?._id)
     if (transaction === undefined) {
       throw new InternalServerErrorException(
         'Transaction not recorded on the application. Contact your administrator.',
