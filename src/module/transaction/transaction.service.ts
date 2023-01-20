@@ -22,7 +22,10 @@ import { SmsService } from 'src/sms/sms.service';
 import { smsTypes } from 'src/sms/constants';
 import { MeterConsumptionRepository } from '../meter-consumption/meter-consumption.repository';
 import { GetPaymentTransactionDto } from './dto/get_payment_transaction.dto';
-import { TransactionPaymentOptions, TransactionStatus } from './enum/transaction.status.enum';
+import {
+  TransactionPaymentOptions,
+  TransactionStatus,
+} from './enum/transaction.status.enum';
 import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dto';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
@@ -52,12 +55,17 @@ export class TransactionService {
   ) {
     const meter = await this.meterRepo.findByDevEui(dto.dev_eui);
     const user = await this.userRepo.findActiveUserByMeter(meter?.meter_name);
+    const full_name = `${user[0].first_name} ${user[0].last_name}`;
+    const admin = await this.userRepo.findOneByID(user_id);
+
     const transaction = await this.repo.create(
       user_id,
       user[0]?.id ?? user[0]?._id,
       dto,
       meter,
       config,
+      full_name,
+      admin.email,
     );
     if (transaction === undefined) {
       throw new InternalServerErrorException(
@@ -144,16 +152,30 @@ export class TransactionService {
   async findAll(
     offset: number,
     pageSize: number,
-
     organization_id: string,
   ): Promise<unknown> {
-    const { data: transactions, total_rows } = await this.repo.findWhere(
+    const { data } = await this.repo.findWhere(
       offset,
       pageSize,
       organization_id,
     );
-
-    return { response: { transactions, total_rows } };
+    const transactions = data.filter(
+      (transaction) =>
+        moment(transaction.createdAt).format('MM-DD-YYYY') ===
+        moment().format('MM-DD-YYYY'),
+    );
+    const total_amount = transactions.reduce(
+      (accumulator: number, transaction: { amount: number }) =>
+        (accumulator += transaction.amount),
+      0,
+    );
+    return {
+      response: {
+        transactions,
+        total_rows: transactions.length,
+        total_amount,
+      },
+    };
   }
 
   async findUser(

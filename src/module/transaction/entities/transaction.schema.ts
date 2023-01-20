@@ -38,6 +38,12 @@ export class Transaction {
   iot_meter_id: string;
 
   @Prop({ required: true })
+  full_name: string;
+
+  @Prop({ required: true })
+  admin_email: string;
+
+  @Prop({ required: true })
   dev_eui: string;
 
   @Prop({ required: true })

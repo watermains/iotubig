@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { IsOptional } from 'class-validator';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Organization } from 'src/module/organization/entities/organization.schema';
 
@@ -19,6 +20,7 @@ export class User {
   email: string;
   
   @Prop({default: ''})
+  @IsOptional()
   phone: string;
 
   @Prop({ required: true, select: false })

@@ -19,12 +19,15 @@ export interface ITransaction {
     dto: CreateTransactionDto,
     meter: Meter,
     config: Configuration,
+    full_name: string,
+    admin_email:string
   );
   seed(data: []);
   findWhere(
     offset: number,
     pageSize: number,
     organization_id: string,
+    userId?: string,
     dev_eui?: string,
   ): Promise<PaginatedData>;
   remove(id: number);
@@ -65,6 +68,8 @@ export class TransactionRepository implements ITransaction {
     dto: CreateTransactionDto,
     meter: Meter,
     config: Configuration,
+    full_name: string,
+    admin_email: string,
   ) {
     const rate = config.getConsumptionRate(meter.consumer_type);
 
@@ -82,7 +87,9 @@ export class TransactionRepository implements ITransaction {
       unit_name: meter.unit_name,
       current_meter_volume: meter.allowed_flow,
       created_by,
+      admin_email,
       cumulative_flow: meter.cumulative_flow,
+      full_name,
     });
 
     return transaction;
@@ -96,6 +103,7 @@ export class TransactionRepository implements ITransaction {
     offset: number,
     pageSize: number,
     organization_id: string,
+    userId?: string,
     dev_eui?: string,
   ): Promise<PaginatedData> {
     const $match = {
@@ -104,6 +112,7 @@ export class TransactionRepository implements ITransaction {
 
     if (dev_eui) {
       $match['meter.dev_eui'] = dev_eui;
+      $match['userId'] = userId;
     }
 
     const transactionsPipeline: PipelineStage[] = [
@@ -316,6 +325,10 @@ export class TransactionRepository implements ITransaction {
       {
         label: 'Meter Number',
         value: 'dev_eui',
+      },
+      {
+        label: 'Created By',
+        value: 'admin_email'
       },
       {
         label: 'Load Amount',

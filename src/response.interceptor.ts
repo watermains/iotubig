@@ -318,7 +318,7 @@ export class CsvReportsInterceptor implements NestInterceptor {
           );
           const rows = _data.map((item: { [x: string]: any }) => {
             return fields.map(
-              (field: { value: string | number }) => item[field.value],
+              (field: { value: string | number }) => item[field.value] ?? 'Unrecorded',
             );
           });
 

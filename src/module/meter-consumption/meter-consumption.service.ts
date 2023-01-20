@@ -82,10 +82,11 @@ export class MeterConsumptionService {
   ) {
     const { meter_name } = await this.meterRepo.findByDevEui(devEUI);
     const user = await this.userRepo.findActiveUserByMeter(meter_name);
-    const { data: transactions, total_rows } =
-      await this.transactionRepo.findWhere(0, 10, organization_id, devEUI);
+    const { data: transactions } =
+      await this.transactionRepo.findWhere(0, 10, organization_id, user[0].id, devEUI);
 
     const response = await this.meterConsRepo.findMeterConsumption(
+      user[0].id,
       devEUI,
       startDate,
       endDate,

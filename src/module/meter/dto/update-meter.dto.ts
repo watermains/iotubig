@@ -18,5 +18,5 @@ export class UpdateMeterDto extends IntersectionType(AllowedFlowDto, MeterDto) {
     { field: MeterField.name, unique: true },
     { message: 'Meter Name already taken' },
   )
-  meter_name: number;
+  meter_name: string;
 }

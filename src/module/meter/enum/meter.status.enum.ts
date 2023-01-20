@@ -5,4 +5,5 @@ export enum MeterStatus {
   fault = 3, //UP defined
   pendingOpen = 4,
   pendingClose = 5,
+  all = 6,
 }

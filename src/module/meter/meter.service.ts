@@ -88,8 +88,8 @@ export class MeterService {
     organization_id: string,
     offset: number,
     pageSize: number,
-    valve_status?: MeterStatus,
-    consumer_type?: ConsumerType,
+    valve_status: MeterStatus = MeterStatus.all,
+    consumer_type: ConsumerType = ConsumerType.All,
     search?: string,
     role?: RoleTypes,
     iot_organization_id?: string,
@@ -122,11 +122,11 @@ export class MeterService {
       $match.allowed_flow = Number(allowed_flow);
     }
 
-    if (valve_status) {
+    if (Number(valve_status) !== MeterStatus.all) {
       $match.valve_status = Number(valve_status);
     }
 
-    if (consumer_type) {
+    if (consumer_type !== ConsumerType.All) {
       $match.consumer_type = consumer_type;
     }
 

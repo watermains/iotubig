@@ -13,7 +13,7 @@ import {
 
 export interface IMeterConsumption {
   create(dto: CreateMeterConsumptionDto);
-  findMeterConsumption(devEUI: string, startDate: Date, endDate?: Date);
+  findMeterConsumption(userId: string, devEUI: string, startDate: Date, endDate?: Date);
   generateReports(
     startDate: Date,
     endDate: Date,
@@ -62,7 +62,7 @@ export class MeterConsumptionRepository implements IMeterConsumption {
     );
   }
 
-  findMeterConsumption(devEUI: string, startDate: Date, endDate?: Date) {
+  findMeterConsumption(userId: string, devEUI: string, startDate: Date, endDate?: Date) {
     const consumed_at: { $gte: Date; $lt?: Date } = { $gte: startDate };
 
     if (endDate) {
@@ -73,6 +73,7 @@ export class MeterConsumptionRepository implements IMeterConsumption {
       .find({
         dev_eui: devEUI,
         consumed_at,
+        userId
       })
       .sort({ consumed_at: 1 });
   }
