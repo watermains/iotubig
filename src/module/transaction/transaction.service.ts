@@ -385,6 +385,7 @@ export class TransactionService {
 
     const btoa64 = btoa(process.env.XENDIT_SECRET);
     const channel_code = TransactionPaymentOptions[dto.payment_channel];
+    console.log('the token: ', process.env.XENDIT_SECRET);
     const response = this.httpService
       .post(
         `${process.env.XENDIT_URL}/ewallets/charges`,
