@@ -385,6 +385,7 @@ export class TransactionService {
 
     const btoa64 = btoa(process.env.XENDIT_SECRET);
     const channel_code = TransactionPaymentOptions[dto.payment_channel];
+    console.log('=========================================');
     console.log('the token: ', process.env.XENDIT_SECRET);
     console.log('the url: ', process.env.XENDIT_URL);
     const response = this.httpService
