@@ -6,7 +6,7 @@ export const reloadAlertTemplate = ({
   amount,
 }) => `Water Meter (${meterName}) Reload \n
 Hi ${user},\n
-Your water meter has been credited with ${amount} as of ${moment().format(
+Your water meter has been credited with ${amount} as of ${moment().tz('Asia/Manila').format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
 Note: Load application to the meter is not in real time. Please check your IoTubig account in the next 12-24 hours for your updated balance.\n
@@ -19,7 +19,7 @@ export const reloadDeductionTemplate = ({
   amount,
 }) => `Water Meter (${meterName}) Deduction \n
 Hi ${user},\n
-Your water meter has been deducted with ${amount} as of ${moment().format(
+Your water meter has been deducted with ${amount} as of ${moment().tz('Asia/Manila').format(
   'MMMM Do YYYY, h:mm:ss a',
 )}. This is due to your monthly consumption wasn't able to reach the minimum amount set by the building Administrator.\n
 Note: Load application to the meter is not in real time. Please check your IoTubig account in the next 12-24 hours for your updated balance.\n
@@ -33,7 +33,7 @@ export const meterStatusAlert = ({
 }) => `Water Meter (${meterName}) ${status === 'opened' ? 'Opened' : 'Closed'}\n
 Hi ${user},\n
 
-Your water meter has been ${status} as of ${moment().format(
+Your water meter has been ${status} as of ${moment().tz('Asia/Manila').format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
 
@@ -47,7 +47,7 @@ export const lowBalanceAlert = ({
 }) => `Water Meter (${meterName}) Alert\n
 Hi ${user},\n
 
-Your water meter is Low Balance (${balance} Php) as of ${moment().format(
+Your water meter is Low Balance (${balance} Php) as of ${moment().tz('Asia/Manila').format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
 Please reload immediately.`;
@@ -59,7 +59,7 @@ export const belowZeroBalanceAlert = ({
 }) => `Water Meter (${meterName}) Alert\n
 Hi ${user},\n
 
-Your water meter is Below Zero Balance (${balance} Php) as of ${moment().format(
+Your water meter is Below Zero Balance (${balance} Php) as of ${moment().tz('Asia/Manila').format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
 Please reload immediately.\n
@@ -73,7 +73,7 @@ export const overdrawnLimitAlert = ({
 }) => `Water Meter (${meterName}) Alert\n
 Hi ${user},\n
 
-Your water meter is near the Overdrawn Water Limit as of ${moment().format(
+Your water meter is near the Overdrawn Water Limit as of ${moment().tz('Asia/Manila').format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
 Meter will be closed. Please pay at least (${balance} Php) immediately for your meter to open.\n
@@ -87,7 +87,7 @@ export const lowBatteryAlert = ({
 }) => `Water Meter (${meterName}) Alert\n
 Hi ${user},\n
 
-Your water meter is WEAK (Low Battery ${batteryLevel}%) as of ${moment().format(
+Your water meter is WEAK (Low Battery ${batteryLevel}%) as of ${moment().tz('Asia/Manila').format(
   'MMMM Do YYYY, h:mm:ss a',
 )}.\n
 Please contact your Building Administrator immediately to change your battery  or it will close soon.`;

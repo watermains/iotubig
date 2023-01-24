@@ -17,7 +17,10 @@ export class BalanceUpdateDTO {
 
 @Injectable()
 export class IotService {
-  constructor(private httpService: HttpService, private readonly mailerService: MailerService) { }
+  constructor(
+    private httpService: HttpService,
+    private readonly mailerService: MailerService,
+  ) {}
   private readonly logger = new Logger(IotService.name);
 
   sendOverdrawUpdate(
@@ -71,16 +74,47 @@ export class IotService {
 
   // 1 - open valve
   // 0 - close valve
-  sendOpenValveUpdate(wireless_id: string, meterName: string,
-    siteName: string, dto: UpdateMeterValveDto) {
-    return this.send(wireless_id, meterName,
-      siteName, 'SVALVE', { data: dto.is_open ? 1 : 0 }, 1);
+  sendOpenValveUpdate(
+    wireless_id: string,
+    meterName: string,
+    siteName: string,
+    dto: UpdateMeterValveDto,
+  ) {
+    return this.send(
+      wireless_id,
+      meterName,
+      siteName,
+      'SVALVE',
+      { data: dto.is_open ? 1 : 0 },
+      1,
+    );
   }
 
-  sendConsumptionRateUpdate(device_id: string, meterName: string,
-    siteName: string, consumption_rate: number) {
-    return this.send(device_id, meterName,
-      siteName, 'SRATE', { data: consumption_rate ?? 20 }, 1);
+  sendConsumptionRateUpdate(
+    device_id: string,
+    meterName: string,
+    siteName: string,
+    consumption_rate: number,
+  ) {
+    return this.send(
+      device_id,
+      meterName,
+      siteName,
+      'SRATE',
+      { data: consumption_rate ?? 20 },
+      1,
+    );
+  }
+
+  sendDefaultMeter(device_id: string, meterName: string, siteName: string) {
+    return this.send(
+      device_id,
+      meterName,
+      siteName,
+      'SDEFAULT',
+      { data: 0 },
+      1,
+    );
   }
 
   private send(

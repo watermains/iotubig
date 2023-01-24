@@ -29,6 +29,7 @@ import {
 import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dto';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
+import { RoleTypes } from 'src/decorators/roles.decorator';
 
 @Injectable()
 export class TransactionService {
@@ -65,7 +66,7 @@ export class TransactionService {
       meter,
       config,
       full_name,
-      admin.email,
+      admin.role === RoleTypes.admin ? admin.email : `${admin.email} via Xendit`,
     );
     if (transaction === undefined) {
       throw new InternalServerErrorException(
@@ -395,9 +396,9 @@ export class TransactionService {
           checkout_method: 'ONE_TIME_PAYMENT',
           channel_code,
           channel_properties: {
-            success_redirect_url: `${process.env.CUSTOMER_FRONT_END_URL}dashboard`,
-            failure_redirect_url: `${process.env.CUSTOMER_FRONT_END_URL}payment/failed`,
-            cancel_redirect_url: `${process.env.CUSTOMER_FRONT_END_URL}payment/cancel`,
+            success_redirect_url: `${process.env.CUSTOMER_FRONT_END_URL}/dashboard`,
+            failure_redirect_url: `${process.env.CUSTOMER_FRONT_END_URL}/dashboard`,
+            cancel_redirect_url: `${process.env.CUSTOMER_FRONT_END_URL}/dashboard`,
           },
           metadata: {
             user_id,
