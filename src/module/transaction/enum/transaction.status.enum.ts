@@ -6,9 +6,11 @@ export enum TransactionStatus {
   refunded = 'REFUNDED',
 }
 
-export enum TransactionPaymentOptions {
+export enum TransactionPaymentCodes {
   GCash = 'PH_GCASH',
   Maya = 'PH_PAYMAYA',
   ShopeePay = 'PH_SHOPEEPAY',
   GrabPay = 'PH_GRABPAY',
+  Cebuana = 'CEBUANA',
+  "7Eleven" = '7ELEVEN',
 }

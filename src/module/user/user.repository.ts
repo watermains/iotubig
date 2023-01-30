@@ -22,6 +22,7 @@ import { User, UserDocument } from './entities/user.schema';
 import * as path from 'path';
 import { ObjectId } from 'mongodb';
 import { VerifyUserDto } from '../verify-users/dto/verify-user-dto';
+import { CreateAdminDto } from './dto/create-admin.dto';
 
 @Injectable()
 export class UserRepository {
@@ -55,7 +56,7 @@ export class UserRepository {
     return this.userModel.find({
       water_meter_id,
       isActive: true,
-      isDeactivated: false
+      isDeactivated: false,
     });
   }
 
@@ -165,6 +166,19 @@ export class UserRepository {
     return { message: 'Registration Success' };
   }
 
+  async createAdmin(org_id: string, dto: CreateAdminDto) {
+    const createdUser = new this.userModel({ ...dto, organization_id: org_id });
+    const org = await this.orgService.findById(
+      createdUser.organization_id.toString(),
+    );
+
+    createdUser.role = RoleTypes.buildingManager;
+    createdUser.save();
+
+    this.mailerService.sendWelcome(dto.first_name, dto.email, org.name);
+    return { message: 'Registration Success' };
+  }
+
   async login(dto: LoginUserDto) {
     try {
       const user = await this.userModel
@@ -230,8 +244,11 @@ export class UserRepository {
   async updateAccount(request, dto: UpdateUserDto) {
     const user = await this.userModel
       .findOne({ water_meter_id: request.body.meter })
-      .select('+email').select('+phone');
-    const match = await bcrypt.compare(dto.email, user.email) && await bcrypt.compare(dto.phone, user.phone);
+      .select('+email')
+      .select('+phone');
+    const match =
+      (await bcrypt.compare(dto.email, user.email)) &&
+      (await bcrypt.compare(dto.phone, user.phone));
     if (!!match) {
       throw new NotAcceptableException([
         'You are entering the same Email address and Phone number.',
@@ -241,7 +258,6 @@ export class UserRepository {
     user.phone = dto.phone;
     user.save();
     return { message: 'Account updated Successfully!' };
-    
   }
 
   // ADMIN

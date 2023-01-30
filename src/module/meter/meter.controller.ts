@@ -72,6 +72,8 @@ export class MeterController {
       dto.allowed_flow,
       dto.sortIndex,
       dto.ascending,
+      dto.battery_level,
+      dto.balance_status,
     );
   }
 

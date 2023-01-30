@@ -7,6 +7,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { BalanceStatus } from '../enum/balance-status.enum';
+import { BatteryLevel  } from '../enum/battery-level.enum';
 import { ConsumerType } from '../enum/consumer-type.enum';
 import { MeterStatus } from '../enum/meter.status.enum';
 
@@ -49,6 +51,18 @@ export class GetMetersDto {
   @IsOptional()
   @IsEnum(ConsumerType)
   consumer_type?: ConsumerType;
+
+  @ApiProperty({ type: 'number', required: false })
+  @IsOptional()
+  @IsEnum(BatteryLevel)
+  @Type(() => Number)
+  battery_level?: BatteryLevel;
+
+  @ApiProperty({ type: 'number', required: false })
+  @IsOptional()
+  @IsEnum(BalanceStatus)
+  @Type(() => Number)
+  balance_status?: BalanceStatus;
 
   @ApiProperty({ type: 'boolean', required: false })
   @IsOptional()

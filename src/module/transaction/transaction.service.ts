@@ -23,7 +23,7 @@ import { smsTypes } from 'src/sms/constants';
 import { MeterConsumptionRepository } from '../meter-consumption/meter-consumption.repository';
 import { GetPaymentTransactionDto } from './dto/get_payment_transaction.dto';
 import {
-  TransactionPaymentOptions,
+  TransactionPaymentCodes,
   TransactionStatus,
 } from './enum/transaction.status.enum';
 import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dto';
@@ -66,7 +66,9 @@ export class TransactionService {
       meter,
       config,
       full_name,
-      admin.role === RoleTypes.admin ? admin.email : `${admin.email} via Xendit`,
+      admin.role === RoleTypes.admin
+        ? admin.email
+        : `${admin.email} via Xendit`,
     );
     if (transaction === undefined) {
       throw new InternalServerErrorException(
@@ -360,22 +362,51 @@ export class TransactionService {
     org_id: string,
     dto: CreatePaymentTransactionDto,
   ) {
-    const { water_meter_id } = await this.userRepo.findOneByID(user_id);
+    const { water_meter_id, first_name, last_name } = await this.userRepo.findOneByID(user_id);
     const { dev_eui } = await this.meterRepo.findMeter({
       meter_name: water_meter_id,
     });
-    const resp = lastValueFrom(
-      this.createReload(user_id, org_id, dto, water_meter_id, dev_eui).pipe(
-        (data) => {
-          return data;
-        },
-      ),
-    );
+    let resp: Promise<AxiosResponse<unknown, any>>;
+    switch (dto.payment_channel) {
+      case 'GCash':
+      case 'Maya':
+        resp = lastValueFrom(
+          this.createEwalletReload(
+            user_id,
+            org_id,
+            dto,
+            water_meter_id,
+            dev_eui,
+          ).pipe((data) => {
+            return data;
+          }),
+        );
+        break;
+
+      case 'Cebuana':
+        resp = lastValueFrom(
+          this.createOtcReload(
+            user_id,
+            org_id,
+            dto,
+            water_meter_id,
+            dev_eui,
+            `${first_name} ${last_name}`
+          ).pipe((data) => {
+            return data;
+          }),
+        );
+        break;
+          
+      default:
+        return;
+    }
+
     const response = await resp;
     return { response };
   }
 
-  private createReload(
+  private createEwalletReload(
     user_id: string,
     org_id: string,
     dto: CreatePaymentTransactionDto,
@@ -385,7 +416,7 @@ export class TransactionService {
     const timeStamp = moment().format('X');
 
     const btoa64 = btoa(process.env.XENDIT_SECRET);
-    const channel_code = TransactionPaymentOptions[dto.payment_channel];
+    const channel_code = TransactionPaymentCodes[dto.payment_channel];
     const response = this.httpService
       .post(
         `${process.env.XENDIT_URL}/ewallets/charges`,
@@ -422,7 +453,68 @@ export class TransactionService {
     return response;
   }
 
+  private createOtcReload(
+    user_id: string,
+    org_id: string,
+    dto: CreatePaymentTransactionDto,
+    water_meter_id: string,
+    dev_eui: string,
+    full_name: string,
+  ): Observable<AxiosResponse<unknown>> {
+    const timeStamp = moment().format('X');
+
+    const btoa64 = btoa(process.env.XENDIT_SECRET);
+    const channel_code = TransactionPaymentCodes[dto.payment_channel];
+    const response = this.httpService
+      .post(
+        `${process.env.XENDIT_URL}/payment_codes`,
+        {
+          reference_id: `order-id-${user_id}-${timeStamp}`,
+          currency: 'PHP',
+          amount: parseFloat(Number(dto.amount).toFixed(2)),
+          channel_code,
+          customer_name: full_name,
+          market: "PH",
+          metadata: {
+            user_id,
+            organization_id: org_id,
+            meter_name: water_meter_id,
+            dev_eui,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Basic ${btoa64}`,
+          },
+        },
+      )
+      .pipe(
+        map((resp) => {
+          console.log(resp);
+          return resp.data;
+        }),
+      );
+    return response;
+  }
+
   async ewalletPayment(dto: GetPaymentTransactionDto) {
+    const { metadata, status, currency, capture_amount, created } = dto;
+    const { dev_eui, meter_name, organization_id, user_id } = metadata;
+
+    const createDto: CreateTransactionDto = {
+      amount: capture_amount,
+      dev_eui,
+      iot_meter_id: meter_name,
+    };
+
+    if (status === TransactionStatus.succeeded) {
+      this.sendBalanceUpdate(user_id, organization_id, createDto);
+    }
+
+    return { paymentStatus: status };
+  }
+
+  async otcPayment(dto: GetPaymentTransactionDto) {
     const { metadata, status, currency, capture_amount, created } = dto;
     const { dev_eui, meter_name, organization_id, user_id } = metadata;
 

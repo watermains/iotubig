@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CreateAdminDto } from '../dto/create-admin.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
 import { UserRepository } from '../user.repository';
 
@@ -16,5 +17,9 @@ export class AdminService {
     );
 
     return { response: { first_name, role } };
+  }
+
+  async registerAdmin(org_id: string, dto: CreateAdminDto) {
+    return await this.userRepository.createAdmin(org_id, dto);
   }
 }

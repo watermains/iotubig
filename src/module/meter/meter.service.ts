@@ -24,6 +24,8 @@ import { ConsumerType } from './enum/consumer-type.enum';
 import { MeterStatus } from './enum/meter.status.enum';
 import { MeterRepository } from './meter.repository';
 import * as moment from 'moment';
+import { BatteryLevel } from './enum/battery-level.enum';
+import { BalanceStatus } from './enum/balance-status.enum';
 
 @Injectable()
 export class MeterService {
@@ -97,6 +99,8 @@ export class MeterService {
     allowed_flow?: number,
     sortIndex?: number,
     ascending?: string,
+    battery_level: BatteryLevel = BatteryLevel.all,
+    balance_status: BalanceStatus = BalanceStatus.all,
   ) {
     const configuration = await this.configRepo.findOne(organization_id);
 
@@ -113,13 +117,22 @@ export class MeterService {
       iot_organization_id?: Mongoose.Types.ObjectId;
       wireless_device_id?: { $nin: unknown[] };
       meter_name?: { $nin: unknown[] };
-      allowed_flow?: number;
+      allowed_flow?: number | { $lte: number; };
+      battery_level?: { $lte: number; };
     } = {
       deleted_at: null,
     };
 
     if (allowed_flow) {
       $match.allowed_flow = Number(allowed_flow);
+    }
+
+    if (Number(balance_status) !== BalanceStatus.all) {
+      $match.allowed_flow = {$lte : low_balance_threshold};
+    }
+
+    if (Number(battery_level) !== BatteryLevel.all) {
+      $match.battery_level = {$lte : battery_level_threshold};
     }
 
     if (Number(valve_status) !== MeterStatus.all) {

@@ -141,9 +141,17 @@ export class ExternalTransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
   @Post('payment/ewallet')
-  create(@Body() body: { data: GetPaymentTransactionDto }) {
+  createEWalletPayment(@Body() body: { data: GetPaymentTransactionDto }) {
     if(!!body?.data?.metadata?.user_id) {
       return this.transactionService.ewalletPayment(body.data);
+    }
+    return 'Tested and Saved!';
+  }
+
+  @Post('payment/otc')
+  createOtcPayment(@Body() body: { data: GetPaymentTransactionDto }) {
+    if(!!body?.data?.metadata?.user_id) {
+      return this.transactionService.otcPayment(body.data);
     }
     return 'Tested and Saved!';
   }

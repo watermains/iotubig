@@ -7,7 +7,7 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop()
+  @Prop({ required: false })
   water_meter_id: string;
 
   @Prop({ required: true })
@@ -35,7 +35,7 @@ export class User {
   @Prop()
   isActive: boolean;
 
-  @Prop()
+  @Prop({ required: false })
   isDeactivated: boolean;
 }
 
