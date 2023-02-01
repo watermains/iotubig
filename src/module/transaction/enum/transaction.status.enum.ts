@@ -4,6 +4,7 @@ export enum TransactionStatus {
   failed = 'FAILED',
   voided = 'VOIDED',
   refunded = 'REFUNDED',
+  completed = 'COMPLETED',
 }
 
 export enum TransactionPaymentCodes {

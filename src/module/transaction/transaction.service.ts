@@ -30,6 +30,7 @@ import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dt
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
 import { RoleTypes } from 'src/decorators/roles.decorator';
+import { GetOtcPaymentTransactionDto } from './dto/get-otc-payment-transaction.dto';
 
 @Injectable()
 export class TransactionService {
@@ -549,17 +550,17 @@ export class TransactionService {
     return { paymentStatus: status };
   }
 
-  async otcPayment(dto: GetPaymentTransactionDto) {
-    const { metadata, status, currency, capture_amount, created } = dto;
+  async otcPayment(dto: GetOtcPaymentTransactionDto) {
+    const { metadata, status, currency, amount, created } = dto;
     const { dev_eui, meter_name, organization_id, user_id } = metadata;
 
     const createDto: CreateTransactionDto = {
-      amount: capture_amount,
+      amount,
       dev_eui,
       iot_meter_id: meter_name,
     };
 
-    if (status === TransactionStatus.succeeded) {
+    if (status === TransactionStatus.completed) {
       this.sendBalanceUpdate(user_id, organization_id, createDto);
     }
 

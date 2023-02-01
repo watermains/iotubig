@@ -27,6 +27,7 @@ import { GetPaymentTransactionDto } from './dto/get_payment_transaction.dto';
 import { GetTransactionsDto } from './dto/get-transactions.dto';
 import { TransactionService } from './transaction.service';
 import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dto';
+import { GetOtcPaymentTransactionDto } from './dto/get-otc-payment-transaction.dto';
 
 @ApiTags('Transactions')
 @ApiBearerAuth()
@@ -149,9 +150,9 @@ export class ExternalTransactionController {
   }
 
   @Post('payment/otc')
-  createOtcPayment(@Body() body: { data: GetPaymentTransactionDto }) {
-    if(!!body?.data?.metadata?.user_id) {
-      return this.transactionService.otcPayment(body.data);
+  createOtcPayment(@Body() body:  GetOtcPaymentTransactionDto ) {
+    if(!!body?.metadata?.user_id) {
+      return this.transactionService.otcPayment(body);
     }
     return 'Tested and Saved!';
   }
