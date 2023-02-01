@@ -28,7 +28,7 @@ export class AdminController {
 
   @Post('auth/me')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleTypes.admin, RoleTypes.superAdmin)
+  @Roles(RoleTypes.admin, RoleTypes.superAdmin, RoleTypes.buildingManager)
   @UseInterceptors(ResponseInterceptor)
   me(@Req() req) {
     return this.adminService.findOneByEmail(req.user.email);

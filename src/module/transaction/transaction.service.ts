@@ -362,8 +362,8 @@ export class TransactionService {
     org_id: string,
     dto: CreatePaymentTransactionDto,
   ) {
-    const { water_meter_id, first_name, last_name } = await this.userRepo.findOneByID(user_id);
-    const { dev_eui } = await this.meterRepo.findMeter({
+    const { water_meter_id, first_name, last_name, phone, email } = await this.userRepo.findOneByID(user_id);
+    const { dev_eui,  iot_organization_id} = await this.meterRepo.findMeter({
       meter_name: water_meter_id,
     });
     let resp: Promise<AxiosResponse<unknown, any>>;
@@ -403,6 +403,41 @@ export class TransactionService {
     }
 
     const response = await resp;
+    
+    if (!!response['payment_code']) {
+      const org = await this.orgService.findById(
+        iot_organization_id.toString(),
+      );
+      const header = `Water Meter (${water_meter_id}) Reload Pending`;
+      this.mailerService.sendCreditPendingNotification(
+        {
+          header,
+          firstName: first_name,
+          messages: [],
+          meterName: water_meter_id,
+          orgName: org.name,
+          amount: response['amount'],
+          paymentCode: response['payment_code'],
+          siteName: '',
+          dateTriggered: ''
+        },
+        email,
+        header,
+      );
+      if (!!phone) {
+        this.smsService.sendSms(
+          water_meter_id,
+          first_name,
+          smsTypes.PENDING,
+          phone,
+          response['amount'],
+          null,
+          null,
+          null,
+          response['payment_code']
+        );
+      }
+    }
     return { response };
   }
 

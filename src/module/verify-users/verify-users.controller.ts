@@ -12,7 +12,7 @@ import { ObjectId } from 'mongodb';
 
 @ApiTags('verify-users')
 @ApiBearerAuth()
-@Roles(RoleTypes.admin)
+@Roles(RoleTypes.admin, RoleTypes.buildingManager)
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('verify-users')
 export class VerifyUsersController {

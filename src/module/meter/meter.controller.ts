@@ -30,7 +30,7 @@ import { MeterService } from './meter.service';
 
 @ApiTags('Meter')
 @ApiBearerAuth()
-@Roles(RoleTypes.admin)
+@Roles(RoleTypes.admin, RoleTypes.buildingManager)
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meter')
 export class MeterController {

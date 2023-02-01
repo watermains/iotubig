@@ -9,6 +9,7 @@ import {
   overdrawnLimitAlert,
   reloadAlertTemplate,
   reloadDeductionTemplate,
+  reloadPendingTemplate,
 } from './sms.template';
 
 @Injectable()
@@ -33,6 +34,7 @@ export class SmsService {
     meterStatus?: string,
     balance?: number | string,
     batteryLevel?: number | string,
+    paymentCode?: string,
   ) => {
     if (!!phone) {
       const mobileNumber = phone;
@@ -44,6 +46,9 @@ export class SmsService {
           break;
         case smsTypes.DEDUCT:
           msg = reloadDeductionTemplate({ meterName, user, amount });
+          break;
+        case smsTypes.PENDING:
+          msg = reloadPendingTemplate({ meterName, user, amount, paymentCode });
           break;
         case smsTypes.STATUS:
           msg = meterStatusAlert({ meterName, user, status: meterStatus });

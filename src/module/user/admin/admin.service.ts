@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
 import { UserRepository } from '../user.repository';
@@ -20,6 +21,7 @@ export class AdminService {
   }
 
   async registerAdmin(org_id: string, dto: CreateAdminDto) {
+    dto.password = await bcrypt.hash(dto.password, 10);
     return await this.userRepository.createAdmin(org_id, dto);
   }
 }

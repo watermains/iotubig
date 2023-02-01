@@ -55,6 +55,12 @@ export interface CreditNotificationOptions extends NotificationOptions {
   amount: string;
   balanceStatus: string;
 }
+
+export interface CreditPendingNotificationOptions extends NotificationOptions {
+  amount: string;
+  paymentCode: string;
+}
+
 @Injectable()
 export class MailerService {
   private readonly ses: SES;
@@ -112,6 +118,14 @@ export class MailerService {
     subject: string,
   ) {
     this.sendEmailWithTemplateOptions(email, subject, 'reload.hbs', options);
+  }
+
+  async sendCreditPendingNotification(
+    options: CreditPendingNotificationOptions,
+    email: string,
+    subject: string,
+  ) {
+    this.sendEmailWithTemplateOptions(email, subject, 'reload_pending.hbs', options);
   }
 
   async sendNotification(

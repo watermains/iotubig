@@ -267,7 +267,7 @@ export class UserRepository {
       const user = await this.userModel
         .findOne({
           email: loginUserDto.email,
-          role: { $in: [RoleTypes.admin, RoleTypes.superAdmin] },
+          role: { $in: [RoleTypes.admin, RoleTypes.superAdmin, RoleTypes.buildingManager] },
         })
         .select('+password')
         .exec();

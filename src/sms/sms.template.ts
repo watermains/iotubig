@@ -26,6 +26,20 @@ Note: Load application to the meter is not in real time. Please check your IoTub
 For other concerns, please contact your Building Administrator.
 `;
 
+export const reloadPendingTemplate = ({
+  meterName,
+  user,
+  amount,
+  paymentCode
+}) => `Water Meter (${meterName}) Reload Pending \n
+Hi ${user},\n
+Your reload request with an amount of Php ${amount} is currently PENDING and waiting for successful payment through its merchant.\n
+Kindly visit and pay your transaction to the merchant's premises and use the given PAYMENT CODE. \n\n
+PAYMENT CODE: ${paymentCode}\n\n
+Note: Load application to the meter is not in real time. Please check your IoTubig account in the next 12-24 hours for your updated balance.\n
+For other concerns, please contact your Building Administrator.
+`;
+
 export const meterStatusAlert = ({
   meterName,
   status,

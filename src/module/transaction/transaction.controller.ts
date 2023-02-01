@@ -31,7 +31,7 @@ import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dt
 @ApiTags('Transactions')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(RoleTypes.admin)
+@Roles(RoleTypes.admin, RoleTypes.buildingManager)
 @Controller('transactions')
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}

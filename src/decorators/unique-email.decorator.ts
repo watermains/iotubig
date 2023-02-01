@@ -7,6 +7,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { UserRepository } from 'src/module/user/user.repository';
+import { RoleTypes } from './roles.decorator';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
@@ -16,6 +17,7 @@ export class IsEmailAlreadyExistConstraint
   constructor(private userRepository: UserRepository) {}
   async validate(aemail: any, args: ValidationArguments) {
     return await this.userRepository.findOneByEmail(aemail).then((user) => {
+      if (user && user.role == RoleTypes.buildingManager) return false;
       if (user && user.water_meter_id !== args.object['meter']) return false;
       return true;
     });

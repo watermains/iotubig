@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { IsDecimal, IsOptional, IsString } from 'class-validator';
+import { IsDecimal, IsInt, IsOptional, IsString } from 'class-validator';
 import { MeterCheck, MeterField } from 'src/validators/meter.validator';
 import { MeterDto } from './create-meter.dto';
 
@@ -19,4 +19,9 @@ export class UpdateMeterDto extends IntersectionType(AllowedFlowDto, MeterDto) {
     { message: 'Meter Name already taken' },
   )
   meter_name: string;
+
+  @ApiProperty({ type: 'number' })
+  @IsOptional()
+  @IsInt()
+  valve_status: number;
 }
