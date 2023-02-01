@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNumber, IsNumberString, IsString } from 'class-validator';
+import { IsDateString, IsNumber, IsString } from 'class-validator';
 
 export class GetOtcPaymentTransactionDto {
   @ApiProperty({ type: 'object' })
@@ -14,8 +14,8 @@ export class GetOtcPaymentTransactionDto {
   @IsString()
   status: string
 
-  @ApiProperty({ type: 'string', format: 'number' })
-  @IsNumberString()
+  @ApiProperty({ type: 'number'})
+  @IsNumber()
   amount: number;
 
   @ApiProperty({ type: 'string' })
