@@ -243,7 +243,7 @@ export class UserRepository {
 
   async updateAccount(request, dto: UpdateUserDto) {
     const user = await this.userModel
-      .findOne({ water_meter_id: request.body.meter })
+      .findOne({ water_meter_id: request.body.meter, isActive: true, isDeactivated: false })
       .select('+email')
       .select('+phone');
     const match =
