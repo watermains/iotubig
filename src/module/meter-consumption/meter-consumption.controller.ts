@@ -64,7 +64,7 @@ export class MeterConsumptionController {
 }
 
 @ApiTags('Meter Consumption')
-@ApiSecurity('api_key', ['x-api-key'])
+@ApiSecurity('External-Calls')
 @Controller('meter-consumption')
 export class ExternalMeterConsumptionController {
   constructor(

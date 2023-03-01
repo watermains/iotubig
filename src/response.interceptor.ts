@@ -146,12 +146,15 @@ export class ReportsInterceptor implements NestInterceptor {
                 };
               case 'cumulative_flow':
                 return {
-                  text: !!item['cumulative_flow'] ? Number(item['cumulative_flow']).toFixed(2) : '--',
+                  text: !!item['cumulative_flow']
+                    ? Number(item['cumulative_flow']).toFixed(2)
+                    : '--',
                   alignment: 'center',
                 };
               default:
                 return {
-                  text: item[field.value]?.toFixed(2) ?? item[field.value] ?? 'N/A',
+                  text:
+                    item[field.value]?.toFixed(2) ?? item[field.value] ?? 'N/A',
                   alignment: 'center',
                 };
             }
@@ -248,7 +251,7 @@ export class CsvReportsInterceptor implements NestInterceptor {
           const _data = data.map((item) => {
             return {
               ...item,
-              time: moment(item.createdAt).format('LT'),
+              time: moment(item.createdAt).tz('Asia/Manila').format('LT'),
             };
           });
 
@@ -318,7 +321,8 @@ export class CsvReportsInterceptor implements NestInterceptor {
           );
           const rows = _data.map((item: { [x: string]: any }) => {
             return fields.map(
-              (field: { value: string | number }) => item[field.value] ?? 'Unrecorded',
+              (field: { value: string | number }) =>
+                item[field.value] ?? 'Unrecorded',
             );
           });
 

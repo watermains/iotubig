@@ -165,8 +165,7 @@ export class TransactionService {
     );
     const transactions = data.filter(
       (transaction) =>
-        moment(transaction.createdAt).format('MM-DD-YYYY') ===
-        moment().format('MM-DD-YYYY'),
+      moment(transaction.createdAt) >= moment().subtract(1, 'days')
     );
     const total_amount = transactions.reduce(
       (accumulator: number, transaction: { amount: number }) =>
@@ -203,10 +202,14 @@ export class TransactionService {
     pageSize: number,
     organization_id: string,
   ): Promise<unknown> {
+    const {meter_name} = await this.meterRepo.findByDevEui(dev_eui);
+    const user = await this.userRepo.findActiveUserByMeter(meter_name);
+    const userId = user[0].id;
     const { data: transactions, total_rows } = await this.repo.findWhere(
       offset,
       pageSize,
       organization_id,
+      userId,
       dev_eui,
     );
 

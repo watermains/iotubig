@@ -6,6 +6,8 @@ import { ScreenerService } from '../screener/screener.service';
 import { UserRepository } from '../user/user.repository';
 import { CreateMeterConsumptionDto } from './dto/create-meter-consumption.dto';
 import { MeterConsumptionRepository } from './meter-consumption.repository';
+import { IotService } from 'src/iot/iot.service';
+import * as moment from 'moment';
 
 @Injectable()
 export class MeterConsumptionService {
@@ -16,15 +18,16 @@ export class MeterConsumptionService {
     private readonly meterConsRepo: MeterConsumptionRepository,
     private readonly userRepo: UserRepository,
     private readonly screenerService: ScreenerService,
+    private readonly iotService: IotService,
   ) {}
 
   async create(organization_id: string, dto: CreateMeterConsumptionDto) {
     const config = await this.configRepo.findOne(organization_id);
     const { meter_name } = await this.meterRepo.findByDevEui(dto.dev_eui);
     const activeUser = await this.userRepo.findActiveUserByMeter(meter_name);
-    
+
     if (dto.last_uplink) {
-      await this.meterConsRepo.create({...dto, userId: activeUser[0].id});
+      await this.meterConsRepo.create({ ...dto, userId: activeUser[0].id });
     }
 
     delete dto.last_uplink;
@@ -36,14 +39,27 @@ export class MeterConsumptionService {
 
     const isReloaded =
       oldMeter && transaction.status === 'Pending'
-        ? oldMeter.allowed_flow + transaction.amount === meter.allowed_flow
+        ? Number(oldMeter.allowed_flow) < Number(meter.allowed_flow)
+          ? 'Success'
+          : 'Failed'
         : false;
 
-    if (isReloaded) {
+    if (isReloaded === 'Success') {
       await this.transactionRepo.updateStatus(
         transaction.reference_no,
         'Successful',
       );
+    }
+
+    if (isReloaded === 'Failed') {
+      if (moment().isSameOrAfter(moment(transaction.createdAt).add('16', 'hours')))
+        this.iotService.sendBalanceUpdate(
+          dto.wireless_device_id,
+          meter.meter_name,
+          meter.site_name,
+          transaction.amount > 0,
+          { balance: Math.abs(transaction.amount).toString() },
+        );
     }
 
     const isChanged =
@@ -82,8 +98,13 @@ export class MeterConsumptionService {
   ) {
     const { meter_name } = await this.meterRepo.findByDevEui(devEUI);
     const user = await this.userRepo.findActiveUserByMeter(meter_name);
-    const { data: transactions } =
-      await this.transactionRepo.findWhere(0, 10, organization_id, user[0].id, devEUI);
+    const { data: transactions } = await this.transactionRepo.findWhere(
+      0,
+      10,
+      organization_id,
+      user[0].id,
+      devEUI,
+    );
 
     const response = await this.meterConsRepo.findMeterConsumption(
       user[0].id,

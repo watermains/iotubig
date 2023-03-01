@@ -18,6 +18,8 @@ import { MeterConsumptionRepository } from './meter-consumption.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { TransactionModule } from '../transaction/transaction.module';
+import { IotService } from 'src/iot/iot.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -40,9 +42,10 @@ import { TransactionModule } from '../transaction/transaction.module';
     ScreenerModule,
     MeterModule,
     UserModule,
+    HttpModule,
   ],
   controllers: [MeterConsumptionController, ExternalMeterConsumptionController],
-  providers: [MeterConsumptionService, MeterConsumptionRepository],
+  providers: [MeterConsumptionService, MeterConsumptionRepository, IotService],
   exports:[
     MongooseModule.forFeature([{ name: MeterConsumption.name, schema: MeterConsumptionSchema }]),
     MeterConsumptionService,

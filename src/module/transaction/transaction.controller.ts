@@ -136,7 +136,7 @@ export class TransactionController {
 }
 
 @ApiTags('Transactions')
-@ApiSecurity('callback_token', ['x-callback-token'])
+@ApiSecurity('Xendit-Calls')
 @Controller('transactions')
 export class ExternalTransactionController {
   constructor(private readonly transactionService: TransactionService) {}

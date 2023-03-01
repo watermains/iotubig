@@ -334,6 +334,10 @@ export class TransactionRepository implements ITransaction {
         label: 'Load Amount',
         value: 'amount',
       },
+      {
+        label: 'Status',
+        value: 'status',
+      },
     ];
 
     const workSheetName = 'Transaction Report';

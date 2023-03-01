@@ -136,7 +136,7 @@ export class ExternalMeterController {
   constructor(private readonly meterService: MeterService) {}
 
   @Post('/iot')
-  @ApiSecurity('api_key', ['x-api-key'])
+  @ApiSecurity('External-Calls')
   @ApiBody({
     type: CreateMeterIOTDto,
   })
