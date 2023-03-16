@@ -165,7 +165,7 @@ export class TransactionService {
     );
     const transactions = data.filter(
       (transaction) =>
-      moment(transaction.createdAt) >= moment().subtract(1, 'days')
+      moment(transaction.createdAt) >= moment().subtract(1, 'days') || transaction.status === 'Pending'
     );
     const total_amount = transactions.reduce(
       (accumulator: number, transaction: { amount: number }) =>

@@ -47,7 +47,7 @@ import { SmsModule } from './sms/sms.module';
     AuthModule,
     LogModule,
     VerifyUsersModule,
-    SmsModule
+    SmsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
